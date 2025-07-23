@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Custom Coca-Cola Colors */
+.coke-red {
+  color: #F40009;
+}
+
+.bg-coke-red {
+  background-color: #F40009;
+}
+
+.border-coke-red {
+  border-color: #F40009;
+}
+
+.coke-light {
+  color: #FF9998;
+}
+
+.bg-coke-light {
+  background-color: #FF9998;
+}
+
+.coke-dark {
+  color: #A30005;
+}
+
+.bg-coke-dark {
+  background-color: #A30005;
+}
+
+/* Coca-Cola Gradient */
+.coke-gradient {
+  background: linear-gradient(135deg, #F40009 0%, #A30005 100%);
+}
+
+/* Animations */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% { transform: translate(0, 0px); }
+  50% { transform: translate(0, 15px); }
+  100% { transform: translate(0, -0px); }
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-in-out;
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Focus states for form elements */
+.focus\:ring-coke-red:focus {
+  --tw-ring-color: #F40009;
+}
+
+.focus\:border-coke-red:focus {
+  border-color: #F40009;
+}
+
+/* Hover states */
+.hover\:bg-coke-dark:hover {
+  background-color: #A30005;
+}
+
+.hover\:text-coke-red:hover {
+  color: #F40009;
+}
+
+.hover\:border-coke-red:hover {
+  border-color: #F40009;
+}
