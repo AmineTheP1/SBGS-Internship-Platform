@@ -19,6 +19,10 @@ export default function Dashboard() {
   const [filterYear, setFilterYear] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
   const [universities, setUniversities] = useState([]);
+  const [supervisors, setSupervisors] = useState([]);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [assignmentStatus, setAssignmentStatus] = useState("");
   
   const navigate = useNavigate();
 
@@ -71,6 +75,26 @@ export default function Dashboard() {
         }
       } catch (err) {
         console.error("Error fetching universities:", err);
+      }
+    };
+
+    // Fetch supervisors for assignment
+    const fetchSupervisors = async () => {
+      try {
+        console.log("Fetching supervisors...");
+        const response = await fetch("http://localhost:3000/api/hr/get-supervisors", {
+          credentials: "include"
+        });
+        const data = await response.json();
+        console.log("Supervisors response:", data);
+        if (data.success) {
+          setSupervisors(data.supervisors);
+          console.log("Supervisors loaded:", data.supervisors.length);
+        } else {
+          console.error("Failed to load supervisors:", data.error);
+        }
+      } catch (err) {
+        console.error("Error fetching supervisors:", err);
       }
     };
     
@@ -164,6 +188,7 @@ export default function Dashboard() {
     };
     
     fetchUniversities();
+    fetchSupervisors();
     fetchApplications();
   }, [navigate]);
 
@@ -328,6 +353,39 @@ export default function Dashboard() {
       case "Accepté": return "bg-green-100 text-green-800";
       case "Rejeté": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleAssignToSupervisor = async () => {
+    if (!selectedSupervisor || !selectedApplication) {
+      setAssignmentStatus("Veuillez sélectionner un responsable de stage");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/hr/assign-intern", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          cdtid: selectedApplication.id,
+          resid: selectedSupervisor
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setAssignmentStatus("Stagiaire assigné avec succès!");
+        setShowAssignmentModal(false);
+        setSelectedSupervisor("");
+        setTimeout(() => setAssignmentStatus(""), 3000);
+      } else {
+        setAssignmentStatus(data.error || "Erreur lors de l'assignation");
+      }
+    } catch (error) {
+      setAssignmentStatus("Erreur réseau lors de l'assignation");
     }
   };
 
@@ -696,6 +754,76 @@ export default function Dashboard() {
                     </button>
                   </div>
                 )}
+
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Assignment Modal */}
+        {showAssignmentModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+              <button 
+                onClick={() => {
+                  setShowAssignmentModal(false);
+                  setSelectedSupervisor("");
+                  setAssignmentStatus("");
+                }}
+                className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
+              >
+                &times;
+              </button>
+              <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
+                Assigner à un Responsable de Stage
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Responsable de Stage
+                  </label>
+                  <select
+                    value={selectedSupervisor}
+                    onChange={(e) => setSelectedSupervisor(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent"
+                  >
+                    <option value="">Sélectionner un responsable</option>
+                    {supervisors.map((supervisor) => (
+                      <option key={supervisor.resid} value={supervisor.resid}>
+                        {supervisor.prenom} {supervisor.nom} - {supervisor.service}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                {assignmentStatus && (
+                  <div className={`p-3 rounded-lg text-sm font-medium ${
+                    assignmentStatus.includes("succès") 
+                      ? "bg-green-100 text-green-700" 
+                      : "bg-red-100 text-red-700"
+                  }`}>
+                    {assignmentStatus}
+                  </div>
+                )}
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowAssignmentModal(false);
+                      setSelectedSupervisor("");
+                      setAssignmentStatus("");
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleAssignToSupervisor}
+                    className="flex-1 px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                  >
+                    Assigner
+                  </button>
+                </div>
               </div>
             </div>
           </div>

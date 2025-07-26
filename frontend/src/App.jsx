@@ -12,6 +12,8 @@ import CandidateDetails from './pages/CandidateDetails';
 import UserTypeSelection from './pages/UserTypeSelection';
 import CandidateLogin from './pages/CandidateLogin';
 import CandidateDashboard from './pages/CandidateDashboard';
+import SupervisorLogin from './pages/SupervisorLogin';
+import SupervisorDashboard from './pages/SupervisorDashboard';
 
 function App() {
   return (
@@ -23,9 +25,11 @@ function App() {
         <Route path="/login" element={<UserTypeSelection />} />
         <Route path="/hr-login" element={<HRPortal />} />
         <Route path="/candidate-login" element={<CandidateLogin />} />
+        <Route path="/supervisor-login" element={<SupervisorLogin />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
+        <Route path="/supervisor-dashboard" element={<SupervisorDashboard />} />
         <Route path="/candidature/:id" element={<CandidateDetails />} />
       </Routes>
       <Footer />

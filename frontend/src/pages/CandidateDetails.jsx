@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AiFillFilePdf } from "react-icons/ai";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import { FaCheck, FaTimes, FaUserPlus } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -10,6 +10,10 @@ export default function CandidateDetails() {
   const navigate = useNavigate();
   const [candidate, setCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [supervisors, setSupervisors] = useState([]);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const [assignmentStatus, setAssignmentStatus] = useState("");
 
   useEffect(() => {
     const fetchCandidate = async () => {
@@ -24,7 +28,23 @@ export default function CandidateDetails() {
       }
       setLoading(false);
     };
+
+    const fetchSupervisors = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/api/hr/get-supervisors", {
+          credentials: "include"
+        });
+        const data = await response.json();
+        if (data.success) {
+          setSupervisors(data.supervisors);
+        }
+      } catch (err) {
+        console.error("Error fetching supervisors:", err);
+      }
+    };
+
     fetchCandidate();
+    fetchSupervisors();
   }, [id]);
 
   if (loading) return <div className="text-center py-20 text-xl">Chargement...</div>;
@@ -107,8 +127,14 @@ export default function CandidateDetails() {
         body: JSON.stringify({ dsgid: candidate.dsgid, status: newStatus }),
       });
       if (res.ok) {
-        // Optionally show a success message
-        navigate(-1); // Go back to dashboard
+        // Update the local candidate status
+        setCandidate(prev => ({ ...prev, status: newStatus }));
+        
+        // Only navigate back if rejecting
+        if (newStatus === "Rejeté") {
+          navigate(-1); // Go back to dashboard
+        }
+        // If accepting, stay on the page to show the assignment button
       } else {
         alert("Erreur lors de la mise à jour du statut");
       }
@@ -130,6 +156,43 @@ export default function CandidateDetails() {
   };
 
   // Helper to download all attachments as zip
+  const handleAssignToSupervisor = async () => {
+    if (!selectedSupervisor || !candidate) {
+      setAssignmentStatus("Veuillez sélectionner un responsable de stage");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/hr/assign-intern", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          cdtid: candidate.cdtid,
+          resid: selectedSupervisor
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setAssignmentStatus("Stagiaire assigné avec succès!");
+        setShowAssignmentModal(false);
+        setSelectedSupervisor("");
+        // Navigate back to dashboard after successful assignment
+        setTimeout(() => {
+          setAssignmentStatus("");
+          navigate(-1); // Go back to dashboard
+        }, 1500);
+      } else {
+        setAssignmentStatus(data.error || "Erreur lors de l'assignation");
+      }
+    } catch (error) {
+      setAssignmentStatus("Erreur réseau lors de l'assignation");
+    }
+  };
+
   const handleDownloadAll = async () => {
     if (!candidate || !candidate.pieces_jointes || candidate.pieces_jointes.length === 0) {
       alert("Aucune pièce jointe à télécharger.");
@@ -250,7 +313,84 @@ export default function CandidateDetails() {
         >
           <FaTimes className="h-4 w-4" /> Rejeter
         </button>
+        {candidate.status === "Accepté" && supervisors.length > 0 && (
+          <button
+            onClick={() => setShowAssignmentModal(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-coke-red text-white hover:bg-red-700 shadow font-semibold text-sm transition"
+          >
+            <FaUserPlus className="h-4 w-4" /> Assigner à un Responsable
+          </button>
+        )}
       </div>
+
+      {/* Assignment Modal */}
+      {showAssignmentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button 
+              onClick={() => {
+                setShowAssignmentModal(false);
+                setSelectedSupervisor("");
+                setAssignmentStatus("");
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
+              Assigner à un Responsable de Stage
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Responsable de Stage
+                </label>
+                <select
+                  value={selectedSupervisor}
+                  onChange={(e) => setSelectedSupervisor(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent"
+                >
+                  <option value="">Sélectionner un responsable</option>
+                  {supervisors.map((supervisor) => (
+                    <option key={supervisor.resid} value={supervisor.resid}>
+                      {supervisor.prenom} {supervisor.nom} - {supervisor.service}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {assignmentStatus && (
+                <div className={`p-3 rounded-lg text-sm font-medium ${
+                  assignmentStatus.includes("succès") 
+                    ? "bg-green-100 text-green-700" 
+                    : "bg-red-100 text-red-700"
+                }`}>
+                  {assignmentStatus}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowAssignmentModal(false);
+                    setSelectedSupervisor("");
+                    setAssignmentStatus("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleAssignToSupervisor}
+                  className="flex-1 px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                >
+                  Assigner
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

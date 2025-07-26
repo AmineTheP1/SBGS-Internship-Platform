@@ -24,13 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const { dsgid } = req.query;
     if (dsgid) {
-      // Update datetraitement to NOW()
-      await pool.query(
-        `UPDATE demandes_stage SET datetraitement = NOW() WHERE dsgid = $1`,
-        [dsgid]
-      );
-
-      // Fetch the application
+      // Fetch the application first to check current status
       const result = await pool.query(`
         SELECT 
           c.cdtid, c.nom, c.prenom, c.email, c.statutetudiant as currentyear, c.telephone,
@@ -49,6 +43,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ success: false, error: "Candidature non trouvée" });
       }
 
+      const application = result.rows[0];
+
+      // Only send email and update datetraitement if status is "En attente" and hasn't been processed before
+      if (application.status === "En attente" && !application.datetraitement) {
+        // Update datetraitement to NOW()
+        await pool.query(
+          `UPDATE demandes_stage SET datetraitement = NOW() WHERE dsgid = $1`,
+          [dsgid]
+        );
+
+        // Send email to candidate
+        const fullName = `${application.prenom} ${application.nom}`.trim();
+        await sendEmail({
+          to: application.email,
+          subject: "Votre demande de stage est en cours d'examen",
+          text: `Bonjour ${fullName},\n\nVotre demande de stage est en cours d'examen.\n\nType de stage : ${application.typestage}\nDurée : ${application.periode}\n\nNous vous contacterons après examen.\n\nCordialement,\nSBGS Plateforme`
+        });
+      }
+
       // Fetch all pieces_jointes for this dsgid
       const piecesResult = await pool.query(
         `SELECT typepiece, url FROM pieces_jointes WHERE dsgid = $1`,
@@ -56,15 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       );
 
       // Attach pieces_jointes to the application object
-      const application = result.rows[0];
       application.pieces_jointes = piecesResult.rows;
-      // Send email to candidate
-      const fullName = `${application.prenom} ${application.nom}`.trim();
-      await sendEmail({
-        to: application.email,
-        subject: "Votre demande de stage est en cours d'examen",
-        text: `Bonjour ${fullName},\n\nVotre demande de stage est en cours d'examen.\n\nType de stage : ${application.typestage}\nDurée : ${application.periode}\n\nNous vous contacterons après examen.\n\nCordialement,\nSBGS Plateforme`
-      });
       return res.status(200).json({ success: true, applications: [application] });
     } else {
       // Fetch all applications as before

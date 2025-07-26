@@ -15,7 +15,7 @@ export default function UserTypeSelection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
           {/* RH Login Card */}
           <Link 
             to="/hr-login"
@@ -35,6 +35,25 @@ export default function UserTypeSelection() {
             </div>
           </Link>
 
+          {/* Supervisor Login Card */}
+          <Link 
+            to="/supervisor-login"
+            className="group bg-white rounded-2xl shadow-2xl p-8 text-center transform transition-all duration-300 hover:scale-105 hover:shadow-3xl"
+          >
+            <div className="bg-coke-red w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-red-700 transition-colors">
+              <FaUserTie className="text-3xl text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              Responsable de Stage
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Supervisez vos stagiaires et évaluez leurs rapports
+            </p>
+            <div className="bg-coke-red text-white py-3 px-6 rounded-lg font-semibold group-hover:bg-red-700 transition-colors">
+              Se connecter
+            </div>
+          </Link>
+
           {/* Candidate Login Card */}
           <Link 
             to="/candidate-login"
@@ -44,10 +63,10 @@ export default function UserTypeSelection() {
               <FaGraduationCap className="text-3xl text-white" />
             </div>
             <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Espace Candidat
+              Espace Stagiaire
             </h3>
             <p className="text-gray-600 mb-6">
-              Accédez à votre espace personnel pour suivre votre candidature
+              Accédez à votre espace pour pointer et gérer vos rapports
             </p>
             <div className="bg-coke-red text-white py-3 px-6 rounded-lg font-semibold group-hover:bg-red-700 transition-colors">
               Se connecter

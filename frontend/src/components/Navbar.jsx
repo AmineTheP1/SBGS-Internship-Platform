@@ -7,7 +7,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userType, setUserType] = useState(null); // 'hr' or 'candidate'
+  const [userType, setUserType] = useState(null); // 'hr', 'candidate', or 'supervisor'
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
@@ -30,6 +30,16 @@ export default function Navbar() {
           setIsLoggedIn(true);
           setUserType('candidate');
           setUserData(candidateData.candidate);
+          return;
+        }
+
+        // Check supervisor session
+        const supervisorRes = await fetch("http://localhost:3000/api/supervisor/session", { credentials: "include" });
+        if (supervisorRes.ok) {
+          const supervisorData = await supervisorRes.json();
+          setIsLoggedIn(true);
+          setUserType('supervisor');
+          setUserData(supervisorData.supervisor);
           return;
         }
 
@@ -94,6 +104,14 @@ export default function Navbar() {
                 Mon Espace
               </Link>
             )}
+            {isLoggedIn && userType === 'supervisor' && (
+              <Link
+                to="/supervisor-dashboard"
+                className={`${isActive("/supervisor-dashboard") ? "text-coke-red font-semibold bg-gray-50 shadow-sm border-b-2 border-coke-red" : "text-gray-600 font-medium"} px-4 py-2 rounded-lg transition-all duration-200 hover:bg-coke-red hover:text-white`}
+              >
+                Tableau de Bord
+              </Link>
+            )}
           </div>
           <div className="absolute right-0 flex items-center">
             {isLoggedIn ? (
@@ -114,7 +132,7 @@ export default function Navbar() {
                     )}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {userType === 'hr' ? 'RH' : 'Candidat'} • {userData?.cdtid || userData?.rhId}
+                    {userType === 'hr' ? 'RH' : userType === 'supervisor' ? 'Responsable de Stage' : 'Candidat'} • {userData?.cdtid || userData?.rhId || userData?.resid}
                   </div>
                 </div>
                 
@@ -125,6 +143,9 @@ export default function Navbar() {
                     if (userType === 'hr') {
                       await fetch("http://localhost:3000/api/hr/logout", { credentials: "include" });
                       navigate('/hr-login');
+                    } else if (userType === 'supervisor') {
+                      await fetch("http://localhost:3000/api/supervisor/logout", { credentials: "include" });
+                      navigate('/supervisor-login');
                     } else {
                       await fetch("http://localhost:3000/api/candidate/logout", { credentials: "include" });
                       navigate('/candidate-login');
@@ -165,6 +186,9 @@ export default function Navbar() {
           )}
           {isLoggedIn && userType === 'candidate' && (
             <Link to="/candidate-dashboard" className={`block px-6 py-3 rounded-lg mt-2 transition-all duration-200 border-l-4 ${isActive("/candidate-dashboard") ? "text-coke-red font-semibold bg-gray-50 border-coke-red" : "text-gray-600 font-medium border-transparent"} hover:bg-coke-red hover:text-white`} onClick={() => setMobileMenuOpen(false)}>Mon Espace</Link>
+          )}
+          {isLoggedIn && userType === 'supervisor' && (
+            <Link to="/supervisor-dashboard" className={`block px-6 py-3 rounded-lg mt-2 transition-all duration-200 border-l-4 ${isActive("/supervisor-dashboard") ? "text-coke-red font-semibold bg-gray-50 border-coke-red" : "text-gray-600 font-medium border-transparent"} hover:bg-coke-red hover:text-white`} onClick={() => setMobileMenuOpen(false)}>Tableau de Bord</Link>
           )}
         </div>
       )}
