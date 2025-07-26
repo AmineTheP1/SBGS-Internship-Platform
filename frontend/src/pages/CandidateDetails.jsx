@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AiFillFilePdf } from "react-icons/ai";
 import { FaCheck, FaTimes } from "react-icons/fa";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 export default function CandidateDetails() {
   const { id } = useParams();
@@ -32,7 +34,7 @@ export default function CandidateDetails() {
   const getPieceUrl = (type) => {
     if (!candidate.pieces_jointes) return null;
     const piece = candidate.pieces_jointes.find(p => p.typepiece === type);
-    return piece ? `http://localhost:3000${piece.url}` : null;
+    return piece ? `http://localhost:3000/api/files${piece.url.replace('/uploads', '')}` : null;
   };
 
   // Helper to render file preview
@@ -127,6 +129,53 @@ export default function CandidateDetails() {
     );
   };
 
+  // Helper to download all attachments as zip
+  const handleDownloadAll = async () => {
+    if (!candidate || !candidate.pieces_jointes || candidate.pieces_jointes.length === 0) {
+      alert("Aucune pièce jointe à télécharger.");
+      return;
+    }
+    const zip = new JSZip();
+    const folderName = `${candidate.prenom}_${candidate.nom}`.replace(/\s+/g, "_");
+    const folder = zip.folder(folderName);
+
+    // Fetch all files first
+    const files = await Promise.all(
+      candidate.pieces_jointes.map(async (piece) => {
+        const url = `http://localhost:3000/api/files${piece.url.replace('/uploads', '')}`;
+        const ext = url.split('.').pop().toLowerCase();
+        let filename = piece.typepiece.replace(/\s+/g, "_");
+        if (!filename.toLowerCase().endsWith(ext)) filename += `.${ext}`;
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Erreur de téléchargement");
+          const blob = await res.blob();
+          return { filename, blob };
+        } catch (e) {
+          console.error(`Erreur lors du téléchargement de ${filename}:`, e);
+          return null;
+        }
+      })
+    );
+
+    // Add files to zip
+    files.forEach(file => {
+      if (file) {
+        folder.file(file.filename, file.blob);
+      }
+    });
+
+    // Only generate zip if there are files
+    if (files.filter(f => f).length === 0) {
+      alert("Aucun fichier n'a pu être téléchargé.");
+      return;
+    }
+
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, `${folderName}.zip`);
+    });
+  };
+
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 mt-10">
       <button
@@ -177,7 +226,14 @@ export default function CandidateDetails() {
         <b>Assurance:</b>
         {getPieceUrl("Assurance") ? renderFilePreview(getPieceUrl("Assurance"), "Assurance.pdf") : <span className="ml-2 text-gray-400">Non fournie</span>}
       </div>
-      <div className="flex items-center gap-4 mt-8">
+      {/* Download All Attachments Button - moved here */}
+      <button
+        onClick={handleDownloadAll}
+        className="mb-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold text-sm transition-colors"
+      >
+        Télécharger toutes les pièces jointes
+      </button>
+      <div className="flex items-center gap-4 mt-4">
         <span className="font-bold">Statut:</span>
         {getStatusBadge(candidate.status)}
       </div>
