@@ -9,6 +9,9 @@ import HRPortal from "./pages/HRPortal";
 import Contact from "./pages/Contact";
 import Dashboard from "./components/Dashboard";
 import CandidateDetails from './pages/CandidateDetails';
+import UserTypeSelection from './pages/UserTypeSelection';
+import CandidateLogin from './pages/CandidateLogin';
+import CandidateDashboard from './pages/CandidateDashboard';
 
 function App() {
   return (
@@ -17,9 +20,12 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/apply" element={<Apply />} />
+        <Route path="/login" element={<UserTypeSelection />} />
         <Route path="/hr-login" element={<HRPortal />} />
+        <Route path="/candidate-login" element={<CandidateLogin />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin" element={<Dashboard />} />
+        <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/candidature/:id" element={<CandidateDetails />} />
       </Routes>
       <Footer />
