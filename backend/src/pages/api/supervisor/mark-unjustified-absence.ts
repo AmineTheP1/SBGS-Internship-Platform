@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const supervisor = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    const { cdtid, date_absence, motif, justifiee } = req.body;
+    const { cdtid, date_absence, motif } = req.body;
 
     if (!cdtid || !date_absence) {
       return res.status(400).json({ 
@@ -64,11 +64,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Insert absence record with justifiee set to true when supervisor marks it
+    // Insert absence record with justifiee set to false
     await pool.query(
       `INSERT INTO absences (cdtid, date_absence, motif, justifiee, notee_par) 
        VALUES ($1, $2, $3, $4, $5)`,
-      [cdtid, date_absence, motif || null, true, supervisor.resid]
+      [cdtid, date_absence, motif || null, false, supervisor.resid]
     );
 
     // Get candidate info to send email
@@ -81,21 +81,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const candidate = candidateResult.rows[0];
       const fullName = `${candidate.prenom} ${candidate.nom}`.trim();
       
-      // Send email to candidate
+      // Send warning email to candidate
       await sendEmail({
         to: candidate.email,
-        subject: "Absence justifiée - Notification",
-        text: `Bonjour ${fullName},\n\nVotre absence du ${new Date(date_absence).toLocaleDateString('fr-FR')} a été notée par votre responsable de stage.\n\nMotif: ${motif || 'Non spécifié'}\nStatut: Justifiée\n\nCordialement,\nSBGS Plateforme`
+        subject: "AVERTISSEMENT - Absence non justifiée",
+        text: `Bonjour ${fullName},\n\nAVERTISSEMENT: Votre absence du ${new Date(date_absence).toLocaleDateString('fr-FR')} a été notée comme NON JUSTIFIÉE par votre responsable de stage.\n\nMotif: ${motif || 'Non spécifié'}\nStatut: NON JUSTIFIÉE\n\n⚠️ ATTENTION: Cette absence non justifiée peut avoir des conséquences sur votre évaluation de stage.\n\nVeuillez contacter votre responsable de stage pour justifier cette absence.\n\nCordialement,\nSBGS Plateforme`
       });
     }
 
     return res.status(200).json({ 
       success: true, 
-      message: "Absence notée avec succès"
+      message: "Absence non justifiée notée avec succès"
     });
 
   } catch (error) {
-    console.error("Error marking absence:", error);
+    console.error("Error marking unjustified absence:", error);
     return res.status(500).json({ success: false, error: (error as Error).message });
   }
 } 

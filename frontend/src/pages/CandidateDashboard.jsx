@@ -227,13 +227,35 @@ export default function CandidateDashboard() {
           <div className="grid md:grid-cols-3 gap-6 mb-6">
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-800 mb-2">
-                {presence?.todayRecord?.heure_entree || '--:--'}
+                {presence?.todayRecord?.heure_entree ? (() => {
+                  try {
+                    // If it's already a time string, format it without seconds
+                    if (typeof presence.todayRecord.heure_entree === 'string' && presence.todayRecord.heure_entree.includes(':')) {
+                      return presence.todayRecord.heure_entree.split(':').slice(0, 2).join(':');
+                    }
+                    // If it's a date object, format it without seconds
+                    return new Date(presence.todayRecord.heure_entree).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                  } catch (error) {
+                    return presence.todayRecord.heure_entree || '--:--';
+                  }
+                })() : '--:--'}
               </div>
               <div className="text-sm text-gray-600">Heure d'entrée</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-800 mb-2">
-                {presence?.todayRecord?.heure_sortie || '--:--'}
+                {presence?.todayRecord?.heure_sortie ? (() => {
+                  try {
+                    // If it's already a time string, format it without seconds
+                    if (typeof presence.todayRecord.heure_sortie === 'string' && presence.todayRecord.heure_sortie.includes(':')) {
+                      return presence.todayRecord.heure_sortie.split(':').slice(0, 2).join(':');
+                    }
+                    // If it's a date object, format it without seconds
+                    return new Date(presence.todayRecord.heure_sortie).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                  } catch (error) {
+                    return presence.todayRecord.heure_sortie || '--:--';
+                  }
+                })() : '--:--'}
               </div>
               <div className="text-sm text-gray-600">Heure de sortie</div>
             </div>
