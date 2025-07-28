@@ -71,6 +71,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       [cdtid, date_absence, motif || null, true, supervisor.resid]
     );
 
+    // Increment total absences in stages table
+    await pool.query(
+      `UPDATE stages SET dureetotaleabsences = dureetotaleabsences + 1 
+       WHERE demandes_stageid = (
+         SELECT dsgid FROM demandes_stage WHERE cdtid = $1 LIMIT 1
+       )`,
+      [cdtid]
+    );
+
     // Get candidate info to send email
     const candidateResult = await pool.query(
       `SELECT c.prenom, c.nom, c.email FROM candidat c WHERE c.cdtid = $1`,

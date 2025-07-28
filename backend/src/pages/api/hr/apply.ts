@@ -84,6 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const currentYear = Array.isArray(fields.currentYear) ? fields.currentYear[0] : fields.currentYear;
         const internshipApplication = Array.isArray(fields.internshipApplication) ? fields.internshipApplication[0] : fields.internshipApplication;
         const periode = Array.isArray(fields.periode) ? fields.periode[0] : fields.periode;
+        const moisDebut = Array.isArray(fields.moisDebut) ? fields.moisDebut[0] : fields.moisDebut;
         
         // Debug: Log the received values
         console.log("Received form data:", {
@@ -126,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (files.assurance) {
           assuranceFile = Array.isArray(files.assurance) ? files.assurance[0] : files.assurance;
         }
-        if (!nom || !prenom || !cin || !email || !telephone || !typestage || !fieldOfStudy || !currentYear || !internshipApplication || !cvFile || !periode || !imageFile || !carteNationaleFile || !conventionStageFile || !assuranceFile) {
+        if (!nom || !prenom || !cin || !email || !telephone || !typestage || !fieldOfStudy || !currentYear || !internshipApplication || !cvFile || !periode || !moisDebut || !imageFile || !carteNationaleFile || !conventionStageFile || !assuranceFile) {
           return res.status(400).json({ success: false, error: "Champs manquants." });
         }
         // Save CV file
@@ -154,6 +155,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.log("Column might already exist or error occurred:", error);
         }
 
+        // Check if mois_debut column exists, if not create it
+        try {
+          await pool.query(`
+            ALTER TABLE demandes_stage 
+            ADD COLUMN IF NOT EXISTS mois_debut VARCHAR(20)
+          `);
+        } catch (error) {
+          console.log("mois_debut column might already exist or error occurred:", error);
+        }
+
         // Check if imageurl column exists, if not create it
         try {
           await pool.query(`
@@ -173,8 +184,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // Insert application
         const dsgid = crypto.randomBytes(8).toString('hex');
         await pool.query(
-          `INSERT INTO demandes_stage (dsgid, cdtid, typestage, periode, statut, datesoumission, domaines_interet, demande_stage, domaine) VALUES ($1, $2, $3, $4, $5, NOW(), $6, $7, $8)`,
-          [dsgid, cdtid, typestage, periode, "En attente", JSON.stringify(areasOfInterest), internshipApplication, fieldOfStudy]
+          `INSERT INTO demandes_stage (dsgid, cdtid, typestage, periode, mois_debut, statut, datesoumission, domaines_interet, demande_stage, domaine) VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7, $8, $9)`,
+          [dsgid, cdtid, typestage, periode, moisDebut, "En attente", JSON.stringify(areasOfInterest), internshipApplication, fieldOfStudy]
         );
         // Insert CV as piece jointe
         const pjtid = crypto.randomBytes(8).toString('hex');

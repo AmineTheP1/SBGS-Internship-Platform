@@ -16,6 +16,7 @@ export default function ApplicationForm() {
     internshipApplication: "",
     photo: null,
     periode: "",
+    moisDebut: "",
     carteNationale: null,
     conventionStage: null,
     assurance: null,
@@ -161,7 +162,7 @@ export default function ApplicationForm() {
     // Basic validation
     if (!formData.nom || !formData.prenom || !formData.cin || !formData.email || 
         !formData.telephone || !formData.typestage || !formData.fieldOfStudy || 
-        !formData.currentYear || !formData.cv || !formData.internshipApplication || !formData.periode || !formData.photo) {
+        !formData.currentYear || !formData.cv || !formData.internshipApplication || !formData.periode || !formData.moisDebut || !formData.photo) {
       setError("Veuillez remplir tous les champs obligatoires.");
       return;
     }
@@ -220,6 +221,7 @@ export default function ApplicationForm() {
           internshipApplication: "",
           photo: null,
           periode: "",
+          moisDebut: "",
           carteNationale: null,
           conventionStage: null,
           assurance: null,
@@ -431,6 +433,30 @@ export default function ApplicationForm() {
                   <option value="10 mois">10 mois</option>
                   <option value="11 mois">11 mois</option>
                   <option value="12 mois">12 mois</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-medium">Mois de début souhaité *</label>
+                <select 
+                  name="moisDebut"
+                  value={formData.moisDebut}
+                  onChange={handleInputChange}
+                  className="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent" 
+                  required
+                >
+                  <option value="">Sélectionner le mois</option>
+                  <option value="Janvier">Janvier</option>
+                  <option value="Février">Février</option>
+                  <option value="Mars">Mars</option>
+                  <option value="Avril">Avril</option>
+                  <option value="Mai">Mai</option>
+                  <option value="Juin">Juin</option>
+                  <option value="Juillet">Juillet</option>
+                  <option value="Août">Août</option>
+                  <option value="Septembre">Septembre</option>
+                  <option value="Octobre">Octobre</option>
+                  <option value="Novembre">Novembre</option>
+                  <option value="Décembre">Décembre</option>
                 </select>
               </div>
               <div className="md:col-span-2">

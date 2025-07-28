@@ -65,11 +65,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Insert absence record with justifiee set to false
-    await pool.query(
-      `INSERT INTO absences (cdtid, date_absence, motif, justifiee, notee_par) 
-       VALUES ($1, $2, $3, $4, $5)`,
-      [cdtid, date_absence, motif || null, false, supervisor.resid]
-    );
+            await pool.query(
+          `INSERT INTO absences (cdtid, date_absence, motif, justifiee, notee_par) 
+           VALUES ($1, $2, $3, $4, $5)`,
+          [cdtid, date_absence, motif || null, false, supervisor.resid]
+        );
+
+        // Increment total absences in stages table
+        await pool.query(
+          `UPDATE stages SET dureetotaleabsences = dureetotaleabsences + 1 
+           WHERE demandes_stageid = (
+             SELECT dsgid FROM demandes_stage WHERE cdtid = $1 LIMIT 1
+           )`,
+          [cdtid]
+        );
 
     // Get candidate info to send email
     const candidateResult = await pool.query(

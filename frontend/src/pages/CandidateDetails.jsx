@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AiFillFilePdf } from "react-icons/ai";
-import { FaCheck, FaTimes, FaUserPlus } from "react-icons/fa";
+import { FaCheck, FaTimes, FaUserPlus, FaCalendar } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -14,6 +14,11 @@ export default function CandidateDetails() {
   const [showAssignmentModal, setShowAssignmentModal] = useState(false);
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
   const [assignmentStatus, setAssignmentStatus] = useState("");
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [dateStatus, setDateStatus] = useState("");
+  const [assignedSupervisor, setAssignedSupervisor] = useState("");
+  const [dateSetCompleted, setDateSetCompleted] = useState(false);
 
   useEffect(() => {
     const fetchCandidate = async () => {
@@ -180,16 +185,73 @@ export default function CandidateDetails() {
         setAssignmentStatus("Stagiaire assigné avec succès!");
         setShowAssignmentModal(false);
         setSelectedSupervisor("");
-        // Navigate back to dashboard after successful assignment
-        setTimeout(() => {
-          setAssignmentStatus("");
-          navigate(-1); // Go back to dashboard
-        }, 1500);
+        setAssignedSupervisor(selectedSupervisor);
+        
+        // Check if both actions are completed
+        if (dateSetCompleted) {
+          // Both actions completed, navigate back
+          setTimeout(() => {
+            setAssignmentStatus("");
+            navigate(-1); // Go back to dashboard
+          }, 1500);
+        } else {
+          // Only assignment completed, stay on page
+          setTimeout(() => {
+            setAssignmentStatus("");
+          }, 1500);
+        }
       } else {
         setAssignmentStatus(data.error || "Erreur lors de l'assignation");
       }
     } catch (error) {
       setAssignmentStatus("Erreur réseau lors de l'assignation");
+    }
+  };
+
+  const handleSetStartDate = async () => {
+    if (!startDate) {
+      setDateStatus("Veuillez sélectionner une date de début");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/hr/set-start-date", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          dsgid: candidate.dsgid,
+          startDate: startDate
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setDateStatus("Date de début définie avec succès!");
+        setShowDateModal(false);
+        setStartDate("");
+        setDateSetCompleted(true);
+        
+        // Check if both actions are completed
+        if (assignedSupervisor) {
+          // Both actions completed, navigate back
+          setTimeout(() => {
+            setDateStatus("");
+            navigate(-1); // Go back to dashboard
+          }, 1500);
+        } else {
+          // Only date setting completed, stay on page
+          setTimeout(() => {
+            setDateStatus("");
+          }, 1500);
+        }
+      } else {
+        setDateStatus(data.error || "Erreur lors de la définition de la date");
+      }
+    } catch (error) {
+      setDateStatus("Erreur réseau lors de la définition de la date");
     }
   };
 
@@ -264,7 +326,8 @@ export default function CandidateDetails() {
       <div className="mb-4"><b>Type de stage:</b> {candidate.typestage || "Non spécifié"}</div>
       <div className="mb-4"><b>Domaine d'Étude/Spécialisation:</b> {candidate.domaine || "Non spécifié"}</div>
       <div className="mb-4"><b>Année d'étude:</b> {yearMap[candidate.currentyear] || candidate.currentyear}</div>
-      <div className="mb-4"><b>Durée du stage:</b> {candidate.periode}</div>
+              <div className="mb-4"><b>Durée du stage:</b> {candidate.periode}</div>
+        <div className="mb-4"><b>Mois de début souhaité:</b> {candidate.mois_debut}</div>
       <div className="mb-4">
         <b>Domaines d'intérêt:</b> {areasOfInterest && areasOfInterest.length > 0
           ? areasOfInterest.join(", ")
@@ -316,9 +379,27 @@ export default function CandidateDetails() {
         {candidate.status === "Accepté" && supervisors.length > 0 && (
           <button
             onClick={() => setShowAssignmentModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-coke-red text-white hover:bg-red-700 shadow font-semibold text-sm transition"
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow font-semibold text-sm transition ${
+              assignedSupervisor 
+                ? "bg-green-600 text-white hover:bg-green-700" 
+                : "bg-coke-red text-white hover:bg-red-700"
+            }`}
           >
-            <FaUserPlus className="h-4 w-4" /> Assigner à un Responsable
+            <FaUserPlus className="h-4 w-4" /> 
+            {assignedSupervisor ? "Responsable assigné ✓" : "Assigner à un Responsable"}
+          </button>
+        )}
+        {candidate.status === "Accepté" && (
+          <button
+            onClick={() => setShowDateModal(true)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow font-semibold text-sm transition ${
+              dateSetCompleted 
+                ? "bg-green-600 text-white hover:bg-green-700" 
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            <FaCalendar className="h-4 w-4" /> 
+            {dateSetCompleted ? "Date définie ✓" : "Définir la date de début"}
           </button>
         )}
       </div>
@@ -385,6 +466,70 @@ export default function CandidateDetails() {
                   className="flex-1 px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
                 >
                   Assigner
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Date Selection Modal */}
+      {showDateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button 
+              onClick={() => {
+                setShowDateModal(false);
+                setStartDate("");
+                setDateStatus("");
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
+              Définir la date de début
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date de début *
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent"
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              {dateStatus && (
+                <div className={`p-3 rounded-lg text-sm font-medium ${
+                  dateStatus.includes("succès") 
+                    ? "bg-green-100 text-green-700" 
+                    : "bg-red-100 text-red-700"
+                }`}>
+                  {dateStatus}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowDateModal(false);
+                    setStartDate("");
+                    setDateStatus("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSetStartDate}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                >
+                  Confirmer
                 </button>
               </div>
             </div>

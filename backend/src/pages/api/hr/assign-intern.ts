@@ -95,6 +95,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const candidate = candidateResult.rows[0];
     const supervisor = supervisorResult.rows[0];
 
+    // Update stages table with supervisor and service if it exists
+    try {
+      await pool.query(
+        `UPDATE stages SET responsables_stageid = $1, serviceaffectation = $2 WHERE demandes_stageid = (
+          SELECT dsgid FROM demandes_stage WHERE cdtid = $3 LIMIT 1
+        )`,
+        [resid, supervisor.service, cdtid]
+      );
+    } catch (error) {
+      console.log("Could not update stages table (might not exist yet):", error);
+    }
+
     // Send email notification to supervisor
     const sendEmailModule = await import("../../../utilities/sendEmail");
     const emailText = `Bonjour ${supervisor.prenom} ${supervisor.nom},

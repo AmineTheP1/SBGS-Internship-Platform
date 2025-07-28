@@ -133,23 +133,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           );
         }
         
-        subject = 'Félicitations, vous avez été accepté(e) - Vos identifiants de connexion';
-        text = `Bonjour ${fullName},
-
-Félicitations, vous avez été accepté(e) pour le stage chez SBGS !
-
-Type de stage : ${typestage}
-Durée : ${periode}
-
-Vos identifiants de connexion pour accéder à votre espace candidat :
-
-Identifiant : ${currentCdtid}
-Mot de passe : ${randomPassword}
-
-Vous pouvez vous connecter sur notre plateforme pour suivre votre candidature et accéder aux informations importantes.
-
-Cordialement,
-SBGS Plateforme`;
+        // Don't send email here - it will be sent when the start date is set
+        subject = '';
+        text = '';
       } else if (status === 'Rejeté') {
         subject = "Malheureusement, vous n'avez pas été sélectionné(e)";
         text = `Bonjour ${fullName},\n\nMalheureusement, vous n'avez pas été sélectionné(e) pour le stage chez SBGS.\n\nType de stage : ${typestage}\nDurée : ${periode}\n\nCordialement,\nSBGS Plateforme`;

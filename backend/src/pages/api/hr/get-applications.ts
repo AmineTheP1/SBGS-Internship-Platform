@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         SELECT 
           c.cdtid, c.nom, c.prenom, c.email, c.statutetudiant as currentyear, c.telephone,
           c.imageurl as imageurl,
-          d.dsgid, d.typestage, d.domaine, d.statut as status, d.datesoumission, d.domaines_interet, d.demande_stage, d.periode, d.datetraitement,
+          d.dsgid, d.typestage, d.domaine, d.statut as status, d.datesoumission, d.domaines_interet, d.demande_stage, d.periode, d.mois_debut, d.datetraitement,
           p.url as cvurl, e.nom as universityname
         FROM demandes_stage d
         JOIN candidat c ON d.cdtid = c.cdtid
@@ -80,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         SELECT 
           c.cdtid, c.nom, c.prenom, c.email, c.statutetudiant as currentyear, c.telephone,
           c.imageurl as imageurl,
-          d.dsgid, d.typestage, d.domaine, d.statut as status, d.datesoumission, d.domaines_interet, d.demande_stage, d.periode,
+          d.dsgid, d.typestage, d.domaine, d.statut as status, d.datesoumission, d.domaines_interet, d.demande_stage, d.periode, d.mois_debut,
           p.url as cvurl, e.nom as universityname
         FROM demandes_stage d
         JOIN candidat c ON d.cdtid = c.cdtid
