@@ -1,9 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { FaPaperPlane } from "react-icons/fa";
 
 export default function Footer() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState("");
+  const [newsletterError, setNewsletterError] = useState("");
+
+  const handleNewsletterSubmit = async (e) => {
+    e.preventDefault();
+    setNewsletterStatus("");
+    setNewsletterError("");
+
+    if (!newsletterEmail) {
+      setNewsletterError("Veuillez entrer votre email.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+      if (response.ok) {
+        setNewsletterStatus("Merci pour votre inscription à la newsletter !");
+        setNewsletterEmail("");
+      } else {
+        setNewsletterError("Erreur lors de l'inscription. Veuillez réessayer.");
+      }
+    } catch {
+      setNewsletterError("Erreur réseau. Veuillez réessayer.");
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
@@ -46,16 +77,25 @@ export default function Footer() {
               </a>
             </div>
             <h5 className="font-medium mb-2">Abonnez-vous à notre newsletter</h5>
-            <div className="flex">
-              <input 
-                type="email" 
-                placeholder="Votre email" 
-                className="bg-gray-800 rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-coke-red" 
+            <form className="flex" onSubmit={handleNewsletterSubmit}>
+              <input
+                type="email"
+                placeholder="Votre email"
+                className="bg-gray-800 rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-coke-red"
+                value={newsletterEmail}
+                onChange={e => setNewsletterEmail(e.target.value)}
+                required
               />
-              <button className="bg-coke-red rounded-r-lg px-4 text-white flex items-center justify-center" aria-label="Envoyer">
+              <button
+                type="submit"
+                className="bg-coke-red rounded-r-lg px-4 text-white flex items-center justify-center"
+                aria-label="Envoyer"
+              >
                 <FaPaperPlane />
               </button>
-            </div>
+            </form>
+            {newsletterError && <div className="text-red-400 text-xs mt-2">{newsletterError}</div>}
+            {newsletterStatus && <div className="text-green-400 text-xs mt-2">{newsletterStatus}</div>}
           </div>
         </div>
         <div className="mt-12 pt-8 border-t border-gray-800">
