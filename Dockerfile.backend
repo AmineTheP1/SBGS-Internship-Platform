@@ -1,11 +1,9 @@
 # Use Node.js 18 as base image
 FROM node:18
 
-# Install build dependencies for bcrypt
+# Install curl for health checks
 RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -14,9 +12,8 @@ WORKDIR /app
 # Copy package files
 COPY backend/package*.json ./
 
-# Install dependencies and rebuild bcrypt for the correct architecture
+# Install dependencies
 RUN npm install --no-audit --no-fund
-RUN npm rebuild bcrypt --build-from-source
 
 # Copy source code
 COPY backend/ .
@@ -25,4 +22,4 @@ COPY backend/ .
 EXPOSE 3001
 
 # Start the development server
-CMD ["npm", "run", "dev", "--", "-p", "3001"] 
+CMD ["npm", "run", "dev", "--", "-p", "3001", "-H", "0.0.0.0"] 

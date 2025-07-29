@@ -4,6 +4,7 @@ import { AiFillFilePdf } from "react-icons/ai";
 import { FaCheck, FaTimes, FaUserPlus, FaCalendar } from "react-icons/fa";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function CandidateDetails() {
   const { id } = useParams();
@@ -23,7 +24,7 @@ export default function CandidateDetails() {
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/hr/get-applications?dsgid=${id}`);
+        const res = await fetch(`${API_ENDPOINTS.HR_APPLICATIONS}?dsgid=${id}`);
         const data = await res.json();
         if (data.success && data.applications.length > 0) {
           setCandidate(data.applications[0]);
@@ -36,7 +37,7 @@ export default function CandidateDetails() {
 
     const fetchSupervisors = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/hr/get-supervisors", {
+        const response = await fetch(API_ENDPOINTS.HR_GET_SUPERVISORS, {
           credentials: "include"
         });
         const data = await response.json();
@@ -59,7 +60,7 @@ export default function CandidateDetails() {
   const getPieceUrl = (type) => {
     if (!candidate.pieces_jointes) return null;
     const piece = candidate.pieces_jointes.find(p => p.typepiece === type);
-    return piece ? `http://localhost:3000/api/files${piece.url.replace('/uploads', '')}` : null;
+            return piece ? `${API_ENDPOINTS.FILES}${piece.url.replace('/uploads', '')}` : null;
   };
 
   // Helper to render file preview
@@ -126,7 +127,7 @@ export default function CandidateDetails() {
 
   const handleStatusUpdate = async (newStatus) => {
     try {
-      const res = await fetch("http://localhost:3000/api/hr/update-status", {
+      const res = await fetch(API_ENDPOINTS.HR_UPDATE_STATUS, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ dsgid: candidate.dsgid, status: newStatus }),
@@ -168,7 +169,7 @@ export default function CandidateDetails() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/hr/assign-intern", {
+      const response = await fetch(API_ENDPOINTS.HR_ASSIGN_INTERN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -215,7 +216,7 @@ export default function CandidateDetails() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/hr/set-start-date", {
+      const response = await fetch(API_ENDPOINTS.HR_SET_START_DATE, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -267,7 +268,7 @@ export default function CandidateDetails() {
     // Fetch all files first
     const files = await Promise.all(
       candidate.pieces_jointes.map(async (piece) => {
-        const url = `http://localhost:3000/api/files${piece.url.replace('/uploads', '')}`;
+        const url = `${API_ENDPOINTS.FILES}${piece.url.replace('/uploads', '')}`;
         const ext = url.split('.').pop().toLowerCase();
         let filename = piece.typepiece.replace(/\s+/g, "_");
         if (!filename.toLowerCase().endsWith(ext)) filename += `.${ext}`;
@@ -313,7 +314,7 @@ export default function CandidateDetails() {
       <div className="flex flex-col items-center mb-6">
         {candidate.imageurl && (
           <img
-            src={`http://localhost:3000${candidate.imageurl}`}
+                            src={`${API_BASE_URL}${candidate.imageurl}`}
             alt="Photo"
             className="h-24 w-24 rounded-full object-cover border mb-2"
           />

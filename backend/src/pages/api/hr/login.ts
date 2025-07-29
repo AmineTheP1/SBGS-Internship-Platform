@@ -1,24 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+import { handleCors } from "../../../utilities/cors";
 
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Handle CORS
+  if (handleCors(req, res)) return;
 
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -53,15 +46,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Login successful
     // Generate JWT token
     const token = jwt.sign(
-      { rhId: user.rhid, nom: user.nom, prenom: user.prenom, email: user.email },
+      { rhId: user.rhid || user.rhId, nom: user.nom, prenom: user.prenom, email: user.email },
       process.env.JWT_SECRET!,
       { expiresIn: rememberMe ? "30d" : "1h" }
     );
 
     // Set token as HTTP-only cookie
-    res.setHeader("Set-Cookie", `hr_token=${token}; HttpOnly; Path=/; Max-Age=${rememberMe ? 60 * 60 * 24 * 30 : 60 * 60}; SameSite=Lax`);
+    res.setHeader("Set-Cookie", `hr_token=${token}; HttpOnly; Path=/; Max-Age=${rememberMe ? 60 * 60 * 24 * 30 : 60 * 60}; SameSite=Lax; Secure=false`);
 
-    return res.status(200).json({ success: true, user: { rhId: user.rhid, nom: user.nom, prenom: user.prenom, email: user.email } });
+    return res.status(200).json({ success: true, user: { rhId: user.rhid || user.rhId, nom: user.nom, prenom: user.prenom, email: user.email } });
   } catch (error) {
     return res.status(500).json({ success: false, error: (error as Error).message });
   }

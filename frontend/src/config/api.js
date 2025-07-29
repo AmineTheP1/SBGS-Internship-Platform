@@ -1,5 +1,5 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -35,7 +35,8 @@ export const API_ENDPOINTS = {
   CANDIDATE_LOGOUT: `${API_BASE_URL}/api/candidate/logout`,
   CANDIDATE_CLOCK_IN: `${API_BASE_URL}/api/candidate/clock-in`,
   CANDIDATE_CLOCK_OUT: `${API_BASE_URL}/api/candidate/clock-out`,
-  CANDIDATE_DAILY_REPORT: `${API_BASE_URL}/api/candidate/daily-report`,
+  CANDIDATE_DAILY_REPORT: `${API_BASE_URL}/api/candidate/get-attendance`,
+  CANDIDATE_UPDATE_DAILY_REPORT: `${API_BASE_URL}/api/candidate/update-daily-report`,
   CANDIDATE_FINAL_REPORT: `${API_BASE_URL}/api/candidate/final-report`,
 
   // Application endpoints

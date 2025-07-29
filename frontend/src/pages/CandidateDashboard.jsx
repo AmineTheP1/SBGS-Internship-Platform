@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit } from "react-icons/fa";
+import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function CandidateDashboard() {
   const [candidate, setCandidate] = useState(null);
@@ -16,7 +17,7 @@ export default function CandidateDashboard() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/candidate/session", { 
+        const res = await fetch(API_ENDPOINTS.CANDIDATE_SESSION, { 
           credentials: "include" 
         });
         if (!res.ok) {
@@ -27,7 +28,7 @@ export default function CandidateDashboard() {
         setCandidate(data.candidate);
         
         // Fetch presence data
-        const presenceRes = await fetch("http://localhost:3000/api/candidate/get-attendance", {
+        const presenceRes = await fetch(API_ENDPOINTS.CANDIDATE_DAILY_REPORT, {
           credentials: "include"
         });
         if (presenceRes.ok) {
@@ -50,7 +51,7 @@ export default function CandidateDashboard() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/candidate/logout", { 
+      await fetch(API_ENDPOINTS.CANDIDATE_LOGOUT, { 
         credentials: "include" 
       });
       navigate('/candidate-login');
@@ -61,14 +62,14 @@ export default function CandidateDashboard() {
 
   const handleClockIn = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/candidate/clock-in", {
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_CLOCK_IN, {
         method: "POST",
         credentials: "include"
       });
       const data = await res.json();
       if (data.success) {
         // Refresh presence data
-        const presenceRes = await fetch("http://localhost:3000/api/candidate/get-attendance", {
+        const presenceRes = await fetch(API_ENDPOINTS.CANDIDATE_DAILY_REPORT, {
           credentials: "include"
         });
         if (presenceRes.ok) {
@@ -86,14 +87,14 @@ export default function CandidateDashboard() {
 
   const handleClockOut = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/candidate/clock-out", {
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_CLOCK_OUT, {
         method: "POST",
         credentials: "include"
       });
       const data = await res.json();
       if (data.success) {
         // Refresh presence data
-        const presenceRes = await fetch("http://localhost:3000/api/candidate/get-attendance", {
+        const presenceRes = await fetch(API_ENDPOINTS.CANDIDATE_DAILY_REPORT, {
           credentials: "include"
         });
         if (presenceRes.ok) {
@@ -111,7 +112,7 @@ export default function CandidateDashboard() {
 
   const handleUpdateDailyReport = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/candidate/update-daily-report", {
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_UPDATE_DAILY_REPORT, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -173,7 +174,7 @@ export default function CandidateDashboard() {
           <div className="flex items-center mb-6">
             {candidate.imageurl ? (
               <img
-                src={`http://localhost:3000${candidate.imageurl}`}
+                src={`${API_BASE_URL}${candidate.imageurl}`}
                 alt={`${candidate.prenom} ${candidate.nom}`}
                 className="w-16 h-16 rounded-full object-cover border-2 border-coke-red mr-4"
               />

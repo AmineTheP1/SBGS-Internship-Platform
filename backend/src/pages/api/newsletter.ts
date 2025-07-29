@@ -1,15 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import sendEmail from "../../utilities/sendEmail";
+import { handleCors } from "../../utilities/cors";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+  // Handle CORS
+  if (handleCors(req, res)) return;
 
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });

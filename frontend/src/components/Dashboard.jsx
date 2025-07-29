@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DocumentTextIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import API_ENDPOINTS from "../config/api.js";
+import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function Dashboard() {
   const [applications, setApplications] = useState([]);
@@ -56,12 +56,19 @@ export default function Dashboard() {
     // Check if user is logged in via session API
     const checkSession = async () => {
       try {
+        console.log("Checking HR session...");
         const res = await fetch(API_ENDPOINTS.HR_SESSION, { credentials: "include" });
+        console.log("HR session response:", res.status);
         if (!res.ok) {
+          console.log("HR session failed, redirecting to login");
           navigate('/hr-login', { replace: true });
+          return;
         }
-      } catch {
+        console.log("HR session successful");
+      } catch (error) {
+        console.error("HR session error:", error);
         navigate('/hr-login', { replace: true });
+        return;
       }
     };
     checkSession();
@@ -391,6 +398,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
+    console.log("Dashboard is loading...");
     return <div className="text-center py-20 text-xl">Chargement des candidatures...</div>;
   }
 
