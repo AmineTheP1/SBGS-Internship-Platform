@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.11",
+    "bcrypt": "^5.1.1",
     "drizzle-orm": "^0.44.3",
     "formidable": "^3.5.4",
     "jsonwebtoken": "^9.0.2",

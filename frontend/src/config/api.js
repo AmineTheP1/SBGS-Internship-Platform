@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = process.env.VITE_API_BASE_URL || '';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 // API endpoints
 export const API_ENDPOINTS = {
@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
   HR_SET_START_DATE: `${API_BASE_URL}/api/hr/set-start-date`,
   HR_CREATE_SUPERVISOR: `${API_BASE_URL}/api/hr/create-supervisor`,
   HR_GET_UNIVERSITIES: `${API_BASE_URL}/api/hr/get-universities`,
+  HR_DELETE_APPLICATION: `${API_BASE_URL}/api/hr/delete-application`,
+  HR_GET_CV: `${API_BASE_URL}/api/hr/get-cv`,
   HR_SUPER_ADMIN_CREATE_RH: `${API_BASE_URL}/api/hr/super-admin/create-rh`,
 
   // Supervisor endpoints

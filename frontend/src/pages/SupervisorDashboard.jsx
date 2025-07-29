@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus } from "react-icons/fa";
+import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function SupervisorDashboard() {
   const [supervisor, setSupervisor] = useState(null);
@@ -18,7 +19,7 @@ export default function SupervisorDashboard() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/supervisor/session", { 
+        const res = await fetch(API_ENDPOINTS.SUPERVISOR_SESSION, { 
           credentials: "include" 
         });
         if (!res.ok) {
@@ -29,7 +30,7 @@ export default function SupervisorDashboard() {
         setSupervisor(data.supervisor);
         
         // Fetch assigned interns
-        const internsRes = await fetch("http://localhost:3000/api/supervisor/get-assigned-interns", {
+        const internsRes = await fetch(API_ENDPOINTS.SUPERVISOR_ASSIGNED_INTERNS, {
           credentials: "include"
         });
         if (internsRes.ok) {
@@ -38,7 +39,7 @@ export default function SupervisorDashboard() {
         }
 
         // Fetch monthly absences
-        const absencesRes = await fetch("http://localhost:3000/api/supervisor/get-monthly-absences", {
+        const absencesRes = await fetch(API_ENDPOINTS.SUPERVISOR_MONTHLY_ABSENCES, {
           credentials: "include"
         });
         if (absencesRes.ok) {
@@ -57,7 +58,7 @@ export default function SupervisorDashboard() {
 
   const handleViewInternDetails = async (cdtid) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/supervisor/get-intern-details?cdtid=${cdtid}`, {
+      const res = await fetch(`${API_ENDPOINTS.SUPERVISOR_INTERN_DETAILS}?cdtid=${cdtid}`, {
         credentials: "include"
       });
       if (res.ok) {
@@ -86,8 +87,8 @@ export default function SupervisorDashboard() {
 
     try {
       const endpoint = absenceType === "justified" 
-        ? "http://localhost:3000/api/supervisor/mark-absence"
-        : "http://localhost:3000/api/supervisor/mark-unjustified-absence";
+        ? API_ENDPOINTS.SUPERVISOR_MARK_ABSENCE
+        : API_ENDPOINTS.SUPERVISOR_MARK_UNJUSTIFIED_ABSENCE;
 
       const response = await fetch(endpoint, {
         method: "POST",
@@ -116,7 +117,7 @@ export default function SupervisorDashboard() {
         handleViewInternDetails(selectedIntern.intern.cdtid);
         
         // Refresh monthly absences count
-        const absencesRes = await fetch("http://localhost:3000/api/supervisor/get-monthly-absences", {
+        const absencesRes = await fetch(API_ENDPOINTS.SUPERVISOR_MONTHLY_ABSENCES, {
           credentials: "include"
         });
         if (absencesRes.ok) {
@@ -232,7 +233,7 @@ export default function SupervisorDashboard() {
                   <div className="flex items-center mb-4">
                     {intern.imageurl ? (
                       <img
-                        src={`http://localhost:3000${intern.imageurl}`}
+                        src={`${API_BASE_URL}${intern.imageurl}`}
                         alt={`${intern.prenom} ${intern.nom}`}
                         className="w-12 h-12 rounded-full object-cover mr-4"
                       />

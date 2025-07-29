@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserTie, FaEye, FaEyeSlash, FaUsers, FaClock, FaFileAlt, FaCalendar } from "react-icons/fa";
+import API_ENDPOINTS from "../config/api.js";
 
 export default function SupervisorLoginSection() {
   const [formData, setFormData] = useState({
@@ -27,7 +28,7 @@ export default function SupervisorLoginSection() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/supervisor/login", {
+      const res = await fetch(API_ENDPOINTS.SUPERVISOR_LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

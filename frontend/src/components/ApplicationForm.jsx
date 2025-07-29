@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import API_ENDPOINTS from "../config/api.js";
 
 export default function ApplicationForm() {
   const [formData, setFormData] = useState({
@@ -39,7 +40,7 @@ export default function ApplicationForm() {
   useEffect(() => {
     const fetchUniversities = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/hr/get-universities");
+        const response = await fetch(API_ENDPOINTS.HR_GET_UNIVERSITIES);
         const data = await response.json();
         if (data.success) {
           setUniversities(data.universities);
@@ -199,7 +200,7 @@ export default function ApplicationForm() {
       if (formData.conventionStage) data.append('conventionStage', formData.conventionStage);
       if (formData.assurance) data.append('assurance', formData.assurance);
 
-      const response = await fetch("http://localhost:3000/api/hr/apply", {
+      const response = await fetch(API_ENDPOINTS.APPLY, {
         method: "POST",
         body: data,
       });

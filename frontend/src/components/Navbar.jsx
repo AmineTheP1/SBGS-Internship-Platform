@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaBars, FaGraduationCap, FaSignOutAlt } from "react-icons/fa";
+import API_ENDPOINTS from "../config/api.js";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,7 +15,7 @@ export default function Navbar() {
     const checkSessions = async () => {
       try {
         // Check HR session first
-        const hrRes = await fetch("http://localhost:3000/api/hr/session", { credentials: "include" });
+        const hrRes = await fetch(API_ENDPOINTS.HR_SESSION, { credentials: "include" });
         if (hrRes.ok) {
           const hrData = await hrRes.json();
           setIsLoggedIn(true);
@@ -24,7 +25,7 @@ export default function Navbar() {
         }
 
         // Check candidate session
-        const candidateRes = await fetch("http://localhost:3000/api/candidate/session", { credentials: "include" });
+        const candidateRes = await fetch(API_ENDPOINTS.CANDIDATE_SESSION, { credentials: "include" });
         if (candidateRes.ok) {
           const candidateData = await candidateRes.json();
           setIsLoggedIn(true);
@@ -34,7 +35,7 @@ export default function Navbar() {
         }
 
         // Check supervisor session
-        const supervisorRes = await fetch("http://localhost:3000/api/supervisor/session", { credentials: "include" });
+        const supervisorRes = await fetch(API_ENDPOINTS.SUPERVISOR_SESSION, { credentials: "include" });
         if (supervisorRes.ok) {
           const supervisorData = await supervisorRes.json();
           setIsLoggedIn(true);
@@ -141,13 +142,13 @@ export default function Navbar() {
                   className="flex items-center px-4 py-2 rounded-lg bg-coke-red text-white font-semibold transition-all duration-200 hover:bg-red-700"
                   onClick={async () => {
                     if (userType === 'hr') {
-                      await fetch("http://localhost:3000/api/hr/logout", { credentials: "include" });
+                      await fetch(API_ENDPOINTS.HR_LOGOUT, { credentials: "include" });
                       navigate('/hr-login');
                     } else if (userType === 'supervisor') {
-                      await fetch("http://localhost:3000/api/supervisor/logout", { credentials: "include" });
+                      await fetch(API_ENDPOINTS.SUPERVISOR_LOGOUT, { credentials: "include" });
                       navigate('/supervisor-login');
                     } else {
-                      await fetch("http://localhost:3000/api/candidate/logout", { credentials: "include" });
+                      await fetch(API_ENDPOINTS.CANDIDATE_LOGOUT, { credentials: "include" });
                       navigate('/candidate-login');
                     }
                     setIsLoggedIn(false);

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaGraduationCap } from "react-icons/fa";
+import API_ENDPOINTS from "../config/api.js";
 
 export default function CandidateLoginSection() {
   const [loginData, setLoginData] = useState({
@@ -31,7 +32,7 @@ export default function CandidateLoginSection() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/candidate/login", {
+      const response = await fetch(API_ENDPOINTS.CANDIDATE_LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

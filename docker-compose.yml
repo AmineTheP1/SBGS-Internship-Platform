@@ -23,6 +23,7 @@ services:
       - /app/dist
     environment:
       - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost
     expose:
       - "3000"
 
