@@ -25,6 +25,7 @@ services:
     environment:
       - NODE_ENV=development
       - VITE_API_BASE_URL=http://localhost
+      - TZ=Africa/Casablanca
     expose:
       - "3000"
     healthcheck:
@@ -53,6 +54,7 @@ services:
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
+      - TZ=Africa/Casablanca
     env_file:
       - .env
     expose:
