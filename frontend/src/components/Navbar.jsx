@@ -14,6 +14,15 @@ export default function Navbar() {
   useEffect(() => {
     const checkSessions = async () => {
       try {
+        // Skip session checks on login pages to avoid unnecessary 401 errors
+        const loginPages = ['/hr-login', '/supervisor-login', '/candidate-login'];
+        if (loginPages.includes(location.pathname)) {
+          setIsLoggedIn(false);
+          setUserType(null);
+          setUserData(null);
+          return;
+        }
+
         // Check HR session first
         const hrRes = await fetch(API_ENDPOINTS.HR_SESSION, { credentials: "include" });
         if (hrRes.ok) {
@@ -48,7 +57,8 @@ export default function Navbar() {
         setIsLoggedIn(false);
         setUserType(null);
         setUserData(null);
-      } catch {
+      } catch (error) {
+        console.log("Session check error:", error);
         setIsLoggedIn(false);
         setUserType(null);
         setUserData(null);

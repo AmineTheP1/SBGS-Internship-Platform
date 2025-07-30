@@ -14,6 +14,8 @@ export default function SupervisorDashboard() {
   const [absenceStatus, setAbsenceStatus] = useState("");
   const [monthlyAbsences, setMonthlyAbsences] = useState(0);
   const [absenceType, setAbsenceType] = useState("justified"); // "justified" or "unjustified"
+  const [confirmationStatus, setConfirmationStatus] = useState("");
+  const [pendingConfirmations, setPendingConfirmations] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +37,10 @@ export default function SupervisorDashboard() {
         });
         if (internsRes.ok) {
           const internsData = await internsRes.json();
-          setInterns(internsData.interns);
+          setInterns(internsData.interns || []);
+        } else {
+          console.error("Failed to fetch assigned interns:", internsRes.status);
+          setInterns([]);
         }
 
         // Fetch monthly absences
@@ -46,6 +51,8 @@ export default function SupervisorDashboard() {
           const absencesData = await absencesRes.json();
           setMonthlyAbsences(absencesData.count || 0);
         }
+
+        setPendingConfirmations(0); // We'll calculate this later when needed
       } catch {
         navigate('/supervisor-login', { replace: true });
       }
@@ -134,6 +141,40 @@ export default function SupervisorDashboard() {
     }
   };
 
+  const handleConfirmPresence = async (cdtid, date, confirmed) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.SUPERVISOR_CONFIRM_PRESENCE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          cdtid: cdtid,
+          date: date,
+          confirmed: confirmed
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setConfirmationStatus(data.message);
+        
+        // Refresh intern details
+        handleViewInternDetails(cdtid);
+        
+        // Simple refresh of intern details
+        handleViewInternDetails(cdtid);
+        
+        setTimeout(() => setConfirmationStatus(""), 3000);
+      } else {
+        setConfirmationStatus(data.error || "Erreur lors de la confirmation");
+      }
+    } catch (error) {
+      setConfirmationStatus("Erreur réseau lors de la confirmation");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -160,7 +201,7 @@ export default function SupervisorDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-lg">
@@ -173,19 +214,19 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-lg">
-                <FaClock className="text-2xl text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Présents aujourd'hui</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {interns.filter(intern => intern.statut_candidature === 'Accepté').length}
-                </p>
-              </div>
-            </div>
-          </div>
+                     <div className="bg-white rounded-xl shadow-lg p-6">
+             <div className="flex items-center">
+               <div className="bg-green-100 p-3 rounded-lg">
+                 <FaClock className="text-2xl text-green-600" />
+               </div>
+               <div className="ml-4">
+                 <p className="text-sm font-medium text-gray-600">Présents aujourd'hui</p>
+                 <p className="text-2xl font-bold text-gray-800">
+                   {interns.filter(intern => intern.today_attendance === true).length}
+                 </p>
+               </div>
+             </div>
+           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center">
@@ -210,6 +251,20 @@ export default function SupervisorDashboard() {
               </div>
             </div>
           </div>
+
+                     <div className="bg-white rounded-xl shadow-lg p-6">
+             <div className="flex items-center">
+               <div className="bg-orange-100 p-3 rounded-lg">
+                 <FaClock className="text-2xl text-orange-600" />
+               </div>
+               <div className="ml-4">
+                 <p className="text-sm font-medium text-gray-600">Confirmations en attente</p>
+                 <p className="text-2xl font-bold text-gray-800">
+                   {interns.filter(intern => intern.pending_confirmations > 0).reduce((sum, intern) => sum + intern.pending_confirmations, 0)}
+                 </p>
+               </div>
+             </div>
+           </div>
         </div>
 
         {/* Interns List */}
@@ -236,12 +291,15 @@ export default function SupervisorDashboard() {
                         src={`${API_BASE_URL}${intern.imageurl}`}
                         alt={`${intern.prenom} ${intern.nom}`}
                         className="w-12 h-12 rounded-full object-cover mr-4"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
                       />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4">
-                        <FaUsers className="text-white" />
-                      </div>
-                    )}
+                    ) : null}
+                    <div className={`w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 ${intern.imageurl ? 'hidden' : ''}`}>
+                      <FaUsers className="text-white" />
+                    </div>
                     <div>
                       <h3 className="font-semibold text-gray-800">
                         {intern.prenom} {intern.nom}
@@ -268,6 +326,7 @@ export default function SupervisorDashboard() {
                       <span className="text-gray-600">Durée:</span>
                       <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
                     </div>
+                    
                   </div>
 
                   <button
@@ -332,6 +391,17 @@ export default function SupervisorDashboard() {
                 Marquer une absence
               </button>
             </div>
+
+            {/* Status Messages */}
+            {confirmationStatus && (
+              <div className={`p-3 rounded-lg text-sm font-medium mb-4 ${
+                confirmationStatus.includes("succès") 
+                  ? "bg-green-100 text-green-700" 
+                  : "bg-red-100 text-red-700"
+              }`}>
+                {confirmationStatus}
+              </div>
+            )}
 
             {/* Daily Logs */}
             <div className="space-y-6">
@@ -421,8 +491,27 @@ export default function SupervisorDashboard() {
                             const att = activities.find(a => a.type === 'attendance').data;
                             return (
                               <div className="bg-white rounded p-3 border-l-4 border-green-500">
-                                <h6 className="font-medium text-gray-800 mb-2">Pointage</h6>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h6 className="font-medium text-gray-800">Pointage</h6>
+                                  <div className="flex items-center gap-2">
+                                    {att.confirme_par_superviseur === true && (
+                                      <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                                        ✓ Confirmé
+                                      </span>
+                                    )}
+                                    {att.confirme_par_superviseur === false && (
+                                      <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">
+                                        ✗ Non confirmé
+                                      </span>
+                                    )}
+                                    {att.confirme_par_superviseur === null && (
+                                      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
+                                        ⏳ En attente
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-sm mb-3">
                                   <div>
                                     <span className="text-gray-600">Entrée:</span>
                                     <span className="ml-2 font-medium">
@@ -458,6 +547,31 @@ export default function SupervisorDashboard() {
                                     </span>
                                   </div>
                                 </div>
+                                
+                                {/* Confirmation buttons */}
+                                {att.confirme_par_superviseur === null && (
+                                  <div className="flex gap-2 mt-3">
+                                    <button
+                                      onClick={() => handleConfirmPresence(selectedIntern.intern.cdtid, new Date().toISOString().split('T')[0], true)}
+                                      className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors"
+                                    >
+                                      Confirmer présence
+                                    </button>
+                                    <button
+                                      onClick={() => handleConfirmPresence(selectedIntern.intern.cdtid, new Date().toISOString().split('T')[0], false)}
+                                      className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                                    >
+                                      Non présent
+                                    </button>
+                                  </div>
+                                )}
+                                
+                                {/* Show confirmation date if confirmed */}
+                                {att.confirme_par_superviseur !== null && att.date_confirmation && (
+                                  <div className="text-xs text-gray-500 mt-2">
+                                    Confirmé le: {new Date(att.date_confirmation).toLocaleDateString('fr-FR')} à {new Date(att.date_confirmation).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                )}
                               </div>
                             );
                           })()}

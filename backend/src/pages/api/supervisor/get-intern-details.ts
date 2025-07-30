@@ -1,23 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import jwt from "jsonwebtoken";
+import { handleCors } from "../../../utilities/cors";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+  // Handle CORS
+  if (handleCors(req, res)) return;
 
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -75,9 +67,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           heure_entree TIMESTAMP,
           heure_sortie TIMESTAMP,
           statut VARCHAR(50) DEFAULT 'En cours',
+          confirme_par_superviseur BOOLEAN DEFAULT NULL,
+          date_confirmation TIMESTAMP,
           FOREIGN KEY (cdtid) REFERENCES candidat(cdtid)
         )
       `);
+      
+      // Add confirmation columns if they don't exist
+      try {
+        await pool.query(`ALTER TABLE presence ADD COLUMN IF NOT EXISTS confirme_par_superviseur BOOLEAN DEFAULT NULL`);
+        await pool.query(`ALTER TABLE presence ADD COLUMN IF NOT EXISTS date_confirmation TIMESTAMP`);
+      } catch (error) {
+        console.log("Confirmation columns might already exist:", error);
+      }
     } catch (error) {
       console.log("Presence table might already exist or error occurred:", error);
     }

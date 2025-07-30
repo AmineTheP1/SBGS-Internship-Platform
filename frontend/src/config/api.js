@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
   SUPERVISOR_MARK_ABSENCE: `${API_BASE_URL}/api/supervisor/mark-absence`,
   SUPERVISOR_MARK_UNJUSTIFIED_ABSENCE: `${API_BASE_URL}/api/supervisor/mark-unjustified-absence`,
   SUPERVISOR_MONTHLY_ABSENCES: `${API_BASE_URL}/api/supervisor/get-monthly-absences`,
+  SUPERVISOR_CONFIRM_PRESENCE: `${API_BASE_URL}/api/supervisor/confirm-presence`,
   SUPERVISOR_ADMIN_CREATE_SUPERVISOR: `${API_BASE_URL}/api/supervisor-admin/create-supervisor`,
 
   // Candidate endpoints

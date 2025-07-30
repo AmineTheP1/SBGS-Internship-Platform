@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     await pool.query(
-      `INSERT INTO presence (cdtid, date, heure_entree, statut) VALUES ($1, $2, $3, $4)`,
+      `INSERT INTO presence (cdtid, date, heure_entree, statut, confirme_par_superviseur) VALUES ($1, $2, $3, $4, NULL)`,
       [candidate.cdtid, today, currentTime, 'En cours']
     );
 

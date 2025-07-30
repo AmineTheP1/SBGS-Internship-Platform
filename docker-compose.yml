@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     volumes:
-      - ./frontend:/app
+      - ./frontend:/src
       - /app/node_modules
       - /app/dist
     environment:
