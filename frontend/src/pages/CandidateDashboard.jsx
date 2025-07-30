@@ -7,6 +7,7 @@ export default function CandidateDashboard() {
   const [candidate, setCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [presence, setPresence] = useState(null);
+  const [assignment, setAssignment] = useState(null);
   const [showDailyReport, setShowDailyReport] = useState(false);
   const [dailyReport, setDailyReport] = useState({
     taches_effectuees: '',
@@ -40,6 +41,15 @@ export default function CandidateDashboard() {
               documents_utilises: presenceData.todayReport.documents_utilises || ''
             });
           }
+        }
+
+        // Fetch assignment information
+        const assignmentRes = await fetch(API_ENDPOINTS.CANDIDATE_GET_ASSIGNMENT, {
+          credentials: "include"
+        });
+        if (assignmentRes.ok) {
+          const assignmentData = await assignmentRes.json();
+          setAssignment(assignmentData.assignment);
         }
       } catch {
         navigate('/candidate-login', { replace: true });
@@ -191,7 +201,7 @@ export default function CandidateDashboard() {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-green-50 p-6 rounded-lg border border-green-200">
               <div className="flex items-center mb-3">
                 <FaGraduationCap className="text-green-600 mr-2" />
@@ -214,6 +224,14 @@ export default function CandidateDashboard() {
                 <h3 className="font-semibold text-purple-800">Durée</h3>
               </div>
               <p className="text-purple-700">{candidate.periode || "Non spécifiée"}</p>
+            </div>
+
+            <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
+              <div className="flex items-center mb-3">
+                <FaFileAlt className="text-orange-600 mr-2" />
+                <h3 className="font-semibold text-orange-800">Thème de stage</h3>
+              </div>
+              <p className="text-orange-700">{assignment?.theme_stage || "Non défini"}</p>
             </div>
           </div>
         </div>

@@ -27,8 +27,9 @@ export const API_ENDPOINTS = {
   SUPERVISOR_MARK_ABSENCE: `${API_BASE_URL}/api/supervisor/mark-absence`,
   SUPERVISOR_MARK_UNJUSTIFIED_ABSENCE: `${API_BASE_URL}/api/supervisor/mark-unjustified-absence`,
   SUPERVISOR_MONTHLY_ABSENCES: `${API_BASE_URL}/api/supervisor/get-monthly-absences`,
-  SUPERVISOR_CONFIRM_PRESENCE: `${API_BASE_URL}/api/supervisor/confirm-presence`,
-  SUPERVISOR_ADMIN_CREATE_SUPERVISOR: `${API_BASE_URL}/api/supervisor-admin/create-supervisor`,
+      SUPERVISOR_CONFIRM_PRESENCE: `${API_BASE_URL}/api/supervisor/confirm-presence`,
+    SUPERVISOR_SET_THEME: `${API_BASE_URL}/api/supervisor/set-theme`,
+    SUPERVISOR_ADMIN_CREATE_SUPERVISOR: `${API_BASE_URL}/api/supervisor-admin/create-supervisor`,
 
   // Candidate endpoints
   CANDIDATE_LOGIN: `${API_BASE_URL}/api/candidate/login`,
@@ -39,6 +40,7 @@ export const API_ENDPOINTS = {
   CANDIDATE_DAILY_REPORT: `${API_BASE_URL}/api/candidate/get-attendance`,
   CANDIDATE_UPDATE_DAILY_REPORT: `${API_BASE_URL}/api/candidate/update-daily-report`,
   CANDIDATE_FINAL_REPORT: `${API_BASE_URL}/api/candidate/final-report`,
+  CANDIDATE_GET_ASSIGNMENT: `${API_BASE_URL}/api/candidate/get-assignment`,
 
   // Application endpoints
   APPLY: `${API_BASE_URL}/api/hr/apply`,

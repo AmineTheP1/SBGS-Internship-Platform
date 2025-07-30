@@ -16,7 +16,23 @@ export default function SupervisorDashboard() {
   const [absenceType, setAbsenceType] = useState("justified"); // "justified" or "unjustified"
   const [confirmationStatus, setConfirmationStatus] = useState("");
   const [pendingConfirmations, setPendingConfirmations] = useState(0);
+  const [themeStatus, setThemeStatus] = useState("");
   const navigate = useNavigate();
+
+  // Available themes for selection
+  const availableThemes = [
+    "Développement Web",
+    "Développement Mobile",
+    "Data Science",
+    "Intelligence Artificielle",
+    "Cybersécurité",
+    "DevOps",
+    "Design UX/UI",
+    "Marketing Digital",
+    "Gestion de Projet",
+    "Administration Système",
+    "Autre"
+  ];
 
   useEffect(() => {
     const checkSession = async () => {
@@ -181,6 +197,42 @@ export default function SupervisorDashboard() {
     }
   };
 
+  const handleSetTheme = async (cdtid, theme) => {
+    try {
+      const response = await fetch(API_ENDPOINTS.SUPERVISOR_SET_THEME, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          cdtid: cdtid,
+          theme: theme
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setThemeStatus(data.message);
+        
+        // Refresh the assigned interns data to update theme display
+        const internsRes = await fetch(API_ENDPOINTS.SUPERVISOR_ASSIGNED_INTERNS, {
+          credentials: "include"
+        });
+        if (internsRes.ok) {
+          const internsData = await internsRes.json();
+          setInterns(internsData.interns || []);
+        }
+        
+        setTimeout(() => setThemeStatus(""), 3000);
+      } else {
+        setThemeStatus(data.error || "Erreur lors de la mise à jour du thème");
+      }
+    } catch (error) {
+      setThemeStatus("Erreur réseau lors de la mise à jour du thème");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -273,14 +325,25 @@ export default function SupervisorDashboard() {
            </div>
         </div>
 
-        {/* Interns List */}
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Mes Stagiaires</h2>
-            <div className="text-sm text-gray-600">
-              {interns.length} stagiaire(s) assigné(s)
-            </div>
-          </div>
+                 {/* Interns List */}
+         <div className="bg-white rounded-xl shadow-lg p-8">
+           <div className="flex justify-between items-center mb-6">
+             <h2 className="text-2xl font-bold text-gray-800">Mes Stagiaires</h2>
+             <div className="text-sm text-gray-600">
+               {interns.length} stagiaire(s) assigné(s)
+             </div>
+           </div>
+
+           {/* Theme Status Message */}
+           {themeStatus && (
+             <div className={`p-3 rounded-lg text-sm font-medium mb-4 ${
+               themeStatus.includes("succès") 
+                 ? "bg-green-100 text-green-700" 
+                 : "bg-red-100 text-red-700"
+             }`}>
+               {themeStatus}
+             </div>
+           )}
 
           {interns.length === 0 ? (
             <div className="text-center py-12">
@@ -314,26 +377,48 @@ export default function SupervisorDashboard() {
                     </div>
                   </div>
 
-                  <div className="space-y-2 mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Statut:</span>
-                      <span className={`font-medium ${
-                        intern.statut_candidature === 'Accepté' ? 'text-green-600' : 
-                        intern.statut_candidature === 'En attente' ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {intern.statut_candidature}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Type:</span>
-                      <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Durée:</span>
-                      <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
-                    </div>
-                    
-                  </div>
+                                     <div className="space-y-2 mb-4">
+                     <div className="flex justify-between text-sm">
+                       <span className="text-gray-600">Statut:</span>
+                       <span className={`font-medium ${
+                         intern.statut_candidature === 'Accepté' ? 'text-green-600' : 
+                         intern.statut_candidature === 'En attente' ? 'text-yellow-600' : 'text-red-600'
+                       }`}>
+                         {intern.statut_candidature}
+                       </span>
+                     </div>
+                     <div className="flex justify-between text-sm">
+                       <span className="text-gray-600">Type:</span>
+                       <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
+                     </div>
+                     <div className="flex justify-between text-sm">
+                       <span className="text-gray-600">Durée:</span>
+                       <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
+                     </div>
+                     <div className="flex justify-between text-sm">
+                       <span className="text-gray-600">Thème:</span>
+                       <span className="font-medium text-blue-600">{intern.theme_stage || 'Non défini'}</span>
+                     </div>
+                   </div>
+
+                   {/* Theme Selection */}
+                   <div className="mb-4">
+                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                       Définir le thème de stage
+                     </label>
+                     <select
+                       value={intern.theme_stage || ''}
+                       onChange={(e) => handleSetTheme(intern.cdtid, e.target.value)}
+                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent text-sm"
+                     >
+                       <option value="">Sélectionner un thème</option>
+                       {availableThemes.map((theme) => (
+                         <option key={theme} value={theme}>
+                           {theme}
+                         </option>
+                       ))}
+                     </select>
+                   </div>
 
                   <button
                     onClick={() => handleViewInternDetails(intern.cdtid)}

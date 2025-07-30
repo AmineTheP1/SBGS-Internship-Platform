@@ -55,8 +55,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         d.periode,
         a.date_assignation,
         a.statut as statut_assignation,
-                 CASE WHEN p.cdtid IS NOT NULL THEN true ELSE false END as today_attendance,
-         COALESCE(pending_counts.pending_count, 0)::integer as pending_confirmations
+        a.theme_stage,
+        CASE WHEN p.cdtid IS NOT NULL THEN true ELSE false END as today_attendance,
+        COALESCE(pending_counts.pending_count, 0)::integer as pending_confirmations
        FROM assignations_stage a
        JOIN candidat c ON a.cdtid = c.cdtid
        LEFT JOIN demandes_stage d ON c.cdtid = d.cdtid
