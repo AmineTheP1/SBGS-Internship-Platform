@@ -163,8 +163,14 @@ export default function SupervisorDashboard() {
         // Refresh intern details
         handleViewInternDetails(cdtid);
         
-        // Simple refresh of intern details
-        handleViewInternDetails(cdtid);
+        // Refresh the assigned interns data to update counters
+        const internsRes = await fetch(API_ENDPOINTS.SUPERVISOR_ASSIGNED_INTERNS, {
+          credentials: "include"
+        });
+        if (internsRes.ok) {
+          const internsData = await internsRes.json();
+          setInterns(internsData.interns || []);
+        }
         
         setTimeout(() => setConfirmationStatus(""), 3000);
       } else {
