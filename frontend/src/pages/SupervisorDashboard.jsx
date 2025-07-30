@@ -17,22 +17,9 @@ export default function SupervisorDashboard() {
   const [confirmationStatus, setConfirmationStatus] = useState("");
   const [pendingConfirmations, setPendingConfirmations] = useState(0);
   const [themeStatus, setThemeStatus] = useState("");
+  const [editingTheme, setEditingTheme] = useState(null);
+  const [newTheme, setNewTheme] = useState("");
   const navigate = useNavigate();
-
-  // Available themes for selection
-  const availableThemes = [
-    "Développement Web",
-    "Développement Mobile",
-    "Data Science",
-    "Intelligence Artificielle",
-    "Cybersécurité",
-    "DevOps",
-    "Design UX/UI",
-    "Marketing Digital",
-    "Gestion de Projet",
-    "Administration Système",
-    "Autre"
-  ];
 
   useEffect(() => {
     const checkSession = async () => {
@@ -225,11 +212,29 @@ export default function SupervisorDashboard() {
         }
         
         setTimeout(() => setThemeStatus(""), 3000);
+        setEditingTheme(null);
+        setNewTheme("");
       } else {
         setThemeStatus(data.error || "Erreur lors de la mise à jour du thème");
       }
     } catch (error) {
       setThemeStatus("Erreur réseau lors de la mise à jour du thème");
+    }
+  };
+
+  const handleStartEditTheme = (cdtid, currentTheme) => {
+    setEditingTheme(cdtid);
+    setNewTheme(currentTheme || "");
+  };
+
+  const handleCancelEditTheme = () => {
+    setEditingTheme(null);
+    setNewTheme("");
+  };
+
+  const handleSaveTheme = (cdtid) => {
+    if (newTheme.trim()) {
+      handleSetTheme(cdtid, newTheme.trim());
     }
   };
 
@@ -377,48 +382,70 @@ export default function SupervisorDashboard() {
                     </div>
                   </div>
 
-                                     <div className="space-y-2 mb-4">
-                     <div className="flex justify-between text-sm">
-                       <span className="text-gray-600">Statut:</span>
-                       <span className={`font-medium ${
-                         intern.statut_candidature === 'Accepté' ? 'text-green-600' : 
-                         intern.statut_candidature === 'En attente' ? 'text-yellow-600' : 'text-red-600'
-                       }`}>
-                         {intern.statut_candidature}
-                       </span>
+                                                                                                <div className="space-y-2 mb-4">
+                       <div className="flex justify-between text-sm">
+                         <span className="text-gray-600">Statut:</span>
+                         <span className={`font-medium ${
+                           intern.statut_candidature === 'Accepté' ? 'text-green-600' : 
+                           intern.statut_candidature === 'En attente' ? 'text-yellow-600' : 'text-red-600'
+                         }`}>
+                           {intern.statut_candidature}
+                         </span>
+                       </div>
+                       <div className="flex justify-between text-sm">
+                         <span className="text-gray-600">Type:</span>
+                         <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
+                       </div>
+                       <div className="flex justify-between text-sm">
+                         <span className="text-gray-600">Durée:</span>
+                         <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
+                       </div>
+                       <div className="flex justify-between text-sm">
+                         <span className="text-gray-600">Thème:</span>
+                         <span className="font-medium text-blue-600 max-w-[80%] text-right">{intern.theme_stage || 'Non défini'}</span>
+                       </div>
                      </div>
-                     <div className="flex justify-between text-sm">
-                       <span className="text-gray-600">Type:</span>
-                       <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
-                     </div>
-                     <div className="flex justify-between text-sm">
-                       <span className="text-gray-600">Durée:</span>
-                       <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
-                     </div>
-                     <div className="flex justify-between text-sm">
-                       <span className="text-gray-600">Thème:</span>
-                       <span className="font-medium text-blue-600">{intern.theme_stage || 'Non défini'}</span>
-                     </div>
-                   </div>
 
-                   {/* Theme Selection */}
-                   <div className="mb-4">
-                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                       Définir le thème de stage
-                     </label>
-                     <select
-                       value={intern.theme_stage || ''}
-                       onChange={(e) => handleSetTheme(intern.cdtid, e.target.value)}
-                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent text-sm"
-                     >
-                       <option value="">Sélectionner un thème</option>
-                       {availableThemes.map((theme) => (
-                         <option key={theme} value={theme}>
-                           {theme}
-                         </option>
-                       ))}
-                     </select>
-                   </div>
+                                       {/* Theme Selection */}
+                    {editingTheme === intern.cdtid ? (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Thème de stage
+                        </label>
+                        <div className="space-y-2">
+                          <textarea
+                            value={newTheme}
+                            onChange={(e) => setNewTheme(e.target.value)}
+                            placeholder="Saisissez le thème de stage..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent text-sm resize-none"
+                            rows="3"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveTheme(intern.cdtid)}
+                              className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
+                            >
+                              Sauvegarder
+                            </button>
+                            <button
+                              onClick={handleCancelEditTheme}
+                              className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <button
+                          onClick={() => handleStartEditTheme(intern.cdtid, intern.theme_stage)}
+                          className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          {intern.theme_stage ? 'Modifier le thème' : 'Définir le thème'}
+                        </button>
+                      </div>
+                    )}
 
                   <button
                     onClick={() => handleViewInternDetails(intern.cdtid)}

@@ -19,13 +19,15 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     volumes:
-      - ./frontend:/src
+      - ./frontend:/app
       - /app/node_modules
       - /app/dist
     environment:
       - NODE_ENV=development
       - VITE_API_BASE_URL=http://localhost
       - TZ=Africa/Casablanca
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     expose:
       - "3000"
     healthcheck:
