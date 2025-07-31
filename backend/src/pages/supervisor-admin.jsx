@@ -317,9 +317,6 @@ export default function SupervisorAdmin() {
                     <option value="Informatique">Informatique</option>
                     <option value="Commercial">Commercial</option>
                     <option value="Achats">Achats</option>
-                    <option value="Juridique">Juridique</option>
-                    <option value="Communication">Communication</option>
-                    <option value="Formation">Formation</option>
                   </select>
                 </div>
               </div>

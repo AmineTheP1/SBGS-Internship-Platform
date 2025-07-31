@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import API_ENDPOINTS from "../config/api.js";
 
 export default function ApplicationForm() {
   const [formData, setFormData] = useState({
@@ -39,7 +40,7 @@ export default function ApplicationForm() {
   useEffect(() => {
     const fetchUniversities = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/hr/get-universities");
+        const response = await fetch(API_ENDPOINTS.HR_GET_UNIVERSITIES);
         const data = await response.json();
         if (data.success) {
           setUniversities(data.universities);
@@ -199,7 +200,7 @@ export default function ApplicationForm() {
       if (formData.conventionStage) data.append('conventionStage', formData.conventionStage);
       if (formData.assurance) data.append('assurance', formData.assurance);
 
-      const response = await fetch("http://localhost:3000/api/hr/apply", {
+      const response = await fetch(API_ENDPOINTS.APPLY, {
         method: "POST",
         body: data,
       });
@@ -427,12 +428,6 @@ export default function ApplicationForm() {
                   <option value="4 mois">4 mois</option>
                   <option value="5 mois">5 mois</option>
                   <option value="6 mois">6 mois</option>
-                  <option value="7 mois">7 mois</option>
-                  <option value="8 mois">8 mois</option>
-                  <option value="9 mois">9 mois</option>
-                  <option value="10 mois">10 mois</option>
-                  <option value="11 mois">11 mois</option>
-                  <option value="12 mois">12 mois</option>
                 </select>
               </div>
               <div>

@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log("Generated password:", randomPassword);
         
         // Hash the password
-        const bcrypt = require('bcrypt');
+        const bcrypt = require('bcryptjs');
         const hashedPassword = await bcrypt.hash(randomPassword, 10);
         
         // Check if password column exists, if not create it

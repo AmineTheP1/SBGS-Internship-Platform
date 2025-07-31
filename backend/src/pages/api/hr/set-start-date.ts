@@ -90,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Generate a new password for the candidate
-    const bcrypt = require('bcrypt');
+            const bcrypt = require('bcryptjs');
     const randomPassword = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10).toUpperCase();
     const hashedPassword = await bcrypt.hash(randomPassword, 10);
     

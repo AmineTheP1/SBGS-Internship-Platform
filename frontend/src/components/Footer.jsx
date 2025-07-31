@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { FaPaperPlane } from "react-icons/fa";
+import API_ENDPOINTS from "../config/api";
 
 export default function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -19,7 +20,7 @@ export default function Footer() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/newsletter", {
+      const response = await fetch(API_ENDPOINTS.NEWSLETTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: newsletterEmail }),

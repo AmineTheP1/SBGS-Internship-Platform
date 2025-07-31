@@ -1,23 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import jwt from "jsonwebtoken";
+import { handleCors } from "../../../utilities/cors";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+  // Handle CORS
+  if (handleCors(req, res)) return;
 
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });

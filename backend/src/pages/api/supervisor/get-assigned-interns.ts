@@ -1,23 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import jwt from "jsonwebtoken";
+import { handleCors } from "../../../utilities/cors";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  // Handle preflight requests
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+  // Handle CORS
+  if (handleCors(req, res)) return;
 
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -49,7 +41,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log("Assignations table might already exist or error occurred:", error);
     }
 
-    // Get assigned interns
+    // Get assigned interns with today's attendance info and pending confirmations
+    const today = new Date().toISOString().split('T')[0];
     const result = await pool.query(
       `SELECT 
         c.cdtid,
@@ -61,13 +54,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         d.typestage,
         d.periode,
         a.date_assignation,
-        a.statut as statut_assignation
+        a.statut as statut_assignation,
+        a.theme_stage,
+        CASE WHEN p.cdtid IS NOT NULL THEN true ELSE false END as today_attendance,
+        COALESCE(pending_counts.pending_count, 0)::integer as pending_confirmations
        FROM assignations_stage a
        JOIN candidat c ON a.cdtid = c.cdtid
        LEFT JOIN demandes_stage d ON c.cdtid = d.cdtid
+       LEFT JOIN presence p ON c.cdtid = p.cdtid AND p.date = $2
+       LEFT JOIN (
+         SELECT 
+           cdtid, 
+           COUNT(*) as pending_count 
+         FROM presence 
+         WHERE confirme_par_superviseur IS NULL 
+         GROUP BY cdtid
+       ) pending_counts ON c.cdtid = pending_counts.cdtid
        WHERE a.resid = $1 AND a.statut = 'Actif'
        ORDER BY a.date_assignation DESC`,
-      [supervisor.resid]
+      [supervisor.resid, today]
     );
 
     return res.status(200).json({ 

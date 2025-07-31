@@ -48,6 +48,14 @@ Plateforme SBGS/
 - Dashboard: view, search, filter, and manage applications
 - Status management: Accept/Reject with badge display
 - Detailed candidate view: all info, file previews, and status actions
+- Intern assignment to supervisors
+
+### For Supervisors
+- Secure login portal
+- Dashboard: view assigned interns and their activities
+- Attendance confirmation: confirm or deny candidate presence
+- Absence management: mark justified/unjustified absences
+- Daily activity monitoring and reporting
 
 ### General
 - Multi-language support (French/English)

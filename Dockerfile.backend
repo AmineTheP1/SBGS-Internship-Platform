@@ -1,0 +1,30 @@
+# Use Node.js 18 as base image
+FROM node:18
+
+# Install curl for health checks and set timezone
+RUN apt-get update && apt-get install -y \
+    curl \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set timezone to Morocco (Africa/Casablanca)
+ENV TZ=Africa/Casablanca
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY backend/package*.json ./
+
+# Install dependencies
+RUN npm install --no-audit --no-fund
+
+# Copy source code
+COPY backend/ .
+
+# Expose port
+EXPOSE 3001
+
+# Start the development server
+CMD ["npm", "run", "dev", "--", "-p", "3001", "-H", "0.0.0.0"] 

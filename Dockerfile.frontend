@@ -1,0 +1,24 @@
+# Use Node.js 20 as base image
+FROM node:20
+
+# Install curl for health checks and set timezone
+RUN apt-get update && apt-get install -y curl tzdata && rm -rf /var/lib/apt/lists/*
+
+# Set timezone to Morocco (Africa/Casablanca)
+ENV TZ=Africa/Casablanca
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm ci --no-audit --no-fund
+
+# Expose port 3000
+EXPOSE 3000
+
+# Start the Vite development server with hot reload
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"] 

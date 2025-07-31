@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import API_ENDPOINTS from "../config/api.js";
 
 export default function ContactSection() {
   const [contactData, setContactData] = useState({
@@ -30,7 +31,7 @@ export default function ContactSection() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/contact", {
+      const response = await fetch(API_ENDPOINTS.CONTACT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

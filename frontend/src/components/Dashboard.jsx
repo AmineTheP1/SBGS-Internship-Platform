@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DocumentTextIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function Dashboard() {
   const [applications, setApplications] = useState([]);
@@ -55,12 +56,19 @@ export default function Dashboard() {
     // Check if user is logged in via session API
     const checkSession = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/hr/session", { credentials: "include" });
+        console.log("Checking HR session...");
+        const res = await fetch(API_ENDPOINTS.HR_SESSION, { credentials: "include" });
+        console.log("HR session response:", res.status);
         if (!res.ok) {
+          console.log("HR session failed, redirecting to login");
           navigate('/hr-login', { replace: true });
+          return;
         }
-      } catch {
+        console.log("HR session successful");
+      } catch (error) {
+        console.error("HR session error:", error);
         navigate('/hr-login', { replace: true });
+        return;
       }
     };
     checkSession();
@@ -68,7 +76,7 @@ export default function Dashboard() {
     // Fetch universities for the filter dropdown
     const fetchUniversities = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/hr/get-universities");
+        const response = await fetch(API_ENDPOINTS.HR_GET_UNIVERSITIES);
         const data = await response.json();
         if (data.success) {
           setUniversities(data.universities);
@@ -82,7 +90,7 @@ export default function Dashboard() {
     const fetchSupervisors = async () => {
       try {
         console.log("Fetching supervisors...");
-        const response = await fetch("http://localhost:3000/api/hr/get-supervisors", {
+        const response = await fetch(API_ENDPOINTS.HR_GET_SUPERVISORS, {
           credentials: "include"
         });
         const data = await response.json();
@@ -102,7 +110,7 @@ export default function Dashboard() {
     const fetchApplications = async () => {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:3000/api/hr/get-applications");
+        const res = await fetch(API_ENDPOINTS.HR_APPLICATIONS);
         const data = await res.json();
         console.log("Dashboard received data:", data); // Debug
         if (data.success) {
@@ -253,7 +261,7 @@ export default function Dashboard() {
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette candidature ? Cette action est irréversible.")) {
       try {
-        const response = await fetch("http://localhost:3000/api/hr/delete-application", {
+        const response = await fetch(API_ENDPOINTS.HR_DELETE_APPLICATION, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -283,7 +291,7 @@ export default function Dashboard() {
       const filename = cvUrl.split('/').pop();
       if (filename) {
         // Use the CV serving API endpoint
-        window.open(`http://localhost:3000/api/hr/get-cv?filename=${encodeURIComponent(filename)}`, '_blank');
+        window.open(`${API_ENDPOINTS.HR_GET_CV}?filename=${encodeURIComponent(filename)}`, '_blank');
       } else {
         alert("CV non disponible");
       }
@@ -323,7 +331,7 @@ export default function Dashboard() {
 
   const updateStatus = async (id, newStatus) => {
     try {
-      const response = await fetch("http://localhost:3000/api/hr/update-status", {
+      const response = await fetch(API_ENDPOINTS.HR_UPDATE_STATUS, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -363,7 +371,7 @@ export default function Dashboard() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/hr/assign-intern", {
+      const response = await fetch(API_ENDPOINTS.HR_ASSIGN_INTERN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -390,6 +398,7 @@ export default function Dashboard() {
   };
 
   if (loading) {
+    console.log("Dashboard is loading...");
     return <div className="text-center py-20 text-xl">Chargement des candidatures...</div>;
   }
 
@@ -606,7 +615,7 @@ export default function Dashboard() {
                         <td className="p-3">
                           <div className="flex items-center gap-3">
                             {app.imageurl ? (
-                              <img src={`http://localhost:3000${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover border" />
+                              <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover border" />
                             ) : (
                               <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?
                               </div>
@@ -706,7 +715,7 @@ export default function Dashboard() {
               <div className="space-y-3">
                 {selectedApplication.imageurl && (
                   <div className="flex justify-center mb-2">
-                    <img src={`http://localhost:3000${selectedApplication.imageurl}`} alt="Photo" className="h-24 w-24 rounded-full object-cover border" />
+                    <img src={`${API_BASE_URL}${selectedApplication.imageurl}`} alt="Photo" className="h-24 w-24 rounded-full object-cover border" />
                   </div>
                 )}
                 <div><b>Prénom:</b> {parseJsonString(selectedApplication.prenom) || "Non disponible"}</div>

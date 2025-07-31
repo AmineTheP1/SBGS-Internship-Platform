@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit } from "react-icons/fa";
+import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function CandidateDashboard() {
   const [candidate, setCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [presence, setPresence] = useState(null);
+  const [assignment, setAssignment] = useState(null);
   const [showDailyReport, setShowDailyReport] = useState(false);
   const [dailyReport, setDailyReport] = useState({
     taches_effectuees: '',
@@ -16,7 +18,7 @@ export default function CandidateDashboard() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/candidate/session", { 
+        const res = await fetch(API_ENDPOINTS.CANDIDATE_SESSION, { 
           credentials: "include" 
         });
         if (!res.ok) {
@@ -27,7 +29,7 @@ export default function CandidateDashboard() {
         setCandidate(data.candidate);
         
         // Fetch presence data
-        const presenceRes = await fetch("http://localhost:3000/api/candidate/get-attendance", {
+        const presenceRes = await fetch(API_ENDPOINTS.CANDIDATE_DAILY_REPORT, {
           credentials: "include"
         });
         if (presenceRes.ok) {
@@ -40,6 +42,15 @@ export default function CandidateDashboard() {
             });
           }
         }
+
+        // Fetch assignment information
+        const assignmentRes = await fetch(API_ENDPOINTS.CANDIDATE_GET_ASSIGNMENT, {
+          credentials: "include"
+        });
+        if (assignmentRes.ok) {
+          const assignmentData = await assignmentRes.json();
+          setAssignment(assignmentData.assignment);
+        }
       } catch {
         navigate('/candidate-login', { replace: true });
       }
@@ -50,7 +61,7 @@ export default function CandidateDashboard() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/candidate/logout", { 
+      await fetch(API_ENDPOINTS.CANDIDATE_LOGOUT, { 
         credentials: "include" 
       });
       navigate('/candidate-login');
@@ -61,14 +72,14 @@ export default function CandidateDashboard() {
 
   const handleClockIn = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/candidate/clock-in", {
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_CLOCK_IN, {
         method: "POST",
         credentials: "include"
       });
       const data = await res.json();
       if (data.success) {
         // Refresh presence data
-        const presenceRes = await fetch("http://localhost:3000/api/candidate/get-attendance", {
+        const presenceRes = await fetch(API_ENDPOINTS.CANDIDATE_DAILY_REPORT, {
           credentials: "include"
         });
         if (presenceRes.ok) {
@@ -86,14 +97,14 @@ export default function CandidateDashboard() {
 
   const handleClockOut = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/candidate/clock-out", {
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_CLOCK_OUT, {
         method: "POST",
         credentials: "include"
       });
       const data = await res.json();
       if (data.success) {
         // Refresh presence data
-        const presenceRes = await fetch("http://localhost:3000/api/candidate/get-attendance", {
+        const presenceRes = await fetch(API_ENDPOINTS.CANDIDATE_DAILY_REPORT, {
           credentials: "include"
         });
         if (presenceRes.ok) {
@@ -111,7 +122,7 @@ export default function CandidateDashboard() {
 
   const handleUpdateDailyReport = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/candidate/update-daily-report", {
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_UPDATE_DAILY_REPORT, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -173,7 +184,7 @@ export default function CandidateDashboard() {
           <div className="flex items-center mb-6">
             {candidate.imageurl ? (
               <img
-                src={`http://localhost:3000${candidate.imageurl}`}
+                src={`${API_BASE_URL}${candidate.imageurl}`}
                 alt={`${candidate.prenom} ${candidate.nom}`}
                 className="w-16 h-16 rounded-full object-cover border-2 border-coke-red mr-4"
               />
@@ -190,7 +201,7 @@ export default function CandidateDashboard() {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-green-50 p-6 rounded-lg border border-green-200">
               <div className="flex items-center mb-3">
                 <FaGraduationCap className="text-green-600 mr-2" />
@@ -213,6 +224,14 @@ export default function CandidateDashboard() {
                 <h3 className="font-semibold text-purple-800">Durée</h3>
               </div>
               <p className="text-purple-700">{candidate.periode || "Non spécifiée"}</p>
+            </div>
+
+            <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
+              <div className="flex items-center mb-3">
+                <FaFileAlt className="text-orange-600 mr-2" />
+                <h3 className="font-semibold text-orange-800">Thème de stage</h3>
+              </div>
+              <p className="text-orange-700">{assignment?.theme_stage || "Non défini"}</p>
             </div>
           </div>
         </div>
