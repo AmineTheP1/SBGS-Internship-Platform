@@ -371,7 +371,7 @@ export default function SupervisorDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid md:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-lg">
                 <FaUsers className="text-2xl text-blue-600" />
@@ -383,7 +383,7 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-                     <div className="bg-white rounded-xl shadow-lg p-6">
+                     <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
              <div className="flex items-center">
                <div className="bg-green-100 p-3 rounded-lg">
                  <FaClock className="text-2xl text-green-600" />
@@ -398,7 +398,7 @@ export default function SupervisorDashboard() {
            </div>
 
           <div 
-            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200"
+            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200  cursor-pointer hover:scale-105"
             onClick={() => {
               console.log('Clicked on Rapports à réviser card');
               console.log('Current reports:', reports);
@@ -426,7 +426,7 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-200 transform hover:scale-105">
             <div className="flex items-center">
               <div className="bg-purple-100 p-3 rounded-lg">
                 <FaCalendar className="text-2xl text-purple-600" />
@@ -438,7 +438,7 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-                     <div className="bg-white rounded-xl shadow-lg p-6">
+                     <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer  transition-all duration-200 transform hover:scale-105 ">
              <div className="flex items-center">
                <div className="bg-orange-100 p-3 rounded-lg">
                  <FaClock className="text-2xl text-orange-600" />
