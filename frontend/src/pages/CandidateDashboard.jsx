@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit } from "react-icons/fa";
+import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function CandidateDashboard() {
@@ -13,6 +13,14 @@ export default function CandidateDashboard() {
     taches_effectuees: '',
     documents_utilises: ''
   });
+  const [reports, setReports] = useState([]);
+  const [showReportUpload, setShowReportUpload] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    reportTitle: '',
+    reportDescription: '',
+    reportFile: null
+  });
+  const [uploadStatus, setUploadStatus] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +58,15 @@ export default function CandidateDashboard() {
         if (assignmentRes.ok) {
           const assignmentData = await assignmentRes.json();
           setAssignment(assignmentData.assignment);
+        }
+
+        // Fetch reports
+        const reportsRes = await fetch(`${API_ENDPOINTS.CANDIDATE_GET_REPORTS}?cdtid=${data.candidate.cdtid}`, {
+          credentials: "include"
+        });
+        if (reportsRes.ok) {
+          const reportsData = await reportsRes.json();
+          setReports(reportsData.reports || []);
         }
       } catch {
         navigate('/candidate-login', { replace: true });
@@ -152,6 +169,67 @@ export default function CandidateDashboard() {
         {status}
       </span>
     );
+  };
+
+  const handleReportUpload = async (e) => {
+    e.preventDefault();
+    console.log('Form data:', reportForm);
+    console.log('Title:', reportForm.reportTitle);
+    console.log('File:', reportForm.reportFile);
+    if (!reportForm.reportTitle || !reportForm.reportFile) {
+      setUploadStatus("Veuillez remplir tous les champs requis.");
+      return;
+    }
+
+    const formData = new FormData();
+    console.log('Sending candidate ID:', candidate.cdtid);
+    formData.append('cdtid', candidate.cdtid);
+    formData.append('reportTitle', reportForm.reportTitle);
+    formData.append('reportDescription', reportForm.reportDescription);
+    formData.append('report', reportForm.reportFile);
+
+    try {
+      setUploadStatus("Envoi en cours...");
+      console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('API URL being used:', API_ENDPOINTS.CANDIDATE_UPLOAD_REPORT);
+      const res = await fetch(API_ENDPOINTS.CANDIDATE_UPLOAD_REPORT, {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUploadStatus("Rapport soumis avec succès !");
+        setReportForm({
+          reportTitle: '',
+          reportDescription: '',
+          reportFile: null
+        });
+        setShowReportUpload(false);
+        // Refresh reports
+        const reportsRes = await fetch(`${API_ENDPOINTS.CANDIDATE_GET_REPORTS}?cdtid=${candidate.cdtid}`, {
+          credentials: "include"
+        });
+        if (reportsRes.ok) {
+          const reportsData = await reportsRes.json();
+          setReports(reportsData.reports || []);
+        }
+      } else {
+        setUploadStatus(data.error);
+      }
+    } catch (error) {
+      setUploadStatus("Erreur lors de l'envoi du rapport");
+    }
+  };
+
+  const getReportStatusColor = (status) => {
+    switch (status) {
+      case "En attente": return "bg-yellow-100 text-yellow-800";
+      case "Approuvé": return "bg-green-100 text-green-800";
+      case "Rejeté": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
   };
 
   if (loading) {
@@ -404,6 +482,58 @@ export default function CandidateDashboard() {
           </div>
         )}
 
+        {/* Reports Section */}
+        {candidate.statut === "Accepté" && (
+          <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                <FaFileAlt className="mr-2 text-coke-red" />
+                Rapports de stage
+              </h3>
+              <button
+                onClick={() => setShowReportUpload(true)}
+                className="bg-coke-red text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Soumettre un rapport
+              </button>
+            </div>
+
+            {reports.length > 0 ? (
+              <div className="space-y-4">
+                {reports.map((report) => (
+                  <div key={report.rapportid} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                                             <div className="flex-1">
+                         <h4 className="font-semibold text-gray-800">{report.titre}</h4>
+                         {report.description && (
+                          <p className="text-sm text-gray-700 mb-2">{report.description}</p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          Soumis le {new Date(report.date_soumission).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReportStatusColor(report.statut)}`}>
+                          {report.statut}
+                        </span>
+                        {report.commentaires_superviseur && report.commentaires_superviseur.trim() && (
+                          <div className="text-xs text-gray-600 max-w-xs">
+                            <strong>Commentaire :</strong> {report.commentaires_superviseur}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600 text-center py-8">
+                Aucun rapport soumis pour le moment.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Contact Information */}
         <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Besoin d'aide ?</h3>
@@ -479,6 +609,98 @@ export default function CandidateDashboard() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Upload Modal */}
+      {showReportUpload && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">
+                Soumettre un rapport de stage
+              </h3>
+              <button
+                onClick={() => setShowReportUpload(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+
+            <form onSubmit={handleReportUpload} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Titre du rapport *
+                </label>
+                <input
+                  type="text"
+                  value={reportForm.reportTitle}
+                  onChange={(e) => setReportForm({...reportForm, reportTitle: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
+                  placeholder="Ex: Analyse des processus de production"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description (optionnel)
+                </label>
+                <textarea
+                  value={reportForm.reportDescription}
+                  onChange={(e) => setReportForm({...reportForm, reportDescription: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
+                  rows="3"
+                  placeholder="Description détaillée du rapport..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Fichier du rapport *
+                </label>
+                <input
+                  type="file"
+                  onChange={(e) => setReportForm({...reportForm, reportFile: e.target.files[0]})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
+                  accept=".pdf,.doc,.docx"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Formats acceptés : PDF, DOC, DOCX (max 10MB)
+                </p>
+              </div>
+
+              {uploadStatus && (
+                <div className={`p-3 rounded-lg ${
+                  uploadStatus.includes('succès') 
+                    ? 'bg-green-100 text-green-700' 
+                    : uploadStatus.includes('Erreur') 
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {uploadStatus}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowReportUpload(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Soumettre le rapport
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

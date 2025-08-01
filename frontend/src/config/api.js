@@ -17,6 +17,8 @@ export const API_ENDPOINTS = {
   HR_DELETE_APPLICATION: `${API_BASE_URL}/api/hr/delete-application`,
   HR_GET_CV: `${API_BASE_URL}/api/hr/get-cv`,
   HR_SUPER_ADMIN_CREATE_RH: `${API_BASE_URL}/api/hr/super-admin/create-rh`,
+  HR_GET_CERTIFICATE_REQUESTS: `${API_BASE_URL}/api/hr/get-certificate-requests`,
+  HR_GENERATE_CERTIFICATE: `${API_BASE_URL}/api/hr/generate-certificate`,
 
   // Supervisor endpoints
   SUPERVISOR_LOGIN: `${API_BASE_URL}/api/supervisor/login`,
@@ -27,9 +29,11 @@ export const API_ENDPOINTS = {
   SUPERVISOR_MARK_ABSENCE: `${API_BASE_URL}/api/supervisor/mark-absence`,
   SUPERVISOR_MARK_UNJUSTIFIED_ABSENCE: `${API_BASE_URL}/api/supervisor/mark-unjustified-absence`,
   SUPERVISOR_MONTHLY_ABSENCES: `${API_BASE_URL}/api/supervisor/get-monthly-absences`,
-      SUPERVISOR_CONFIRM_PRESENCE: `${API_BASE_URL}/api/supervisor/confirm-presence`,
-    SUPERVISOR_SET_THEME: `${API_BASE_URL}/api/supervisor/set-theme`,
-    SUPERVISOR_ADMIN_CREATE_SUPERVISOR: `${API_BASE_URL}/api/supervisor-admin/create-supervisor`,
+  SUPERVISOR_CONFIRM_PRESENCE: `${API_BASE_URL}/api/supervisor/confirm-presence`,
+  SUPERVISOR_SET_THEME: `${API_BASE_URL}/api/supervisor/set-theme`,
+  SUPERVISOR_ADMIN_CREATE_SUPERVISOR: `${API_BASE_URL}/api/supervisor-admin/create-supervisor`,
+  SUPERVISOR_GET_INTERN_REPORTS: `${API_BASE_URL}/api/supervisor/get-intern-reports`,
+  SUPERVISOR_APPROVE_REPORT: `${API_BASE_URL}/api/supervisor/approve-report`,
 
   // Candidate endpoints
   CANDIDATE_LOGIN: `${API_BASE_URL}/api/candidate/login`,
@@ -41,6 +45,8 @@ export const API_ENDPOINTS = {
   CANDIDATE_UPDATE_DAILY_REPORT: `${API_BASE_URL}/api/candidate/update-daily-report`,
   CANDIDATE_FINAL_REPORT: `${API_BASE_URL}/api/candidate/final-report`,
   CANDIDATE_GET_ASSIGNMENT: `${API_BASE_URL}/api/candidate/get-assignment`,
+  CANDIDATE_UPLOAD_REPORT: `${API_BASE_URL}/api/candidate/upload-report`,
+  CANDIDATE_GET_REPORTS: `${API_BASE_URL}/api/candidate/get-reports`,
 
   // Application endpoints
   APPLY: `${API_BASE_URL}/api/hr/apply`,

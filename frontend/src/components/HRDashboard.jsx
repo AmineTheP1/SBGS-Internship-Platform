@@ -26,6 +26,11 @@ export default function HRDashboard() {
   const [filterInternshipType, setFilterInternshipType] = useState("all");
   const [filterYear, setFilterYear] = useState("all");
   const [universities, setUniversities] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [showCertificates, setShowCertificates] = useState(false);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
+  const [certificateComment, setCertificateComment] = useState("");
+  const [certificateStatus, setCertificateStatus] = useState("");
   
   const navigate = useNavigate();
 
@@ -93,8 +98,25 @@ export default function HRDashboard() {
       }
     };
 
+    // Fetch certificates
+    const fetchCertificates = async () => {
+      try {
+        const response = await fetch(API_ENDPOINTS.HR_GET_CERTIFICATE_REQUESTS, {
+          credentials: "include"
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          setCertificates(data.certificates || []);
+        }
+      } catch (error) {
+        console.error("Error fetching certificates:", error);
+      }
+    };
+
     fetchUniversities();
     fetchApplications();
+    fetchCertificates();
   }, [navigate]);
 
   // Filter applications
@@ -178,6 +200,43 @@ export default function HRDashboard() {
     } catch (error) {
       console.error("Logout error:", error);
       navigate('/hr-login');
+    }
+  };
+
+  const handleGenerateCertificate = async (attestationid) => {
+    try {
+      setCertificateStatus("Génération en cours...");
+      const response = await fetch(API_ENDPOINTS.HR_GENERATE_CERTIFICATE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          attestationid,
+          commentaires: certificateComment
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setCertificateStatus("Attestation générée avec succès !");
+        setSelectedCertificate(null);
+        setCertificateComment("");
+        // Refresh certificates
+        const certResponse = await fetch(API_ENDPOINTS.HR_GET_CERTIFICATE_REQUESTS, {
+          credentials: "include"
+        });
+        if (certResponse.ok) {
+          const certData = await certResponse.json();
+          setCertificates(certData.certificates || []);
+        }
+      } else {
+        setCertificateStatus(data.error);
+      }
+    } catch (error) {
+      console.error("Error generating certificate:", error);
+      setCertificateStatus("Erreur lors de la génération de l'attestation");
     }
   };
 
@@ -314,6 +373,13 @@ export default function HRDashboard() {
                   <DocumentTextIcon className="h-5 w-5 mr-2" />
                   Nouvelle candidature
                 </button>
+                <button
+                  onClick={() => setShowCertificates(true)}
+                  className="flex items-center justify-center px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors transform hover:scale-105"
+                >
+                  <DocumentTextIcon className="h-5 w-5 mr-2" />
+                  Attestations ({certificates.filter(c => c.statut === 'En attente').length})
+                </button>
               </div>
             </div>
 
@@ -359,6 +425,55 @@ export default function HRDashboard() {
                     </button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Certificates Section */}
+            {certificates.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Demandes d'attestations de stage</h2>
+                <div className="space-y-4">
+                  {certificates.slice(0, 3).map((cert) => (
+                    <div key={cert.attestationid} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-800">{cert.prenom} {cert.nom}</h4>
+                          <p className="text-sm text-gray-600 mb-2">{cert.rapport_titre}</p>
+                          <p className="text-xs text-gray-500">
+                            Demande du {new Date(cert.date_demande).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            cert.statut === 'En attente' ? 'bg-yellow-100 text-yellow-800' : 
+                            cert.statut === 'Généré' ? 'bg-green-100 text-green-800' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {cert.statut}
+                          </span>
+                          {cert.statut === 'En attente' && (
+                            <button
+                              onClick={() => setSelectedCertificate(cert)}
+                              className="text-xs bg-coke-red text-white px-2 py-1 rounded hover:bg-red-700"
+                            >
+                              Générer
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {certificates.length > 3 && (
+                    <div className="text-center">
+                      <button
+                        onClick={() => setShowCertificates(true)}
+                        className="text-sm text-coke-red hover:text-red-700 font-medium"
+                      >
+                        Voir toutes les demandes ({certificates.length})
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -599,6 +714,94 @@ export default function HRDashboard() {
           </div>
         )}
 
+        {/* Certificates View */}
+        {showCertificates && (
+          <div className="space-y-6">
+            {/* Header with back button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowCertificates(false)}
+                  className="flex items-center text-gray-600 hover:text-gray-900"
+                >
+                  <XMarkIcon className="h-5 w-5 mr-2" />
+                  Retour au tableau de bord
+                </button>
+                <h2 className="text-xl font-semibold text-gray-900">Attestations de stage</h2>
+              </div>
+              <div className="text-sm text-gray-500">
+                {certificates.length} demande(s) d'attestation
+              </div>
+            </div>
+
+            {/* Certificates List */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Stagiaire
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Rapport
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date de demande
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Statut
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {certificates.map((cert) => (
+                      <tr key={cert.attestationid} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">{cert.prenom} {cert.nom}</div>
+                            <div className="text-sm text-gray-500">{cert.email}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {cert.rapport_titre}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(cert.date_demande).toLocaleDateString('fr-FR')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            cert.statut === 'En attente' ? 'bg-yellow-100 text-yellow-800' : 
+                            cert.statut === 'Généré' ? 'bg-green-100 text-green-800' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {cert.statut}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {cert.statut === 'En attente' ? (
+                            <button
+                              onClick={() => setSelectedCertificate(cert)}
+                              className="text-coke-red hover:text-red-700 mr-3"
+                            >
+                              Générer attestation
+                            </button>
+                          ) : (
+                            <span className="text-gray-500">Attestation générée</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Application Details Modal */}
         {selectedApplication && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -680,6 +883,82 @@ export default function HRDashboard() {
                   className="px-4 py-2 text-sm font-medium text-white bg-coke-red rounded-lg hover:bg-red-700"
                 >
                   Voir détails complets
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Certificate Generation Modal */}
+        {selectedCertificate && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Générer l'attestation de stage</h3>
+                <button
+                  onClick={() => setSelectedCertificate(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Stagiaire</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedCertificate.prenom} {selectedCertificate.nom}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedCertificate.email}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Rapport</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedCertificate.rapport_titre}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Date de demande</label>
+                    <p className="mt-1 text-sm text-gray-900">{new Date(selectedCertificate.date_demande).toLocaleDateString('fr-FR')}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Commentaires (optionnel)</label>
+                  <textarea
+                    value={certificateComment}
+                    onChange={(e) => setCertificateComment(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
+                    rows="3"
+                    placeholder="Commentaires additionnels pour l'attestation..."
+                  />
+                </div>
+
+                {certificateStatus && (
+                  <div className={`p-3 rounded-lg ${
+                    certificateStatus.includes('succès') 
+                      ? 'bg-green-100 text-green-700' 
+                      : certificateStatus.includes('Erreur') 
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {certificateStatus}
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={() => setSelectedCertificate(null)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => handleGenerateCertificate(selectedCertificate.attestationid)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-coke-red rounded-lg hover:bg-red-700"
+                >
+                  Générer l'attestation
                 </button>
               </div>
             </div>

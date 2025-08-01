@@ -19,6 +19,13 @@ export default function SupervisorDashboard() {
   const [themeStatus, setThemeStatus] = useState("");
   const [editingTheme, setEditingTheme] = useState(null);
   const [newTheme, setNewTheme] = useState("");
+  const [reports, setReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportAction, setReportAction] = useState("");
+  const [reportComment, setReportComment] = useState("");
+  const [requestCertificate, setRequestCertificate] = useState(false);
+  const [reportStatus, setReportStatus] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +63,15 @@ export default function SupervisorDashboard() {
         }
 
         setPendingConfirmations(0); // We'll calculate this later when needed
+
+        // Fetch intern reports
+        const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?superviseurid=${data.supervisor.superviseurid}`, {
+          credentials: "include"
+        });
+        if (reportsRes.ok) {
+          const reportsData = await reportsRes.json();
+          setReports(reportsData.reports || []);
+        }
       } catch {
         navigate('/supervisor-login', { replace: true });
       }
@@ -238,6 +254,63 @@ export default function SupervisorDashboard() {
     }
   };
 
+  const handleApproveReport = async () => {
+    if (!selectedReport || !reportAction) {
+      setReportStatus("Veuillez sélectionner une action.");
+      return;
+    }
+
+    try {
+      setReportStatus("Traitement en cours...");
+      const response = await fetch(API_ENDPOINTS.SUPERVISOR_APPROVE_REPORT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          rapportid: selectedReport.rapportid,
+          action: reportAction,
+          commentaires: reportComment,
+          superviseurid: supervisor.superviseurid,
+          requestCertificate: requestCertificate
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setReportStatus("Rapport traité avec succès !");
+        setSelectedReport(null);
+        setReportAction("");
+        setReportComment("");
+        setRequestCertificate(false);
+        setShowReportModal(false);
+        // Refresh reports
+        const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?superviseurid=${supervisor.superviseurid}`, {
+          credentials: "include"
+        });
+        if (reportsRes.ok) {
+          const reportsData = await reportsRes.json();
+          setReports(reportsData.reports || []);
+        }
+      } else {
+        setReportStatus(data.error);
+      }
+    } catch (error) {
+      console.error("Error approving report:", error);
+      setReportStatus("Erreur lors du traitement du rapport");
+    }
+  };
+
+  const getReportStatusColor = (status) => {
+    switch (status) {
+      case "En attente": return "bg-yellow-100 text-yellow-800";
+      case "Approuvé": return "bg-green-100 text-green-800";
+      case "Rejeté": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -298,7 +371,7 @@ export default function SupervisorDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Rapports à réviser</p>
-                <p className="text-2xl font-bold text-gray-800">0</p>
+                <p className="text-2xl font-bold text-gray-800">{reports.filter(r => r.statut === 'En attente').length}</p>
               </div>
             </div>
           </div>
@@ -460,6 +533,54 @@ export default function SupervisorDashboard() {
           )}
         </div>
       </div>
+
+      {/* Reports Section */}
+      {reports.length > 0 && (
+        <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
+          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+            <FaFileAlt className="mr-2 text-coke-red" />
+            Rapports de stage à réviser
+          </h3>
+          <div className="space-y-4">
+            {reports.map((report) => (
+              <div key={report.rapportid} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-800">{report.prenom} {report.nom}</h4>
+                    <p className="text-sm text-gray-600 mb-2">{report.titre}</p>
+                    <p className="text-xs text-gray-500 mb-2">Type: {report.type_rapport}</p>
+                    {report.description && (
+                      <p className="text-sm text-gray-700 mb-2">{report.description}</p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Soumis le {new Date(report.date_soumission).toLocaleDateString('fr-FR')}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReportStatusColor(report.statut)}`}>
+                      {report.statut}
+                    </span>
+                    {report.statut === 'En attente' && (
+                      <button
+                        onClick={() => {
+                          setSelectedReport(report);
+                          setShowReportModal(true);
+                          setReportAction("");
+                          setReportComment("");
+                          setRequestCertificate(false);
+                        }}
+                        className="text-xs bg-coke-red text-white px-3 py-1 rounded hover:bg-red-700"
+                      >
+                        Réviser
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Intern Details Modal */}
       {showInternDetails && selectedIntern && (
@@ -688,11 +809,139 @@ export default function SupervisorDashboard() {
                                 {att.confirme_par_superviseur !== null && att.date_confirmation && (
                                   <div className="text-xs text-gray-500 mt-2">
                                     Confirmé le: {new Date(att.date_confirmation).toLocaleDateString('fr-FR')} à {new Date(att.date_confirmation).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })()}
+                                          </div>
+      )}
+
+      {/* Report Approval Modal */}
+      {showReportModal && selectedReport && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">
+                Réviser le rapport de stage
+              </h3>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Stagiaire</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.prenom} {selectedReport.nom}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Type de rapport</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.type_rapport}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Titre</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.titre}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Date de soumission</label>
+                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedReport.date_soumission).toLocaleDateString('fr-FR')}</p>
+                </div>
+              </div>
+
+              {selectedReport.description && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.description}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Action</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="reportAction"
+                      value="Approuvé"
+                      checked={reportAction === "Approuvé"}
+                      onChange={(e) => setReportAction(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-green-600">Approuver</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="reportAction"
+                      value="Rejeté"
+                      checked={reportAction === "Rejeté"}
+                      onChange={(e) => setReportAction(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-red-600">Rejeter</span>
+                  </label>
+                </div>
+              </div>
+
+              {reportAction === "Approuvé" && (
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="requestCertificate"
+                    checked={requestCertificate}
+                    onChange={(e) => setRequestCertificate(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="requestCertificate" className="text-sm text-gray-700">
+                    Demander une attestation de stage pour ce stagiaire
+                  </label>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Commentaires</label>
+                <textarea
+                  value={reportComment}
+                  onChange={(e) => setReportComment(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
+                  rows="3"
+                  placeholder="Commentaires sur le rapport..."
+                />
+              </div>
+
+              {reportStatus && (
+                <div className={`p-3 rounded-lg ${
+                  reportStatus.includes('succès') 
+                    ? 'bg-green-100 text-green-700' 
+                    : reportStatus.includes('Erreur') 
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {reportStatus}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowReportModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleApproveReport}
+                  className="px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Soumettre la décision
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+})()}
                           
                           {/* Daily Report */}
                           {activities.find(a => a.type === 'report') && (() => {
