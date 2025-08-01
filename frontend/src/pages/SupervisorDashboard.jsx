@@ -1260,6 +1260,131 @@ export default function SupervisorDashboard() {
           </div>
         </div>
       )}
+
+      {/* Report Approval Modal - DÉPLACÉ ICI */}
+      {showReportModal && selectedReport && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">
+                Réviser le rapport de stage
+              </h3>
+              <button
+                onClick={() => setShowReportModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Stagiaire</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.prenom} {selectedReport.nom}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Titre</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.titre}</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Date de soumission</label>
+                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedReport.date_soumission).toLocaleDateString('fr-FR')}</p>
+                </div>
+              </div>
+
+              {selectedReport.description && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedReport.description}</p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Action</label>
+                <div className="flex gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="reportAction"
+                      value="Approuvé"
+                      checked={reportAction === "Approuvé"}
+                      onChange={(e) => setReportAction(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-green-600">Approuver</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="reportAction"
+                      value="Rejeté"
+                      checked={reportAction === "Rejeté"}
+                      onChange={(e) => setReportAction(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-red-600">Rejeter</span>
+                  </label>
+                </div>
+              </div>
+
+              {reportAction === "Approuvé" && (
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="requestCertificate"
+                    checked={requestCertificate}
+                    onChange={(e) => setRequestCertificate(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <label htmlFor="requestCertificate" className="text-sm text-gray-700">
+                    Demander une attestation de stage pour ce stagiaire
+                  </label>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Commentaires</label>
+                <textarea
+                  value={reportComment}
+                  onChange={(e) => setReportComment(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
+                  rows="3"
+                  placeholder="Commentaires sur le rapport..."
+                />
+              </div>
+
+              {reportStatus && (
+                <div className={`p-3 rounded-lg ${
+                  reportStatus.includes('succès') 
+                    ? 'bg-green-100 text-green-700' 
+                    : reportStatus.includes('Erreur') 
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {reportStatus}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowReportModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleApproveReport}
+                  className="px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Soumettre la décision
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-} 
+}
