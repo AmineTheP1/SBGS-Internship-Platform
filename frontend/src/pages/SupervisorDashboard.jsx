@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
@@ -32,6 +32,7 @@ export default function SupervisorDashboard() {
   const [candidatesPerPage] = useState(6);
   const [reportsPerPage] = useState(6);
   const navigate = useNavigate();
+  const reportsSectionRef = useRef(null);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -70,12 +71,20 @@ export default function SupervisorDashboard() {
         setPendingConfirmations(0); // We'll calculate this later when needed
 
         // Fetch intern reports
+        console.log('Fetching reports for supervisor resid:', data.supervisor.resid);
         const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?resid=${data.supervisor.resid}`, {
           credentials: "include"
         });
+        console.log('Reports response status:', reportsRes.status);
         if (reportsRes.ok) {
           const reportsData = await reportsRes.json();
+          console.log('Reports data:', reportsData);
           setReports(reportsData.reports || []);
+          console.log('Set reports state to:', reportsData.reports || []);
+        } else {
+          console.error('Failed to fetch reports:', reportsRes.status);
+          const errorData = await reportsRes.json();
+          console.error('Error data:', errorData);
         }
       } catch {
         navigate('/supervisor-login', { replace: true });
@@ -382,7 +391,21 @@ export default function SupervisorDashboard() {
 
           <div 
             className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200"
-            onClick={() => setShowReportsSection(true)}
+            onClick={() => {
+              console.log('Clicked on Rapports à réviser card');
+              console.log('Current reports:', reports);
+              console.log('Reports with En attente status:', reports.filter(r => r.statut === 'En attente'));
+              setShowReportsSection(true);
+              // Scroll to reports section after a short delay to ensure it's rendered
+              setTimeout(() => {
+                if (reportsSectionRef.current) {
+                  reportsSectionRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }
+              }, 100);
+            }}
           >
             <div className="flex items-center">
               <div className="bg-yellow-100 p-3 rounded-lg">
@@ -452,19 +475,23 @@ export default function SupervisorDashboard() {
               {currentCandidates.map((intern) => (
                 <div key={intern.cdtid} className="bg-gray-50 rounded-lg p-6 border">
                   <div className="flex items-center mb-4">
-                    {intern.imageurl ? (
-                      <img
-                        src={`${API_BASE_URL}${intern.imageurl}`}
-                        alt={`${intern.prenom} ${intern.nom}`}
-                        className="w-12 h-12 rounded-full object-cover mr-4"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 ${intern.imageurl ? 'hidden' : ''}`}>
-                      <FaUsers className="text-white" />
+                    <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
+                      {intern.imageurl ? (
+                        <img
+                          src={`${API_BASE_URL}${intern.imageurl}`}
+                          alt={`${intern.prenom} ${intern.nom}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-full h-full flex items-center justify-center ${intern.imageurl ? 'hidden' : ''}`}>
+                        <span className="text-white font-semibold text-lg">
+                          {intern.prenom ? intern.prenom.charAt(0).toUpperCase() : ''}{intern.nom ? intern.nom.charAt(0).toUpperCase() : ''}
+                        </span>
+                      </div>
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-800">
@@ -576,8 +603,9 @@ export default function SupervisorDashboard() {
         </div>
 
         {/* Reports Section */}
+        {console.log('showReportsSection:', showReportsSection)}
         {showReportsSection && (
-          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+          <div ref={reportsSectionRef} className="bg-white rounded-xl shadow-lg p-8 mt-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Rapports de stage à réviser</h2>
               <button
@@ -595,17 +623,43 @@ export default function SupervisorDashboard() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentReports.map((report) => (
+                {currentReports.map((report) => {
+                  console.log('Rendering report:', report);
+                  console.log('API_BASE_URL:', API_BASE_URL);
+                  console.log('Full image URL:', `${API_BASE_URL}${report.imageurl}`);
+                  return (
                   <div key={report.rapportid} className="bg-gray-50 rounded-lg p-6 border">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mr-4">
-                        <FaFileAlt className="text-yellow-600" />
+                      <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
+                        {report.imageurl ? (
+                          <img
+                            src={`${API_BASE_URL}${report.imageurl}`}
+                            alt={`${report.prenom} ${report.nom}`}
+                            className="w-full h-full object-cover"
+                            onLoad={() => console.log('Image loaded successfully for:', report.prenom, report.nom, 'URL:', `${API_BASE_URL}${report.imageurl}`)}
+                            onError={(e) => {
+                              console.log('Image failed to load for:', report.prenom, report.nom, 'URL:', `${API_BASE_URL}${report.imageurl}`);
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="w-full h-full flex items-center justify-center"
+                          style={{ display: report.imageurl ? 'none' : 'flex' }}
+                        >
+                          <span className="text-white font-semibold text-lg">
+                            {report.prenom ? report.prenom.charAt(0).toUpperCase() : ''}{report.nom ? report.nom.charAt(0).toUpperCase() : ''}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-800 truncate">
                           {report.prenom} {report.nom}
                         </h3>
-                        <p className="text-sm text-gray-600">{report.titre}</p>
+                        <p className="text-sm text-gray-600 truncate" title={report.titre}>
+                          {report.titre}
+                        </p>
                       </div>
                     </div>
 
@@ -645,7 +699,8 @@ export default function SupervisorDashboard() {
                       </button>
                     )}
                   </div>
-                ))}
+                );
+                })}
               </div>
             )}
             

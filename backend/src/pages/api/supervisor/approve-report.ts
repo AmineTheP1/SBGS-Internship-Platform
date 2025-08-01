@@ -22,9 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { rapportid, action, commentaires, superviseurid, requestCertificate } = req.body;
+    const { rapportid, action, commentaires, resid, requestCertificate } = req.body;
 
-    if (!rapportid || !action || !superviseurid) {
+    if (!rapportid || !action || !resid) {
       return res.status(400).json({ success: false, error: "Tous les champs sont requis." });
     }
 
@@ -77,7 +77,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         await pool.query(
           `INSERT INTO attestations_stage (attestationid, cdtid, rapportid, superviseurid) 
            VALUES ($1, $2, $3, $4)`,
-          [attestationid, candidate.cdtid, rapportid, superviseurid]
+          [attestationid, candidate.cdtid, rapportid, resid]
         );
 
         // Send email to HR

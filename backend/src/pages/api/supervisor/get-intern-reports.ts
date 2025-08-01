@@ -21,10 +21,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { superviseurid } = req.query;
+    const { resid } = req.query;
 
-    if (!superviseurid) {
-      return res.status(400).json({ success: false, error: "superviseurid est requis." });
+    if (!resid) {
+      return res.status(400).json({ success: false, error: "resid est requis." });
     }
 
     // Get all reports from interns assigned to this supervisor
@@ -40,13 +40,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
          c.cdtid,
          c.nom,
          c.prenom,
-         c.email
+         c.email,
+         c.imageurl
        FROM rapports_stage r
        JOIN candidat c ON r.cdtid = c.cdtid
        JOIN stages s ON r.stagesid = s.stagesid
        WHERE s.responsables_stageid = $1
        ORDER BY r.dateenvoi DESC`,
-      [superviseurid]
+      [resid]
     );
 
     // Process the results to extract filename from URL and remove timestamp prefix
