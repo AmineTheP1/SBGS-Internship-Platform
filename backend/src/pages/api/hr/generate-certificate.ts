@@ -40,18 +40,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         c.email,
         c.telephone,
         c.statutetudiant,
-                 r.titre as rapport_titre,
-        r.date_soumission as rapport_date,
-        s.nom as superviseur_nom,
-        s.prenom as superviseur_prenom,
+        r.titre as rapport_titre,
+        r.dateenvoi as rapport_date,
+        rs.nom as superviseur_nom,
+        rs.prenom as superviseur_prenom,
         e.nom as ecole_nom,
         d.domaine,
         d.periode,
         d.mois_debut
       FROM attestations_stage a
       JOIN candidat c ON a.cdtid = c.cdtid
-      JOIN rapports_stage r ON a.rapportid = r.rapportid
-      LEFT JOIN superviseur s ON a.superviseurid = s.superviseurid
+      JOIN rapports_stage r ON a.rapportid = r.rstid
+      JOIN stages s ON r.stagesid = s.stagesid
+      JOIN responsables_stage rs ON s.responsables_stageid = rs.responsables_stageid
       LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
       LEFT JOIN demandes_stage d ON c.cdtid = d.cdtid
       WHERE a.attestationid = $1

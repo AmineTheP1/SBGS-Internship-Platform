@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
+import path from 'path';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -26,37 +27,47 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: "superviseurid est requis." });
     }
 
-    // Create reports table if it doesn't exist
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS rapports_stage (
-        id SERIAL PRIMARY KEY,
-        cdtid VARCHAR(16) REFERENCES candidat(cdtid),
-        titre VARCHAR(255) NOT NULL,
-        description TEXT,
-        url_fichier VARCHAR(500) NOT NULL,
-        date_soumission TIMESTAMP DEFAULT NOW(),
-        statut VARCHAR(20) DEFAULT 'En attente',
-        commentaires_superviseur TEXT,
-        date_approbation TIMESTAMP,
-        superviseurid VARCHAR(16)
-      )
-    `);
-
     // Get all reports from interns assigned to this supervisor
     const result = await pool.query(
-      `SELECT r.*, c.nom, c.prenom, c.email 
+      `SELECT 
+         r.rstid as rapportid,
+         r.url,
+         r.titre,
+         r.commentaire as description,
+         r.dateenvoi as date_soumission,
+         r.statut,
+         r.commentaire as commentaires_superviseur,
+         c.cdtid,
+         c.nom,
+         c.prenom,
+         c.email
        FROM rapports_stage r
-       JOIN assignations_stage a ON r.stagesid = a.stagesid
-       JOIN candidat c ON a.cdtid = c.cdtid
-       JOIN stages s ON a.stagesid = s.stagesid
+       JOIN candidat c ON r.cdtid = c.cdtid
+       JOIN stages s ON r.stagesid = s.stagesid
        WHERE s.responsables_stageid = $1
        ORDER BY r.dateenvoi DESC`,
       [superviseurid]
     );
 
+    // Process the results to extract filename from URL and remove timestamp prefix
+    const processedReports = result.rows.map(report => {
+      let filename = 'Unknown file';
+      if (report.url) {
+        // Get the basename first
+        const basename = path.basename(report.url);
+        // Remove the timestamp prefix (numbers + underscore)
+        filename = basename.replace(/^\d+_/, '');
+      }
+      
+      return {
+        ...report,
+        titre: filename
+      };
+    });
+
     res.status(200).json({ 
       success: true, 
-      reports: result.rows 
+      reports: processedReports 
     });
 
   } catch (error) {

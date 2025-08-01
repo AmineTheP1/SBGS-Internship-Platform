@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus } from "react-icons/fa";
+import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function SupervisorDashboard() {
@@ -26,6 +26,11 @@ export default function SupervisorDashboard() {
   const [reportComment, setReportComment] = useState("");
   const [requestCertificate, setRequestCertificate] = useState(false);
   const [reportStatus, setReportStatus] = useState("");
+  const [showReportsSection, setShowReportsSection] = useState(false);
+  const [currentCandidatePage, setCurrentCandidatePage] = useState(1);
+  const [currentReportPage, setCurrentReportPage] = useState(1);
+  const [candidatesPerPage] = useState(6);
+  const [reportsPerPage] = useState(6);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,7 +70,7 @@ export default function SupervisorDashboard() {
         setPendingConfirmations(0); // We'll calculate this later when needed
 
         // Fetch intern reports
-        const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?superviseurid=${data.supervisor.superviseurid}`, {
+        const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?resid=${data.supervisor.resid}`, {
           credentials: "include"
         });
         if (reportsRes.ok) {
@@ -272,7 +277,7 @@ export default function SupervisorDashboard() {
           rapportid: selectedReport.rapportid,
           action: reportAction,
           commentaires: reportComment,
-          superviseurid: supervisor.superviseurid,
+          resid: supervisor.resid,
           requestCertificate: requestCertificate
         }),
       });
@@ -286,7 +291,7 @@ export default function SupervisorDashboard() {
         setRequestCertificate(false);
         setShowReportModal(false);
         // Refresh reports
-        const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?superviseurid=${supervisor.superviseurid}`, {
+        const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?resid=${supervisor.resid}`, {
           credentials: "include"
         });
         if (reportsRes.ok) {
@@ -310,6 +315,17 @@ export default function SupervisorDashboard() {
       default: return "bg-gray-100 text-gray-800";
     }
   };
+
+  // Pagination logic
+  const indexOfLastCandidate = currentCandidatePage * candidatesPerPage;
+  const indexOfFirstCandidate = indexOfLastCandidate - candidatesPerPage;
+  const currentCandidates = interns.slice(indexOfFirstCandidate, indexOfLastCandidate);
+  const totalCandidatePages = Math.ceil(interns.length / candidatesPerPage);
+
+  const indexOfLastReport = currentReportPage * reportsPerPage;
+  const indexOfFirstReport = indexOfLastReport - reportsPerPage;
+  const currentReports = reports.slice(indexOfFirstReport, indexOfLastReport);
+  const totalReportPages = Math.ceil(reports.length / reportsPerPage);
 
   if (loading) {
     return (
@@ -364,7 +380,10 @@ export default function SupervisorDashboard() {
              </div>
            </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div 
+            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200"
+            onClick={() => setShowReportsSection(true)}
+          >
             <div className="flex items-center">
               <div className="bg-yellow-100 p-3 rounded-lg">
                 <FaFileAlt className="text-2xl text-yellow-600" />
@@ -430,7 +449,7 @@ export default function SupervisorDashboard() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {interns.map((intern) => (
+              {currentCandidates.map((intern) => (
                 <div key={intern.cdtid} className="bg-gray-50 rounded-lg p-6 border">
                   <div className="flex items-center mb-4">
                     {intern.imageurl ? (
@@ -531,35 +550,86 @@ export default function SupervisorDashboard() {
               ))}
             </div>
           )}
+            
+            {/* Candidates Pagination */}
+            {totalCandidatePages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentCandidatePage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentCandidatePage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentCandidatePage} sur {totalCandidatePages}
+                </span>
+                <button
+                  onClick={() => setCurrentCandidatePage(prev => Math.min(prev + 1, totalCandidatePages))}
+                  disabled={currentCandidatePage === totalCandidatePages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
         </div>
-      </div>
 
-      {/* Reports Section */}
-      {reports.length > 0 && (
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
-          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
-            <FaFileAlt className="mr-2 text-coke-red" />
-            Rapports de stage à réviser
-          </h3>
-          <div className="space-y-4">
-            {reports.map((report) => (
-              <div key={report.rapportid} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-800">{report.prenom} {report.nom}</h4>
-                    <p className="text-sm text-gray-600 mb-2">{report.titre}</p>
-                    <p className="text-xs text-gray-500 mb-2">Type: {report.type_rapport}</p>
-                    {report.description && (
-                      <p className="text-sm text-gray-700 mb-2">{report.description}</p>
-                    )}
-                    <p className="text-xs text-gray-500">
-                      Soumis le {new Date(report.date_soumission).toLocaleDateString('fr-FR')}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReportStatusColor(report.statut)}`}>
-                      {report.statut}
-                    </span>
+        {/* Reports Section */}
+        {showReportsSection && (
+          <div className="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Rapports de stage à réviser</h2>
+              <button
+                onClick={() => setShowReportsSection(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes className="text-xl" />
+              </button>
+            </div>
+
+            {reports.length === 0 ? (
+              <div className="text-center py-12">
+                <FaFileAlt className="text-4xl text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">Aucun rapport à réviser pour le moment</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentReports.map((report) => (
+                  <div key={report.rapportid} className="bg-gray-50 rounded-lg p-6 border">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center mr-4">
+                        <FaFileAlt className="text-yellow-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800">
+                          {report.prenom} {report.nom}
+                        </h3>
+                        <p className="text-sm text-gray-600">{report.titre}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Statut:</span>
+                        <span className={`font-medium ${getReportStatusColor(report.statut)}`}>
+                          {report.statut}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Date:</span>
+                        <span className="font-medium">
+                          {new Date(report.date_soumission).toLocaleDateString('fr-FR')}
+                        </span>
+                      </div>
+                      {report.description && (
+                        <div className="text-sm">
+                          <span className="text-gray-600">Description:</span>
+                          <p className="text-gray-800 mt-1">{report.description}</p>
+                        </div>
+                      )}
+                    </div>
+
                     {report.statut === 'En attente' && (
                       <button
                         onClick={() => {
@@ -569,18 +639,41 @@ export default function SupervisorDashboard() {
                           setReportComment("");
                           setRequestCertificate(false);
                         }}
-                        className="text-xs bg-coke-red text-white px-3 py-1 rounded hover:bg-red-700"
+                        className="w-full flex items-center justify-center px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors"
                       >
                         Réviser
                       </button>
                     )}
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            )}
+            
+            {/* Reports Pagination */}
+            {totalReportPages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentReportPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentReportPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentReportPage} sur {totalReportPages}
+                </span>
+                <button
+                  onClick={() => setCurrentReportPage(prev => Math.min(prev + 1, totalReportPages))}
+                  disabled={currentReportPage === totalReportPages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Intern Details Modal */}
       {showInternDetails && selectedIntern && (
@@ -834,10 +927,7 @@ export default function SupervisorDashboard() {
                   <label className="block text-sm font-medium text-gray-700">Stagiaire</label>
                   <p className="mt-1 text-sm text-gray-900">{selectedReport.prenom} {selectedReport.nom}</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Type de rapport</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedReport.type_rapport}</p>
-                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Titre</label>
                   <p className="mt-1 text-sm text-gray-900">{selectedReport.titre}</p>

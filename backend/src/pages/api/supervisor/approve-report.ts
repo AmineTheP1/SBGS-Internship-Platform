@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
 import sendEmail from '../../../utilities/sendEmail';
+import crypto from 'crypto';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -31,16 +32,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: "Action invalide." });
     }
 
-    // Update the report status
+    // Update the report status using rstid
     const updateQuery = action === 'Approuvé' 
       ? `UPDATE rapports_stage 
-         SET statut = $1, commentaires_superviseur = $2, date_approbation = NOW(), superviseurid = $3
-         WHERE rapportid = $4`
+         SET statut = $1, commentaire = $2, datevalidation = NOW()
+         WHERE rstid = $3`
       : `UPDATE rapports_stage 
-         SET statut = $1, commentaires_superviseur = $2, superviseurid = $3
-         WHERE rapportid = $4`;
+         SET statut = $1, commentaire = $2
+         WHERE rstid = $3`;
 
-    await pool.query(updateQuery, [action, commentaires || '', superviseurid, rapportid]);
+    await pool.query(updateQuery, [action, commentaires || '', rapportid]);
 
     // If approved and certificate is requested, create certificate request
     if (action === 'Approuvé' && requestCertificate) {
@@ -49,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         CREATE TABLE IF NOT EXISTS attestations_stage (
           attestationid VARCHAR(16) PRIMARY KEY,
           cdtid VARCHAR(16) REFERENCES candidat(cdtid),
-          rapportid VARCHAR(16) REFERENCES rapports_stage(rapportid),
+          rapportid VARCHAR(16) REFERENCES rapports_stage(rstid),
           superviseurid VARCHAR(16),
           date_demande TIMESTAMP DEFAULT NOW(),
           statut VARCHAR(20) DEFAULT 'En attente',
@@ -64,13 +65,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         `SELECT c.cdtid, c.nom, c.prenom, c.email, r.titre
          FROM rapports_stage r
          JOIN candidat c ON r.cdtid = c.cdtid
-         WHERE r.rapportid = $1`,
+         WHERE r.rstid = $1`,
         [rapportid]
       );
 
       if (candidateResult.rows.length > 0) {
         const candidate = candidateResult.rows[0];
-        const attestationid = require('crypto').randomBytes(8).toString('hex');
+        const attestationid = crypto.randomBytes(8).toString('hex');
 
         // Insert certificate request
         await pool.query(
