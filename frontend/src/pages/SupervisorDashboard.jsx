@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes } from "react-icons/fa";
+import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes, FaDownload } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function SupervisorDashboard() {
@@ -269,7 +269,11 @@ export default function SupervisorDashboard() {
   };
 
   const handleApproveReport = async () => {
+    console.log("handleApproveReport called with reportAction:", reportAction);
+    console.log("selectedReport:", selectedReport);
+
     if (!selectedReport || !reportAction) {
+      console.log("Validation failed: selectedReport or reportAction is missing");
       setReportStatus("Veuillez sélectionner une action.");
       return;
     }
@@ -960,130 +964,7 @@ export default function SupervisorDashboard() {
                                           </div>
       )}
 
-      {/* Report Approval Modal */}
-      {showReportModal && selectedReport && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-800">
-                Réviser le rapport de stage
-              </h3>
-              <button
-                onClick={() => setShowReportModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FaTimes className="text-xl" />
-              </button>
-            </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Stagiaire</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedReport.prenom} {selectedReport.nom}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Titre</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedReport.titre}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Date de soumission</label>
-                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedReport.date_soumission).toLocaleDateString('fr-FR')}</p>
-                </div>
-              </div>
-
-              {selectedReport.description && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <p className="mt-1 text-sm text-gray-900">{selectedReport.description}</p>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Action</label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="reportAction"
-                      value="Approuvé"
-                      checked={reportAction === "Approuvé"}
-                      onChange={(e) => setReportAction(e.target.value)}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-green-600">Approuver</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="reportAction"
-                      value="Rejeté"
-                      checked={reportAction === "Rejeté"}
-                      onChange={(e) => setReportAction(e.target.value)}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-red-600">Rejeter</span>
-                  </label>
-                </div>
-              </div>
-
-              {reportAction === "Approuvé" && (
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="requestCertificate"
-                    checked={requestCertificate}
-                    onChange={(e) => setRequestCertificate(e.target.checked)}
-                    className="mr-2"
-                  />
-                  <label htmlFor="requestCertificate" className="text-sm text-gray-700">
-                    Demander une attestation de stage pour ce stagiaire
-                  </label>
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Commentaires</label>
-                <textarea
-                  value={reportComment}
-                  onChange={(e) => setReportComment(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red"
-                  rows="3"
-                  placeholder="Commentaires sur le rapport..."
-                />
-              </div>
-
-              {reportStatus && (
-                <div className={`p-3 rounded-lg ${
-                  reportStatus.includes('succès') 
-                    ? 'bg-green-100 text-green-700' 
-                    : reportStatus.includes('Erreur') 
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {reportStatus}
-                </div>
-              )}
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowReportModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Annuler
-                </button>
-                <button
-                  onClick={handleApproveReport}
-                  className="px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Soumettre la décision
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 })()}
@@ -1298,6 +1179,72 @@ export default function SupervisorDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Description</label>
                   <p className="mt-1 text-sm text-gray-900">{selectedReport.description}</p>
+                </div>
+              )}
+
+              {/* File Viewer/Download Section */}
+              {selectedReport.url ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fichier soumis</label>
+                  {console.log('selectedReport in modal:', selectedReport)}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                          <FaFileAlt className="text-red-600 text-lg" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate" title={selectedReport.titre}>
+                            {selectedReport.titre}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Soumis le {new Date(selectedReport.date_soumission).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => {
+                            const fileUrl = `${API_BASE_URL}${selectedReport.url}`;
+                            window.open(fileUrl, '_blank');
+                          }}
+                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center space-x-1"
+                        >
+                          <FaEye className="text-xs" />
+                          <span>Voir</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            const fileUrl = `${API_BASE_URL}${selectedReport.url}`;
+                            const link = document.createElement('a');
+                            link.href = fileUrl;
+                            link.download = selectedReport.titre;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                          className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors flex items-center space-x-1"
+                        >
+                          <FaDownload className="text-xs" />
+                          <span>Télécharger</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fichier soumis</label>
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <FaFileAlt className="text-gray-400 text-lg" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Aucun fichier disponible</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
