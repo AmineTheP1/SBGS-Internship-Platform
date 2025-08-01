@@ -23,6 +23,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { rapportid, action, commentaires, resid, requestCertificate } = req.body;
+    
+    console.log('approve-report request body:', { rapportid, action, commentaires, resid, requestCertificate });
 
     if (!rapportid || !action || !resid) {
       return res.status(400).json({ success: false, error: "Tous les champs sont requis." });
@@ -44,25 +46,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await pool.query(updateQuery, [action, commentaires || '', rapportid]);
 
     // If approved and certificate is requested, create certificate request
+    console.log('Checking certificate request:', { action, requestCertificate, type: typeof requestCertificate });
     if (action === 'Approuvé' && requestCertificate) {
-      // Create certificates table if it doesn't exist
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS attestations_stage (
-          attestationid VARCHAR(16) PRIMARY KEY,
-          cdtid VARCHAR(16) REFERENCES candidat(cdtid),
-          rapportid VARCHAR(16) REFERENCES rapports_stage(rstid),
-          superviseurid VARCHAR(16),
-          date_demande TIMESTAMP DEFAULT NOW(),
-          statut VARCHAR(20) DEFAULT 'En attente',
-          date_generation TIMESTAMP,
-          url_attestation VARCHAR(500),
-          commentaires_hr TEXT
-        )
-      `);
 
-      // Get candidate info for the report
+      // Get candidate info and stagesid for the report
       const candidateResult = await pool.query(
-        `SELECT c.cdtid, c.nom, c.prenom, c.email, r.titre
+        `SELECT c.cdtid, c.nom, c.prenom, c.email, r.titre, r.stagesid
          FROM rapports_stage r
          JOIN candidat c ON r.cdtid = c.cdtid
          WHERE r.rstid = $1`,
@@ -75,13 +64,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Insert certificate request
         await pool.query(
-          `INSERT INTO attestations_stage (attestationid, cdtid, rapportid, superviseurid) 
-           VALUES ($1, $2, $3, $4)`,
-          [attestationid, candidate.cdtid, rapportid, resid]
+          `INSERT INTO attestations_stage (atsid, stagesid, url, dategeneration) 
+           VALUES ($1, $2, $3, NOW())`,
+          [attestationid, candidate.stagesid, null] // Use the actual stagesid from the report
         );
 
         // Send email to HR
-        const hrEmail = process.env.HR_EMAIL || 'hr@sbgs.ma';
+        const hrEmail = process.env.HR_EMAIL || 'amine.aichane@gmail.com';
+        console.log('Sending attestation email to:', hrEmail);
+        console.log('HR_EMAIL env var:', process.env.HR_EMAIL);
+        
         const emailSubject = 'Demande d\'attestation de stage';
         const emailBody = `
           Bonjour,
@@ -99,11 +91,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         `;
 
         try {
+          console.log('Attempting to send email...');
           await sendEmail({
             to: hrEmail,
             subject: emailSubject,
             text: emailBody
           });
+          console.log('Email sent successfully');
         } catch (emailError) {
           console.error('Error sending email:', emailError);
         }

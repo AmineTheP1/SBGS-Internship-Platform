@@ -271,6 +271,7 @@ export default function SupervisorDashboard() {
   const handleApproveReport = async () => {
     console.log("handleApproveReport called with reportAction:", reportAction);
     console.log("selectedReport:", selectedReport);
+    console.log("requestCertificate value:", requestCertificate, "type:", typeof requestCertificate);
 
     if (!selectedReport || !reportAction) {
       console.log("Validation failed: selectedReport or reportAction is missing");
@@ -280,19 +281,22 @@ export default function SupervisorDashboard() {
 
     try {
       setReportStatus("Traitement en cours...");
+      const requestBody = {
+        rapportid: selectedReport.rapportid,
+        action: reportAction,
+        commentaires: reportComment,
+        resid: supervisor.resid,
+        requestCertificate: requestCertificate
+      };
+      console.log("Sending request body:", requestBody);
+      
       const response = await fetch(API_ENDPOINTS.SUPERVISOR_APPROVE_REPORT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          rapportid: selectedReport.rapportid,
-          action: reportAction,
-          commentaires: reportComment,
-          resid: supervisor.resid,
-          requestCertificate: requestCertificate
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
