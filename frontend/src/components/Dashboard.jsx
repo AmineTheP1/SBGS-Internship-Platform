@@ -450,14 +450,29 @@ export default function Dashboard() {
       });
 
       const data = await response.json();
+      console.log("Attestation generation response:", data); // Debug
+      
       if (data.success) {
         setAttestationStatus("Attestation de stage générée avec succès !");
         
-        // Store the candidate info for later removal when download is clicked
-        setSelectedAttestation({
-          ...data.attestation,
-          candidateToRemove: { cdtid, rapportid }
-        });
+                 console.log("Attestation URL from backend:", data.attestation?.downloadUrl); // Debug
+         
+         // Store the candidate info for later removal when download is clicked
+         setSelectedAttestation({
+           ...data.attestation,
+           candidateToRemove: { cdtid, rapportid }
+         });
+         
+         // Update the approved candidates list to mark this candidate's attestation as generated
+         setApprovedCandidates(prevCandidates => {
+           const updated = prevCandidates.map(candidate => 
+             candidate.cdtid === cdtid && candidate.rapportid === rapportid
+               ? { ...candidate, attestationGenerated: true, downloadUrl: data.attestation.downloadUrl }
+               : candidate
+           );
+           console.log("Updated candidates with attestation:", updated); // Debug
+           return updated;
+         });
       } else {
         setAttestationStatus(data.error);
       }
@@ -467,100 +482,83 @@ export default function Dashboard() {
     }
   };
 
-  const handleDownloadAttestation = async (downloadUrl) => {
+  const handleDownloadAttestation = async (downloadUrl, cdtid, rapportid) => {
+    console.log("handleDownloadAttestation called with:", { downloadUrl, cdtid, rapportid }); // Debug
+    
     if (downloadUrl) {
+      const fullUrl = `${API_BASE_URL}${downloadUrl}`;
+      console.log("Opening URL:", fullUrl); // Debug
+      
       // Open attestation in a new tab
-      window.open(`${API_BASE_URL}${downloadUrl}`, '_blank');
+      window.open(fullUrl, '_blank');
       
-      console.log("selectedAttestation:", selectedAttestation); // Debug
+      console.log("Downloading attestation for candidate:", { cdtid, rapportid }); // Debug
       
-      // Remove the candidate from the approved candidates list and send email notification
-      if (selectedAttestation?.candidateToRemove) {
-        const { cdtid, rapportid } = selectedAttestation.candidateToRemove;
-        console.log("Removing candidate:", { cdtid, rapportid }); // Debug
-        console.log("cdtid type:", typeof cdtid, "value:", cdtid); // Debug
-        console.log("rapportid type:", typeof rapportid, "value:", rapportid); // Debug
+      // Safety check: don't proceed if values are empty
+      if (!cdtid || !rapportid) {
+        console.log("Empty cdtid or rapportid, skipping removal"); // Debug
+        return;
+      }
+      
+      // Remove from local state
+      setApprovedCandidates(prevCandidates => {
+        console.log("Previous candidates:", prevCandidates); // Debug
         
-        // Safety check: don't proceed if values are empty
-        if (!cdtid || !rapportid) {
-          console.log("Empty cdtid or rapportid, skipping removal"); // Debug
-          return;
-        }
-        
-        // Remove from local state
-        setApprovedCandidates(prevCandidates => {
-          console.log("Previous candidates:", prevCandidates); // Debug
-          console.log("First candidate example:", prevCandidates[0]); // Debug
-          console.log("All candidate IDs:", prevCandidates.map(c => ({ cdtid: c.cdtid, rapportid: c.rapportid }))); // Debug
+        const filtered = prevCandidates.filter(candidate => {
+          // Convert to strings for comparison to handle type mismatches
+          const candidateCdtid = String(candidate.cdtid || '');
+          const candidateRapportid = String(candidate.rapportid || '');
+          const targetCdtid = String(cdtid || '');
+          const targetRapportid = String(rapportid || '');
           
-          const filtered = prevCandidates.filter(candidate => {
-            console.log("Checking candidate:", candidate.cdtid, "vs", cdtid, "and", candidate.rapportid, "vs", rapportid); // Debug
-            
-            // Convert to strings for comparison to handle type mismatches
-            const candidateCdtid = String(candidate.cdtid || '');
-            const candidateRapportid = String(candidate.rapportid || '');
-            const targetCdtid = String(cdtid || '');
-            const targetRapportid = String(rapportid || '');
-            
-            console.log("String comparison:", {
-              candidateCdtid,
-              targetCdtid,
-              candidateRapportid,
-              targetRapportid
-            }); // Debug
-            
-            const shouldKeep = !(candidateCdtid === targetCdtid && candidateRapportid === targetRapportid);
-            console.log("Should keep this candidate:", shouldKeep); // Debug
-            return shouldKeep;
-          });
-          
-          console.log("Filtered candidates:", filtered); // Debug
-          return filtered;
+          const shouldKeep = !(candidateCdtid === targetCdtid && candidateRapportid === targetRapportid);
+          console.log(`Checking ${candidateCdtid} vs ${targetCdtid} and ${candidateRapportid} vs ${targetRapportid}: ${shouldKeep}`); // Debug
+          return shouldKeep;
         });
         
-        // Mark attestation as downloaded in database
-        try {
-          const markResponse = await fetch(API_ENDPOINTS.HR_MARK_ATTESTATION_DOWNLOADED, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              cdtid,
-              rapportid
-            }),
-          });
-          console.log("Mark downloaded response:", markResponse.status); // Debug
-        } catch (error) {
-          console.error("Error marking attestation as downloaded:", error);
-        }
-
-        // Send email notification
-        try {
-          const response = await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              cdtid,
-              rapportid
-            }),
-          });
-          console.log("Email notification response:", response.status); // Debug
-        } catch (error) {
-          console.error("Error sending email notification:", error);
-          // Don't fail the download if email fails
-        }
-        
-        // Clear the attestation status and selected attestation
-        setAttestationStatus("");
-        setSelectedAttestation(null);
-      } else {
-        console.log("No candidateToRemove found in selectedAttestation"); // Debug
+        console.log("Filtered candidates:", filtered); // Debug
+        return filtered;
+      });
+      
+      // Mark attestation as downloaded in database
+      try {
+        const markResponse = await fetch(API_ENDPOINTS.HR_MARK_ATTESTATION_DOWNLOADED, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            cdtid,
+            rapportid
+          }),
+        });
+        console.log("Mark downloaded response:", markResponse.status); // Debug
+      } catch (error) {
+        console.error("Error marking attestation as downloaded:", error);
       }
+
+      // Send email notification
+      try {
+        const response = await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            cdtid,
+            rapportid
+          }),
+        });
+        console.log("Email notification response:", response.status); // Debug
+      } catch (error) {
+        console.error("Error sending email notification:", error);
+        // Don't fail the download if email fails
+      }
+      
+      // Clear the attestation status
+      setAttestationStatus("");
     }
   };
 
@@ -679,17 +677,7 @@ export default function Dashboard() {
                          ? 'bg-red-100 text-red-700'
                          : 'bg-blue-100 text-blue-700'
                      }`}>
-                       <div className="flex items-center justify-between">
-                         <span>{attestationStatus}</span>
-                         {attestationStatus.includes('succès') && selectedAttestation?.downloadUrl && (
-                           <button
-                             onClick={() => handleDownloadAttestation(selectedAttestation.downloadUrl)}
-                             className="ml-4 px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                           >
-                             Télécharger l'attestation
-                           </button>
-                         )}
-                       </div>
+                       <span>{attestationStatus}</span>
                      </div>
                    )}
                    
@@ -740,13 +728,30 @@ export default function Dashboard() {
                               {candidate.ecole_nom || 'Non spécifié'}
                             </td>
                                                          <td className="p-3 font-medium">
-                               <button
-                                 onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
-                                 className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                               >
-                                 Attestation de stage
-                               </button>
-                             </td>
+                              {candidate.attestationGenerated ? (
+                                <button
+                                  onClick={() => {
+                                    console.log("Download button clicked for candidate:", {
+                                      cdtid: candidate.cdtid,
+                                      rapportid: candidate.rapportid,
+                                      downloadUrl: candidate.downloadUrl,
+                                      attestationGenerated: candidate.attestationGenerated
+                                    });
+                                    handleDownloadAttestation(candidate.downloadUrl, candidate.cdtid, candidate.rapportid);
+                                  }}
+                                  className="px-4 py-2 rounded-lg bg-green-200 text-green-700 hover:bg-green-300 font-semibold text-sm transition-colors"
+                                >
+                                  Télécharger l'attestation
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
+                                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                                >
+                                  Attestation de stage
+                                </button>
+                              )}
+                            </td>
                           </tr>
                         ))}
                                         </tbody>
