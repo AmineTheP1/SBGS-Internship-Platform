@@ -41,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       JOIN rapports_stage r ON c.cdtid = r.cdtid
       JOIN stages s ON r.stagesid = s.stagesid
       LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
-      LEFT JOIN attestations_stage ats ON s.stagesid = ats.stagesid
+      LEFT JOIN attestations_stage ats ON s.stagesid = ats.stagesid AND c.cdtid = ats.cdtid AND r.rstid = ats.rapportid
       WHERE r.statut = 'Approuvé'
       AND (ats.downloaded IS NULL OR ats.downloaded = FALSE)
       ORDER BY r.datevalidation DESC

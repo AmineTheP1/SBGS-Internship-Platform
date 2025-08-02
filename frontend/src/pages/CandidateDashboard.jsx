@@ -451,36 +451,6 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Important Notice */}
-        {candidate.statut === "Accepté" && (
-          <div className="mt-8 bg-green-50 border border-green-200 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-green-800 mb-3">
-              🎉 Félicitations ! Votre candidature a été acceptée
-            </h3>
-            <p className="text-green-700 mb-4">
-              Vous allez recevoir prochainement toutes les informations nécessaires pour commencer votre stage chez SBGS.
-            </p>
-            <div className="bg-white rounded-lg p-4">
-              <h4 className="font-semibold text-gray-800 mb-2">Prochaines étapes :</h4>
-              <ul className="text-gray-700 space-y-1">
-                <li>• Vous recevrez un email avec les détails de votre intégration</li>
-                <li>• Un membre de l'équipe RH vous contactera pour planifier votre arrivée</li>
-                <li>• Préparez les documents nécessaires pour votre premier jour</li>
-              </ul>
-            </div>
-          </div>
-        )}
-
-        {candidate.statut === "En attente" && (
-          <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-yellow-800 mb-3">
-              ⏳ Votre candidature est en cours d'examen
-            </h3>
-            <p className="text-yellow-700">
-              Notre équipe RH examine actuellement votre candidature. Vous recevrez une notification par email dès qu'une décision sera prise.
-            </p>
-          </div>
-        )}
 
         {/* Reports Section */}
         {candidate.statut === "Accepté" && (

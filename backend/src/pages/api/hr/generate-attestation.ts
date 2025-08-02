@@ -766,21 +766,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log('Candidate data for attestation:', candidate);
     const attestationid = crypto.randomBytes(8).toString('hex');
 
-    // First, ensure the cdtid column exists in attestations_stage table
+    // First, ensure the cdtid and rapportid columns exist in attestations_stage table
     try {
       await pool.query(`ALTER TABLE attestations_stage ADD COLUMN IF NOT EXISTS cdtid VARCHAR(16) REFERENCES candidat(cdtid)`);
+      await pool.query(`ALTER TABLE attestations_stage ADD COLUMN IF NOT EXISTS rapportid VARCHAR(16) REFERENCES rapports_stage(rstid)`);
     } catch (error) {
-      console.log("cdtid column might already exist or error occurred:", error);
+      console.log("Columns might already exist or error occurred:", error);
     }
 
-    // Check if attestation already exists for this specific candidate and stage
+    // Check if attestation already exists for this specific candidate and report
     const existingAttestation = await pool.query(
-      `SELECT atsid FROM attestations_stage WHERE stagesid = $1 AND cdtid = $2`,
-      [candidate.stagesid, candidate.cdtid]
+      `SELECT atsid FROM attestations_stage WHERE stagesid = $1 AND cdtid = $2 AND rapportid = $3`,
+      [candidate.stagesid, candidate.cdtid, rapportid]
     );
 
     if (existingAttestation.rows.length > 0) {
-      return res.status(400).json({ success: false, error: "Une attestation existe déjà pour ce candidat et ce stage." });
+      return res.status(400).json({ success: false, error: "Une attestation existe déjà pour ce candidat et ce rapport." });
     }
 
          // Generate attestation data
@@ -817,9 +818,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Insert attestation record with file URL
     await pool.query(
-      `INSERT INTO attestations_stage (atsid, stagesid, url, dategeneration, cdtid) 
-       VALUES ($1, $2, $3, NOW(), $4)`,
-      [attestationid, candidate.stagesid, fileUrl, candidate.cdtid]
+      `INSERT INTO attestations_stage (atsid, stagesid, url, dategeneration, cdtid, rapportid) 
+       VALUES ($1, $2, $3, NOW(), $4, $5)`,
+      [attestationid, candidate.stagesid, fileUrl, candidate.cdtid, rapportid]
     );
 
     // Note: Email notification will be sent when the attestation is downloaded

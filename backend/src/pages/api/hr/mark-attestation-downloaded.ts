@@ -26,12 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const result = await pool.query(`
       UPDATE attestations_stage 
       SET dategeneration = NOW(), downloaded = true
-      WHERE stagesid = (
-        SELECT s.stagesid 
-        FROM stages s 
-        JOIN rapports_stage r ON s.stagesid = r.stagesid 
-        WHERE r.cdtid = $1 AND r.rstid = $2
-      )
+      WHERE cdtid = $1 AND rapportid = $2
     `, [cdtid, rapportid]);
 
     console.log(`Attestation marked as downloaded for candidate ${cdtid}, rapport ${rapportid}`);
