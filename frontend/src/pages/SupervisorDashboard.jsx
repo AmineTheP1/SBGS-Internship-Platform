@@ -370,6 +370,8 @@ export default function SupervisorDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+        
         {/* Stats Cards */}
         <div className="grid md:grid-cols-5 gap-6 mb-8">
           <div 
@@ -454,8 +456,16 @@ export default function SupervisorDashboard() {
 
 
 
-        {/* Main View - Show all sections */}
+        {/* Main View - Show only welcome message and cards */}
         {currentView === 'main' && (
+          <div className="text-center py-12">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">Tableau de bord Responsable de Stage</h1>
+            <p className="text-gray-600 text-lg">Sélectionnez une carte ci-dessus pour afficher les données correspondantes</p>
+          </div>
+        )}
+
+        {/* Interns View - Show when Stagiaires assignés card is clicked */}
+        {currentView === 'interns' && (
           <>
                  {/* Interns List */}
          <div className="bg-white rounded-xl shadow-lg p-8">
@@ -485,7 +495,7 @@ export default function SupervisorDashboard() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentCandidates.map((intern) => (
-                <div key={intern.cdtid} className="bg-gray-50 rounded-lg p-6 border">
+                <div key={intern.cdtid} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
                       {intern.imageurl ? (
@@ -580,9 +590,8 @@ export default function SupervisorDashboard() {
 
                   <button
                     onClick={() => handleViewInternDetails(intern.cdtid)}
-                    className="w-full flex items-center justify-center px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="w-full px-3 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
                   >
-                    <FaEye className="mr-2" />
                     Voir détails
                   </button>
                 </div>
@@ -645,7 +654,7 @@ export default function SupervisorDashboard() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentCandidates.map((intern) => (
-                  <div key={intern.cdtid} className="bg-gray-50 rounded-lg p-6 border">
+                  <div key={intern.cdtid} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
                     <div className="flex items-center mb-4">
                       <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
                         {intern.imageurl ? (
@@ -746,21 +755,12 @@ export default function SupervisorDashboard() {
                       </div>
                     )}
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleViewInternDetails(intern.cdtid)}
-                        className="flex-1 flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                      >
-                        <FaEye className="mr-1" />
-                        Voir détails
-                      </button>
-                      <button
-                        onClick={() => handleMarkAbsence(intern.cdtid)}
-                        className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                      >
-                        Absence
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleViewInternDetails(intern.cdtid)}
+                      className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      Voir détails
+                    </button>
                   </div>
                 ))}
               </div>
