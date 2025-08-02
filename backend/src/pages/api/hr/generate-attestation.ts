@@ -70,7 +70,7 @@ const generateAttestationPDF = (attestationData: any) => {
          }
         
                  .attestation-container {
-           max-width: 95%;
+           max-width: 800px;
            width: 100%;
            margin: 0 auto;
            background: white;
@@ -168,7 +168,7 @@ const generateAttestationPDF = (attestationData: any) => {
         }
         
                  .content {
-           padding: 25px 30px;
+           padding: 25px 25px;
            position: relative;
            flex: 1;
            display: flex;
@@ -214,7 +214,7 @@ const generateAttestationPDF = (attestationData: any) => {
                  .info-label {
            font-weight: 600;
            color: #374151;
-           min-width: 140px;
+           min-width: 120px;
            font-size: 12px;
            text-transform: uppercase;
            letter-spacing: 0.5px;
@@ -264,7 +264,7 @@ const generateAttestationPDF = (attestationData: any) => {
         }
         
                  .signature-line {
-           width: 250px;
+           width: 200px;
            height: 2px;
            background: #374151;
            margin: 20px auto 10px;
