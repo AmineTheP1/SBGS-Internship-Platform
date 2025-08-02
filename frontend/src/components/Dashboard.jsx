@@ -452,13 +452,12 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.success) {
         setAttestationStatus("Attestation de stage générée avec succès !");
-        setSelectedAttestation(data.attestation);
         
         // Store the candidate info for later removal when download is clicked
-        setSelectedAttestation(prev => ({
+        setSelectedAttestation({
           ...data.attestation,
           candidateToRemove: { cdtid, rapportid }
-        }));
+        });
       } else {
         setAttestationStatus(data.error);
       }
@@ -473,20 +472,26 @@ export default function Dashboard() {
       // Open attestation in a new tab
       window.open(`${API_BASE_URL}${downloadUrl}`, '_blank');
       
+      console.log("selectedAttestation:", selectedAttestation); // Debug
+      
       // Remove the candidate from the approved candidates list and send email notification
       if (selectedAttestation?.candidateToRemove) {
         const { cdtid, rapportid } = selectedAttestation.candidateToRemove;
+        console.log("Removing candidate:", { cdtid, rapportid }); // Debug
         
         // Remove from local state
-        setApprovedCandidates(prevCandidates => 
-          prevCandidates.filter(candidate => 
-            !(candidate.cdtid === cdtid && candidate.rstid === rapportid)
-          )
-        );
+        setApprovedCandidates(prevCandidates => {
+          console.log("Previous candidates:", prevCandidates); // Debug
+          const filtered = prevCandidates.filter(candidate => 
+  !(candidate.cdtid === cdtid && candidate.rapportid === rapportid)
+);
+          console.log("Filtered candidates:", filtered); // Debug
+          return filtered;
+        });
         
         // Send email notification
         try {
-          await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
+          const response = await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -497,6 +502,7 @@ export default function Dashboard() {
               rapportid
             }),
           });
+          console.log("Email notification response:", response.status); // Debug
         } catch (error) {
           console.error("Error sending email notification:", error);
           // Don't fail the download if email fails
@@ -505,6 +511,8 @@ export default function Dashboard() {
         // Clear the attestation status and selected attestation
         setAttestationStatus("");
         setSelectedAttestation(null);
+      } else {
+        console.log("No candidateToRemove found in selectedAttestation"); // Debug
       }
     }
   };

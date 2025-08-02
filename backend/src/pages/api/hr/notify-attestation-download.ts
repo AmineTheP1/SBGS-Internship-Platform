@@ -1,6 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { pool } from '../../../db';
+import { Pool } from 'pg';
 import sendEmail from '../../../utilities/sendEmail';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
 const formatStageType = (stageType: string) => {
   if (!stageType) return 'Non spécifié';
@@ -40,8 +44,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       FROM candidat c
       JOIN rapports_stage r ON c.cdtid = r.cdtid
       JOIN stages s ON r.stagesid = s.stagesid
-      JOIN demandes_stage ds ON s.dsgid = ds.dsgid
-      LEFT JOIN ecoles e ON ds.ecoleid = e.ecoleid
+      LEFT JOIN demandes_stage ds ON s.demandes_stageid = ds.dsgid
+      LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
       WHERE c.cdtid = $1 AND r.rstid = $2
     `, [cdtid, rapportid]);
 
@@ -77,8 +81,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await sendEmail({
         to: candidate.email,
         subject: emailSubject,
+        html: emailBody,
         text: emailBody
-      });
+      }); 
       console.log(`Email notification sent to ${candidate.email}`);
     } catch (emailError) {
       console.error('Error sending email notification:', emailError);
@@ -94,4 +99,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('Error sending download notification:', error);
     res.status(500).json({ success: false, error: "Erreur lors de l'envoi de la notification." });
   }
-} 
+}
