@@ -45,16 +45,16 @@ const generateAttestationPDF = (attestationData: any) => {
           font-family: 'Inter', sans-serif;
           background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
           min-height: 100vh;
-          padding: 40px 20px;
+          padding: 20px 10px;
           color: #1e293b;
-          line-height: 1.6;
+          line-height: 1.4;
         }
         
         .attestation-container {
           max-width: 800px;
           margin: 0 auto;
           background: white;
-          border-radius: 20px;
+          border-radius: 15px;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
           overflow: hidden;
           position: relative;
@@ -63,7 +63,7 @@ const generateAttestationPDF = (attestationData: any) => {
         .header {
           background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
           color: white;
-          padding: 40px;
+          padding: 25px;
           text-align: center;
           position: relative;
         }
@@ -89,20 +89,20 @@ const generateAttestationPDF = (attestationData: any) => {
         }
         
         .logo {
-          width: 80px;
-          height: 80px;
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
           background: white;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 20px;
-          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+          margin-right: 15px;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         }
         
         .logo img {
-          width: 60px;
-          height: 60px;
+          width: 45px;
+          height: 45px;
           object-fit: contain;
         }
         
@@ -112,40 +112,40 @@ const generateAttestationPDF = (attestationData: any) => {
         
         .company-name {
           font-family: 'Playfair Display', serif;
-          font-size: 28px;
+          font-size: 24px;
           font-weight: 900;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .company-subtitle {
-          font-size: 14px;
+          font-size: 12px;
           opacity: 0.9;
           font-weight: 300;
         }
         
         .title-section {
-          margin-top: 30px;
+          margin-top: 20px;
           position: relative;
           z-index: 1;
         }
         
         .main-title {
           font-family: 'Playfair Display', serif;
-          font-size: 36px;
+          font-size: 28px;
           font-weight: 700;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .subtitle {
-          font-size: 16px;
+          font-size: 14px;
           opacity: 0.9;
           font-weight: 300;
         }
         
         .content {
-          padding: 50px 40px;
+          padding: 30px 25px;
           position: relative;
         }
         
@@ -161,23 +161,23 @@ const generateAttestationPDF = (attestationData: any) => {
         }
         
         .intro-text {
-          font-size: 18px;
+          font-size: 16px;
           color: #374151;
-          margin-bottom: 30px;
+          margin-bottom: 20px;
           font-weight: 500;
         }
         
         .candidate-info {
           background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-radius: 15px;
-          padding: 30px;
-          margin: 30px 0;
-          border-left: 5px solid #dc2626;
+          border-radius: 12px;
+          padding: 20px;
+          margin: 20px 0;
+          border-left: 4px solid #dc2626;
         }
         
         .info-row {
           display: flex;
-          margin-bottom: 15px;
+          margin-bottom: 12px;
           align-items: center;
         }
         
@@ -188,8 +188,8 @@ const generateAttestationPDF = (attestationData: any) => {
         .info-label {
           font-weight: 600;
           color: #374151;
-          min-width: 150px;
-          font-size: 14px;
+          min-width: 120px;
+          font-size: 12px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -197,36 +197,36 @@ const generateAttestationPDF = (attestationData: any) => {
         .info-value {
           font-weight: 500;
           color: #1e293b;
-          font-size: 16px;
+          font-size: 14px;
         }
         
         .stage-details {
           background: white;
           border: 2px solid #e5e7eb;
-          border-radius: 15px;
-          padding: 30px;
-          margin: 30px 0;
+          border-radius: 12px;
+          padding: 20px;
+          margin: 20px 0;
         }
         
         .stage-title {
           font-family: 'Playfair Display', serif;
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 700;
           color: #dc2626;
-          margin-bottom: 20px;
+          margin-bottom: 15px;
           text-align: center;
         }
         
         .conclusion {
-          font-size: 16px;
+          font-size: 14px;
           color: #374151;
-          margin: 30px 0;
+          margin: 20px 0;
           text-align: center;
           font-style: italic;
         }
         
         .signature-section {
-          margin-top: 50px;
+          margin-top: 30px;
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
@@ -311,10 +311,61 @@ const generateAttestationPDF = (attestationData: any) => {
           body {
             background: white;
             padding: 0;
+            margin: 0;
+            font-size: 12px;
           }
           .attestation-container {
             box-shadow: none;
             border-radius: 0;
+            max-width: 100%;
+            margin: 0;
+          }
+          .header {
+            padding: 15px;
+          }
+          .content {
+            padding: 20px;
+          }
+          .logo {
+            width: 50px;
+            height: 50px;
+          }
+          .logo img {
+            width: 35px;
+            height: 35px;
+          }
+          .company-name {
+            font-size: 20px;
+          }
+          .main-title {
+            font-size: 24px;
+          }
+          .intro-text {
+            font-size: 14px;
+            margin-bottom: 15px;
+          }
+          .candidate-info, .stage-details {
+            padding: 15px;
+            margin: 15px 0;
+          }
+          .info-label {
+            font-size: 11px;
+            min-width: 100px;
+          }
+          .info-value {
+            font-size: 13px;
+          }
+          .conclusion {
+            font-size: 13px;
+            margin: 15px 0;
+          }
+          .signature-section {
+            margin-top: 20px;
+          }
+          .stamp {
+            width: 80px;
+            height: 80px;
+            font-size: 10px;
           }
         }
       </style>
@@ -367,10 +418,10 @@ const generateAttestationPDF = (attestationData: any) => {
               <div class="info-label">Période</div>
               <div class="info-value">Du ${attestationData.dateDebut ? new Date(attestationData.dateDebut).toLocaleDateString('fr-FR') : 'Non spécifié'} au ${attestationData.dateFin ? new Date(attestationData.dateFin).toLocaleDateString('fr-FR') : 'Non spécifié'}</div>
             </div>
-            <div class="info-row">
-              <div class="info-label">Rapport</div>
-              <div class="info-value">${attestationData.rapportTitre}</div>
-            </div>
+                         <div class="info-row">
+               <div class="info-label">Type de stage</div>
+               <div class="info-value">${attestationData.rapportTitre}</div>
+             </div>
             <div class="info-row">
               <div class="info-label">Approbation</div>
               <div class="info-value">${attestationData.dateValidation ? new Date(attestationData.dateValidation).toLocaleDateString('fr-FR') : 'Non spécifié'}</div>
@@ -425,25 +476,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: "cdtid et rapportid sont requis." });
     }
 
-    // Get candidate and report details
-    const candidateResult = await pool.query(`
-      SELECT 
-        c.cdtid, c.nom, c.prenom, c.email, c.cin, c.statutetudiant,
-        r.rstid, r.titre, r.datevalidation, r.stagesid,
-        s.datedebut, s.datefin,
-        e.nom as ecole_nom
-      FROM candidat c
-      JOIN rapports_stage r ON c.cdtid = r.cdtid
-      JOIN stages s ON r.stagesid = s.stagesid
-      LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
-      WHERE c.cdtid = $1 AND r.rstid = $2 AND r.statut = 'Approuvé'
-    `, [cdtid, rapportid]);
+         // Get candidate and report details
+     const candidateResult = await pool.query(`
+       SELECT 
+         c.cdtid, c.nom, c.prenom, c.email, c.cin, c.statutetudiant,
+         r.rstid, r.titre, r.datevalidation, r.stagesid,
+         s.datedebut, s.datefin,
+         ds.typestage,
+         e.nom as ecole_nom
+       FROM candidat c
+       JOIN rapports_stage r ON c.cdtid = r.cdtid
+       JOIN stages s ON r.stagesid = s.stagesid
+       LEFT JOIN demandes_stage ds ON s.demandes_stageid = ds.dsgid
+       LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
+       WHERE c.cdtid = $1 AND r.rstid = $2 AND r.statut = 'Approuvé'
+     `, [cdtid, rapportid]);
 
     if (candidateResult.rows.length === 0) {
       return res.status(404).json({ success: false, error: "Candidat ou rapport non trouvé." });
     }
 
     const candidate = candidateResult.rows[0];
+    console.log('Candidate data for attestation:', candidate);
     const attestationid = crypto.randomBytes(8).toString('hex');
 
     // First, ensure the cdtid column exists in attestations_stage table
@@ -463,18 +517,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: "Une attestation existe déjà pour ce candidat et ce stage." });
     }
 
-    // Generate attestation data
-    const attestationData = {
-      attestationid,
-      candidateName: `${candidate.prenom} ${candidate.nom}`,
-      cin: candidate.cin,
-      rapportTitre: candidate.titre,
-      dateValidation: candidate.datevalidation,
-      dateDebut: candidate.datedebut,
-      dateFin: candidate.datefin,
-      ecole: candidate.ecole_nom,
-      dateGeneration: new Date().toISOString()
-    };
+         // Generate attestation data
+     const attestationData = {
+       attestationid,
+       candidateName: `${candidate.prenom} ${candidate.nom}`,
+       cin: candidate.cin,
+       rapportTitre: candidate.typestage || 'Type de stage non spécifié',
+       dateValidation: candidate.datevalidation,
+       dateDebut: candidate.datedebut,
+       dateFin: candidate.datefin,
+       ecole: candidate.ecole_nom,
+       dateGeneration: new Date().toISOString()
+     };
 
     // Generate PDF content (HTML for now, can be converted to PDF later)
     const pdfContent = generateAttestationPDF(attestationData);
