@@ -453,14 +453,12 @@ export default function Dashboard() {
       if (data.success) {
         setAttestationStatus("Attestation de stage générée avec succès !");
         setSelectedAttestation(data.attestation);
-        // Refresh approved candidates
-        const candidatesResponse = await fetch(API_ENDPOINTS.HR_GET_APPROVED_CANDIDATES, {
-          credentials: "include"
-        });
-        if (candidatesResponse.ok) {
-          const candidatesData = await candidatesResponse.json();
-          setApprovedCandidates(candidatesData.candidates || []);
-        }
+        
+        // Store the candidate info for later removal when download is clicked
+        setSelectedAttestation(prev => ({
+          ...data.attestation,
+          candidateToRemove: { cdtid, rapportid }
+        }));
       } else {
         setAttestationStatus(data.error);
       }
@@ -470,9 +468,44 @@ export default function Dashboard() {
     }
   };
 
-  const handleDownloadAttestation = (downloadUrl) => {
+  const handleDownloadAttestation = async (downloadUrl) => {
     if (downloadUrl) {
+      // Open attestation in a new tab
       window.open(`${API_BASE_URL}${downloadUrl}`, '_blank');
+      
+      // Remove the candidate from the approved candidates list and send email notification
+      if (selectedAttestation?.candidateToRemove) {
+        const { cdtid, rapportid } = selectedAttestation.candidateToRemove;
+        
+        // Remove from local state
+        setApprovedCandidates(prevCandidates => 
+          prevCandidates.filter(candidate => 
+            !(candidate.cdtid === cdtid && candidate.rstid === rapportid)
+          )
+        );
+        
+        // Send email notification
+        try {
+          await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              cdtid,
+              rapportid
+            }),
+          });
+        } catch (error) {
+          console.error("Error sending email notification:", error);
+          // Don't fail the download if email fails
+        }
+        
+        // Clear the attestation status and selected attestation
+        setAttestationStatus("");
+        setSelectedAttestation(null);
+      }
     }
   };
 
@@ -582,13 +615,35 @@ export default function Dashboard() {
                 <p className="text-coke-light">Candidats avec rapports de stage approuvés</p>
               </div>
               
-                             <div className="p-6">
-                 {approvedCandidates.length === 0 ? (
-                   <div className="text-center py-8 text-gray-500">
-                     Aucun rapport approuvé trouvé.
-                   </div>
-                 ) : (
-                                   <table className="w-full text-left">
+                                              <div className="p-6">
+                   {attestationStatus && (
+                     <div className={`mb-4 p-4 rounded-lg ${
+                       attestationStatus.includes('succès') 
+                         ? 'bg-green-100 text-green-700' 
+                         : attestationStatus.includes('Erreur') 
+                         ? 'bg-red-100 text-red-700'
+                         : 'bg-blue-100 text-blue-700'
+                     }`}>
+                       <div className="flex items-center justify-between">
+                         <span>{attestationStatus}</span>
+                         {attestationStatus.includes('succès') && selectedAttestation?.downloadUrl && (
+                           <button
+                             onClick={() => handleDownloadAttestation(selectedAttestation.downloadUrl)}
+                             className="ml-4 px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                           >
+                             Télécharger l'attestation
+                           </button>
+                         )}
+                       </div>
+                     </div>
+                   )}
+                   
+                   {approvedCandidates.length === 0 ? (
+                     <div className="text-center py-8 text-gray-500">
+                       Aucun rapport approuvé trouvé.
+                     </div>
+                   ) : (
+                     <table className="w-full text-left">
                   <thead>
                     <tr className="bg-gray-100 text-gray-700">
                       <th className="p-3">Candidat</th>
@@ -639,31 +694,9 @@ export default function Dashboard() {
                              </td>
                           </tr>
                         ))}
-                     </tbody>
-                   </table>
-                 )}
-                
-                                 {attestationStatus && (
-                   <div className={`mt-4 p-4 rounded-lg ${
-                     attestationStatus.includes('succès') 
-                       ? 'bg-green-100 text-green-700' 
-                       : attestationStatus.includes('Erreur') 
-                       ? 'bg-red-100 text-red-700'
-                       : 'bg-blue-100 text-blue-700'
-                   }`}>
-                     <div className="flex items-center justify-between">
-                       <span>{attestationStatus}</span>
-                       {attestationStatus.includes('succès') && selectedAttestation?.downloadUrl && (
-                         <button
-                           onClick={() => handleDownloadAttestation(selectedAttestation.downloadUrl)}
-                           className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                         >
-                           Télécharger l'attestation
-                         </button>
-                       )}
-                     </div>
-                   </div>
-                 )}
+                                        </tbody>
+                 </table>
+               )}
               </div>
             </div>
           </div>

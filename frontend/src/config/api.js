@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
   HR_GENERATE_CERTIFICATE: `${API_BASE_URL}/api/hr/generate-certificate`,
   HR_GET_APPROVED_CANDIDATES: `${API_BASE_URL}/api/hr/get-approved-candidates`,
   HR_GENERATE_ATTESTATION: `${API_BASE_URL}/api/hr/generate-attestation`,
+  HR_NOTIFY_ATTESTATION_DOWNLOAD: `${API_BASE_URL}/api/hr/notify-attestation-download`,
 
   // Supervisor endpoints
   SUPERVISOR_LOGIN: `${API_BASE_URL}/api/supervisor/login`,

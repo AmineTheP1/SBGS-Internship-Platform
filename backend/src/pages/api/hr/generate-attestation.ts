@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import sendEmail from '../../../utilities/sendEmail';
 
 // Function to convert image to base64
 const getLogoBase64 = () => {
@@ -820,6 +821,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
        VALUES ($1, $2, $3, NOW(), $4)`,
       [attestationid, candidate.stagesid, fileUrl, candidate.cdtid]
     );
+
+    // Note: Email notification will be sent when the attestation is downloaded
 
     res.status(200).json({ 
       success: true, 
