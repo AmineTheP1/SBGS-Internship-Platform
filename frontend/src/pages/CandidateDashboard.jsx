@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes } from "react-icons/fa";
+import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes, FaCertificate, FaHeart, FaCheckCircle } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 
 export default function CandidateDashboard() {
@@ -21,6 +21,8 @@ export default function CandidateDashboard() {
     reportFile: null
   });
   const [uploadStatus, setUploadStatus] = useState('');
+  const [hasAttestation, setHasAttestation] = useState(false);
+  const [attestationData, setAttestationData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +69,18 @@ export default function CandidateDashboard() {
         if (reportsRes.ok) {
           const reportsData = await reportsRes.json();
           setReports(reportsData.reports || []);
+        }
+
+        // Check if candidate has received attestation
+        const attestationRes = await fetch(`${API_ENDPOINTS.CANDIDATE_CHECK_ATTESTATION}?cdtid=${data.candidate.cdtid}`, {
+          credentials: "include"
+        });
+        if (attestationRes.ok) {
+          const attestationData = await attestationRes.json();
+          setHasAttestation(attestationData.hasAttestation);
+          if (attestationData.hasAttestation) {
+            setAttestationData(attestationData.attestation);
+          }
         }
       } catch {
         navigate('/candidate-login', { replace: true });
@@ -314,8 +328,80 @@ export default function CandidateDashboard() {
           </div>
         </div>
 
-        {/* Clock In/Out Section */}
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+        {/* Thankful Message for Candidates with Attestation */}
+        {hasAttestation && (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl shadow-lg p-8 mb-8 border-2 border-green-200">
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="bg-green-100 p-4 rounded-full">
+                  <FaCertificate className="text-6xl text-green-600" />
+                </div>
+              </div>
+              
+              <h2 className="text-3xl font-bold text-green-800 mb-4">
+                Félicitations ! 🎉
+              </h2>
+              
+              <p className="text-xl text-green-700 mb-6">
+                Votre attestation de stage a été générée avec succès !
+              </p>
+              
+              <div className="bg-white rounded-lg p-6 mb-6 shadow-sm">
+                <div className="grid md:grid-cols-2 gap-4 text-left">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Rapport de stage</p>
+                    <p className="font-semibold text-gray-800">{attestationData?.rapportTitre || 'Non spécifié'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Date de génération</p>
+                    <p className="font-semibold text-gray-800">
+                      {attestationData?.dateGenerated ? new Date(attestationData.dateGenerated).toLocaleDateString('fr-FR') : 'Non spécifiée'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Période de stage</p>
+                    <p className="font-semibold text-gray-800">
+                      {attestationData?.dateDebut && attestationData?.dateFin 
+                        ? `Du ${new Date(attestationData.dateDebut).toLocaleDateString('fr-FR')} au ${new Date(attestationData.dateFin).toLocaleDateString('fr-FR')}`
+                        : 'Non spécifiée'
+                      }
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Statut</p>
+                    <div className="flex items-center">
+                      <FaCheckCircle className="text-green-500 mr-2" />
+                      <span className="font-semibold text-green-600">Attestation disponible</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-green-100 rounded-lg p-6 mb-6">
+                <div className="flex items-center justify-center mb-3">
+                  <FaHeart className="text-red-500 mr-2" />
+                  <h3 className="text-lg font-semibold text-green-800">Message de remerciement</h3>
+                </div>
+                <p className="text-green-700 leading-relaxed">
+                  Nous tenons à vous remercier pour votre excellent travail et votre dévouement tout au long de votre stage chez SBGS. 
+                  Votre contribution a été précieuse et nous vous souhaitons le plus grand succès dans vos futures entreprises professionnelles.
+                </p>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-sm text-green-600 mb-2">
+                  Votre attestation peut être récupérée auprès du service RH.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Regular Internship Tracking Sections - Only show if no attestation */}
+        {!hasAttestation && (
+          <>
+            {/* Clock In/Out Section */}
+            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
             <FaClock className="mr-2 text-coke-red" />
             Pointage - {new Date().toLocaleDateString('fr-FR')}
@@ -504,7 +590,11 @@ export default function CandidateDashboard() {
           </div>
         )}
 
-        {/* Contact Information */}
+
+          </>
+        )}
+
+        {/* Contact Information - Always show */}
         <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Besoin d'aide ?</h3>
           <p className="text-gray-600 mb-4">

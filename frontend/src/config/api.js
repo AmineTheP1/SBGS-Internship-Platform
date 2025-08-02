@@ -51,6 +51,7 @@ export const API_ENDPOINTS = {
   CANDIDATE_GET_ASSIGNMENT: `${API_BASE_URL}/api/candidate/get-assignment`,
   CANDIDATE_UPLOAD_REPORT: `${API_BASE_URL}/api/candidate/upload-report`,
   CANDIDATE_GET_REPORTS: `${API_BASE_URL}/api/candidate/get-reports`,
+  CANDIDATE_CHECK_ATTESTATION: `${API_BASE_URL}/api/candidate/check-attestation`,
 
   // Application endpoints
   APPLY: `${API_BASE_URL}/api/hr/apply`,
