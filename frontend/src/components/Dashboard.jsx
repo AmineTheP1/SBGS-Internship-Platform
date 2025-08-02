@@ -29,7 +29,15 @@ export default function Dashboard() {
   const [selectedAttestation, setSelectedAttestation] = useState(null);
   const [attestationStatus, setAttestationStatus] = useState("");
   
+  // New state variable for tracking the current view
+  const [currentView, setCurrentView] = useState("main");
+  
   const navigate = useNavigate();
+
+  // Scroll to top on mount and when filters/search/page change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [search, filterStatus, dateFrom, dateTo, filterUniversity, filterInternshipType, filterYear, currentPage, applications]);
 
   // Calculate statistics from applications state
   const totalSubmissions = applications.length;
@@ -463,7 +471,14 @@ export default function Dashboard() {
     <section className="min-h-screen bg-gray-50 py-12">
       <div className="flex flex-row gap-4 mb-8 justify-center ">
         {/* Total Submissions */}
-        <div className="min-w-[200px] bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
+        <div 
+          className={`min-w-[200px] bg-white border ${currentView === "main" ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+          onClick={() => {
+            setCurrentView("main");
+            setShowApprovedCandidates(false);
+            setFilterStatus("all");
+          }}
+        >
           <div className="bg-blue-100 p-3 rounded-full flex items-center justify-center">
             <DocumentTextIcon className="h-7 w-7 text-blue-500" />
           </div>
@@ -473,7 +488,14 @@ export default function Dashboard() {
           </div>
         </div>
         {/* Pending Review */}
-        <div className="min-w-[200px] bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
+        <div 
+          className={`min-w-[200px] bg-white border ${currentView === "pending" ? "border-yellow-500 ring-2 ring-yellow-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+          onClick={() => {
+            setCurrentView("pending");
+            setShowApprovedCandidates(false);
+            setFilterStatus("En attente");
+          }}
+        >
           <div className="bg-yellow-100 p-3 rounded-full flex items-center justify-center">
             <ClockIcon className="h-7 w-7 text-yellow-500" />
           </div>
@@ -483,7 +505,14 @@ export default function Dashboard() {
           </div>
         </div>
         {/* Approved */}
-        <div className="min-w-[200px] bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
+        <div 
+          className={`min-w-[200px] bg-white border ${currentView === "approved" ? "border-green-500 ring-2 ring-green-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+          onClick={() => {
+            setCurrentView("approved");
+            setShowApprovedCandidates(false);
+            setFilterStatus("Accepté");
+          }}
+        >
           <div className="bg-green-100 p-3 rounded-full flex items-center justify-center">
             <CheckCircleIcon className="h-7 w-7 text-green-500" />
           </div>
@@ -494,8 +523,12 @@ export default function Dashboard() {
         </div>
         {/* Approved Reports */}
         <div 
-          className="min-w-[200px] bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
-          onClick={() => setShowApprovedCandidates(true)}
+          className={`min-w-[200px] bg-white border ${currentView === "reports" ? "border-purple-500 ring-2 ring-purple-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+          onClick={() => {
+            setCurrentView("reports");
+            setShowApprovedCandidates(true);
+            setFilterStatus("all");
+          }}
         >
           <div className="bg-purple-100 p-3 rounded-full flex items-center justify-center">
             <DocumentTextIcon className="h-7 w-7 text-purple-500" />
@@ -909,164 +942,105 @@ export default function Dashboard() {
         )}
 
         {/* Approved Candidates View */}
-        {showApprovedCandidates && (
+        {currentView === "reports" && (
           <div className="space-y-6">
-            {/* Header with back button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setShowApprovedCandidates(false)}
-                  className="flex items-center text-gray-600 hover:text-gray-900"
-                >
-                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  Retour au tableau de bord
-                </button>
-                <h2 className="text-xl font-semibold text-gray-900">Candidats avec rapports approuvés</h2>
-              </div>
-              <div className="text-sm text-gray-500">
-                {approvedCandidates.length} candidat(s) avec rapport(s) approuvé(s)
-              </div>
-            </div>
-
-            {/* Approved Candidates List */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Candidat
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        CIN
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Rapport
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date d'approbation
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        École
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {approvedCandidates.map((candidate) => (
-                      <tr key={`${candidate.cdtid}-${candidate.rapportid}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <img
-                                className="h-10 w-10 rounded-full object-cover"
-                                src={candidate.imageurl || '/default-avatar.png'}
-                                alt=""
-                              />
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{candidate.prenom} {candidate.nom}</div>
-                              <div className="text-sm text-gray-500">{candidate.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {candidate.cin || 'Non spécifié'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {candidate.rapport_titre}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {candidate.datevalidation ? new Date(candidate.datevalidation).toLocaleDateString('fr-FR') : 'N/A'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {candidate.ecole_nom || 'Non spécifié'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button
-                            onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
-                            className="text-coke-red hover:text-red-700 mr-3"
-                          >
-                            Attestation de stage
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="coke-gradient px-6 py-4">
+                <h2 className="text-2xl font-bold text-white">Rapports approuvés</h2>
+                <p className="text-coke-light">Candidats avec rapports de stage approuvés</p>
+              </div>
+              
+              <div className="p-6">
+                {approvedCandidates.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    Aucun rapport approuvé trouvé.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Candidat
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            CIN
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Rapport
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date d'approbation
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            École
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {approvedCandidates.map((candidate) => (
+                          <tr key={`${candidate.cdtid}-${candidate.rapportid}`} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-10 w-10">
+                                  <img
+                                    className="h-10 w-10 rounded-full object-cover"
+                                    src={candidate.imageurl || '/default-avatar.png'}
+                                    alt=""
+                                  />
+                                </div>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">{candidate.prenom} {candidate.nom}</div>
+                                  <div className="text-sm text-gray-500">{candidate.email}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {candidate.cin || 'Non spécifié'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {candidate.rapport_titre}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {candidate.datevalidation ? new Date(candidate.datevalidation).toLocaleDateString('fr-FR') : 'N/A'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {candidate.ecole_nom || 'Non spécifié'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
+                                className="text-coke-red hover:text-red-700 mr-3"
+                              >
+                                Attestation de stage
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                
+                {attestationStatus && (
+                  <div className={`mt-4 p-4 rounded-lg ${
+                    attestationStatus.includes('succès') 
+                      ? 'bg-green-100 text-green-700' 
+                      : attestationStatus.includes('Erreur') 
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {attestationStatus}
+                  </div>
+                )}
               </div>
             </div>
-
-            {attestationStatus && (
-              <div className={`p-4 rounded-lg ${
-                attestationStatus.includes('succès') 
-                  ? 'bg-green-100 text-green-700' 
-                  : attestationStatus.includes('Erreur') 
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-blue-100 text-blue-700'
-              }`}>
-                {attestationStatus}
-              </div>
-            )}
-
-            {/* Attestation Preview Modal */}
-            {selectedAttestation && (
-              <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Attestation de stage générée</h3>
-                    <button
-                      onClick={() => setSelectedAttestation(null)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-center mb-4">ATTESTATION DE STAGE</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><strong>Nom complet:</strong> {selectedAttestation.candidateName}</p>
-                        <p><strong>CIN:</strong> {selectedAttestation.cin}</p>
-                        <p><strong>Rapport:</strong> {selectedAttestation.rapportTitre}</p>
-                        <p><strong>Date d'approbation:</strong> {selectedAttestation.dateValidation ? new Date(selectedAttestation.dateValidation).toLocaleDateString('fr-FR') : 'N/A'}</p>
-                        <p><strong>Période de stage:</strong> {selectedAttestation.dateDebut ? new Date(selectedAttestation.dateDebut).toLocaleDateString('fr-FR') : 'N/A'} - {selectedAttestation.dateFin ? new Date(selectedAttestation.dateFin).toLocaleDateString('fr-FR') : 'N/A'}</p>
-                        <p><strong>École:</strong> {selectedAttestation.ecole || 'Non spécifié'}</p>
-                        <p><strong>Date de génération:</strong> {new Date(selectedAttestation.dateGeneration).toLocaleDateString('fr-FR')}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      onClick={() => setSelectedAttestation(null)}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      Fermer
-                    </button>
-                    <button
-                      onClick={() => {
-                        // Here you would implement PDF generation and download
-                        alert('Fonctionnalité de téléchargement PDF à implémenter');
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-white bg-coke-red rounded-lg hover:bg-red-700"
-                    >
-                      Télécharger PDF
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
     </section>
   );
-} 
+}
