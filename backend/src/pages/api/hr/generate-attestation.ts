@@ -19,6 +19,24 @@ const getLogoBase64 = () => {
   return 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
 };
 
+// Function to format stage type with proper capitalization
+const formatStageType = (stageType: string) => {
+  if (!stageType) return 'Type de stage non spécifié';
+  
+  // Convert to lowercase first, then capitalize each word
+  const words = stageType.toLowerCase().split(' ');
+  const formattedWords = words.map(word => {
+    // Handle special cases like "d'" and "de"
+    if (word === 'd' || word === 'de' || word === 'du' || word === 'des') {
+      return word;
+    }
+    // Capitalize first letter of each word
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  });
+  
+  return formattedWords.join(' ');
+};
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -522,7 +540,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
        attestationid,
        candidateName: `${candidate.prenom} ${candidate.nom}`,
        cin: candidate.cin,
-       rapportTitre: candidate.typestage || 'Type de stage non spécifié',
+       rapportTitre: formatStageType(candidate.typestage),
        dateValidation: candidate.datevalidation,
        dateDebut: candidate.datedebut,
        dateFin: candidate.datefin,
