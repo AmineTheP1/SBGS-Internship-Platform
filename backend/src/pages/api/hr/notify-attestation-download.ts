@@ -60,6 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const emailSubject = "Votre attestation de stage est prête - SBGS";
       const emailBodyHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2 style="color: #dc2626;">Attestation de Stage - SBGS</h2>
           <p>Bonjour ${candidate.prenom} ${candidate.nom},</p>
           <p>Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.</p>
           <p><strong>Détails de votre stage :</strong></p>
@@ -78,6 +79,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `;
       
       const emailBodyText = `
+Attestation de Stage - SBGS
+
 Bonjour ${candidate.prenom} ${candidate.nom},
 
 Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.
@@ -102,6 +105,7 @@ SBGS - Société des Boissons Gazeuse du Souss
         text: emailBodyText,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; text-align: left;">
+            <h2 style="color: #dc2626; font-size: 24px; margin: 0 0 20px 0;">Attestation de Stage - SBGS</h2>
             <p>Bonjour ${candidate.prenom} ${candidate.nom},</p>
             <p>Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.</p>
             <p><strong>Détails de votre stage :</strong></p>
