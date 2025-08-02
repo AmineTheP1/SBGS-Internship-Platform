@@ -43,9 +43,10 @@ export default function Dashboard() {
   const totalSubmissions = applications.length;
   const pendingReview = applications.filter(app => app.status === "En attente" || app.status === "Under Review").length;
   const approved = applications.filter(app => app.status === "Accepté").length;
+  const rejected = applications.filter(app => app.status === "Rejeté").length;
 
   // Debug: Log statistics
-  console.log("Statistics:", { totalSubmissions, pendingReview, approved });
+  console.log("Statistics:", { totalSubmissions, pendingReview, approved, rejected });
 
   // Helper function to safely parse JSON strings
   const parseJsonString = (value) => {
@@ -242,8 +243,15 @@ export default function Dashboard() {
       app.fieldOfStudy.toLowerCase().includes(search.toLowerCase()) ||
       app.email.toLowerCase().includes(search.toLowerCase());
     
-    // Status filter
-    const matchesStatus = filterStatus === "all" || app.status === filterStatus;
+    // View-based filtering
+    let matchesView = true;
+    if (currentView === "pending") {
+      matchesView = app.status === "En attente" || app.status === "Under Review";
+    } else if (currentView === "approved") {
+      matchesView = app.status === "Accepté";
+    } else if (currentView === "rejected") {
+      matchesView = app.status === "Rejeté";
+    }
     
     // Date range filter
     let matchesDate = true;
@@ -269,7 +277,7 @@ export default function Dashboard() {
     // Year filter (extract year from currentYear field)
     const matchesYear = filterYear === "all" || app.currentYear === filterYear;
     
-    return matchesSearch && matchesStatus && matchesDate && matchesUniversity && matchesInternshipType && matchesYear;
+    return matchesSearch && matchesView && matchesDate && matchesUniversity && matchesInternshipType && matchesYear;
   });
 
   // Debug: Log applications state and filtered results
@@ -469,14 +477,13 @@ export default function Dashboard() {
 
   return (
     <section className="min-h-screen bg-gray-50 py-12">
-      <div className="flex flex-row gap-4 mb-8 justify-center ">
+      <div className="flex flex-row gap-4 mb-8 justify-center flex-wrap">
         {/* Total Submissions */}
         <div 
           className={`min-w-[200px] bg-white border ${currentView === "main" ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
           onClick={() => {
             setCurrentView("main");
             setShowApprovedCandidates(false);
-            setFilterStatus("all");
           }}
         >
           <div className="bg-blue-100 p-3 rounded-full flex items-center justify-center">
@@ -493,7 +500,6 @@ export default function Dashboard() {
           onClick={() => {
             setCurrentView("pending");
             setShowApprovedCandidates(false);
-            setFilterStatus("En attente");
           }}
         >
           <div className="bg-yellow-100 p-3 rounded-full flex items-center justify-center">
@@ -510,7 +516,6 @@ export default function Dashboard() {
           onClick={() => {
             setCurrentView("approved");
             setShowApprovedCandidates(false);
-            setFilterStatus("Accepté");
           }}
         >
           <div className="bg-green-100 p-3 rounded-full flex items-center justify-center">
@@ -521,13 +526,30 @@ export default function Dashboard() {
             <div className="text-xl font-bold">{approved}</div>
           </div>
         </div>
+        {/* Rejected */}
+        <div 
+          className={`min-w-[200px] bg-white border ${currentView === "rejected" ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+          onClick={() => {
+            setCurrentView("rejected");
+            setShowApprovedCandidates(false);
+          }}
+        >
+          <div className="bg-red-100 p-3 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <div className="text-gray-500 text-xs font-medium">Refusé</div>
+            <div className="text-xl font-bold">{rejected}</div>
+          </div>
+        </div>
         {/* Approved Reports */}
         <div 
           className={`min-w-[200px] bg-white border ${currentView === "reports" ? "border-purple-500 ring-2 ring-purple-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
           onClick={() => {
             setCurrentView("reports");
             setShowApprovedCandidates(true);
-            setFilterStatus("all");
           }}
         >
           <div className="bg-purple-100 p-3 rounded-full flex items-center justify-center">
@@ -539,410 +561,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="coke-gradient px-6 py-4">
-            <h2 className="text-2xl font-bold text-white">Tableau de bord RH</h2>
-            <p className="text-coke-light">Gérez les candidatures de stage</p>
-          </div>
-          
-          <div className="p-6">
-            {/* Search and Filter */}
-            <div className="mb-6">
-              {/* Basic Search and Status Filter */}
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
-                <input
-                  type="text"
-                  placeholder="Rechercher par nom, école ou filière..."
-                  className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red text-lg"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red"
-                >
-                  <option value="all">Tous les statuts</option>
-                  <option value="En attente">En attente</option>
-                  <option value="Accepté">Accepté</option>
-                  <option value="Rejeté">Rejeté</option>
-                </select>
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
-                  title={showFilters ? "Masquer les filtres avancés" : "Afficher les filtres avancés"}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  <span className="text-sm font-medium">{showFilters ? "Masquer" : "Filtres"}</span>
-                </button>
-              </div>
-
-              {/* Advanced Filters */}
-              {showFilters && (
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h3 className="font-semibold text-gray-700 mb-3">Filtres Avancés</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Date Range */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date de soumission</label>
-                      <div className="flex gap-2">
-                        <div className="flex-1">
-                          <label className="block text-xs text-gray-500 mb-1">De</label>
-                          <input
-                            type="date"
-                            value={dateFrom}
-                            onChange={(e) => setDateFrom(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
-                            placeholder="Date de début"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <label className="block text-xs text-gray-500 mb-1">À</label>
-                          <input
-                            type="date"
-                            value={dateTo}
-                            onChange={(e) => setDateTo(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
-                            placeholder="Date de fin"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* University Filter */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Établissement</label>
-                      <select
-                        value={filterUniversity}
-                        onChange={(e) => setFilterUniversity(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
-                      >
-                        <option value="all">Tous les établissements</option>
-                        {universities.map((university) => (
-                          <option key={university.ecoleid} value={university.nom}>
-                            {university.nom} - {university.ville}
-                          </option>
-                        ))}
-                        <option value="Non spécifié">Non spécifié</option>
-                      </select>
-                    </div>
-
-                    {/* Internship Type Filter */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Type de Stage</label>
-                      <select
-                        value={filterInternshipType}
-                        onChange={(e) => setFilterInternshipType(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
-                      >
-                        <option value="all">Tous les types</option>
-                        <option value="stage d'observation">Stage d'Observation</option>
-                        <option value="stage projet de fin d'année">Stage Projet de Fin d'Année</option>
-                        <option value="stage projet de fin d'études">Stage Projet de Fin d'Études</option>
-                        <option value="stage pré-embauche">Stage Pré-embauche</option>
-                      </select>
-                    </div>
-
-                    {/* Year Filter */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Année d'Étude</label>
-                      <select
-                        value={filterYear}
-                        onChange={(e) => setFilterYear(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
-                      >
-                        <option value="all">Toutes les années</option>
-                        <option value="1st Year">1ère Année</option>
-                        <option value="2nd Year">2ème Année</option>
-                        <option value="3rd Year">3ème Année</option>
-                        <option value="4th Year">4ème Année</option>
-                        <option value="5th Year">5ème Année</option>
-                        <option value="Graduate">Diplômé</option>
-                      </select>
-                    </div>
-
-                    {/* Clear Filters Button */}
-                    <div className="flex items-end">
-                      <button
-                        onClick={() => {
-                          setDateFrom("");
-                          setDateTo("");
-                          setFilterUniversity("all");
-                          setFilterInternshipType("all");
-                          setFilterYear("all");
-                          setSearch("");
-                          setFilterStatus("all");
-                        }}
-                        className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors text-sm"
-                      >
-                        Effacer Tous les Filtres
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Applications Table */}
-            <div className="overflow-x-auto">
-              {/* Page Info */}
-              <div className="mb-4 text-sm text-gray-600">
-                Affichage de {indexOfFirstApplication + 1} à {Math.min(indexOfLastApplication, filteredApplications.length)} sur {filteredApplications.length} candidatures
-              </div>
-              
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="bg-gray-100 text-gray-700">
-                    <th className="p-3">Candidat</th>
-                    <th className="p-3">Institution</th>
-                    <th className="p-3">Type de stage</th>
-                    <th className="p-3">Date de soumission</th>
-                    <th className="p-3">Durée</th>
-                    <th className="p-3">Statut</th>
-                    <th className="p-3">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentApplications.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center p-6 text-gray-400">
-                        Aucune candidature trouvée.
-                      </td>
-                    </tr>
-                  ) : (
-                    currentApplications.map((app, idx) => (
-                      <tr key={app.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                        <td className="p-3">
-                          <div className="flex items-center gap-3">
-                            {app.imageurl ? (
-                              <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover border" />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?
-                              </div>
-                            )}
-                            <div>
-                              <div className="font-semibold">{app.fullName}</div>
-                              <div className="text-sm text-gray-600">{app.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3">{app.institution}</td>
-                        <td className="p-3">{app.typestage}</td>
-                        <td className="p-3">{app.date}</td>
-                        <td className="p-3">{app.periode}</td>
-                        <td className="p-3">
-                          <span
-                            className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-center align-middle ${getStatusColor(app.status)}`}
-                            style={{
-                              minWidth: "90px",
-                              maxWidth: "120px",
-                              whiteSpace: "normal",
-                              wordBreak: "break-word",
-                              lineHeight: "1.1",
-                              display: "inline-block"
-                            }}
-                          >
-                            {app.status}
-                          </span>
-                        </td>
-                        <td className="p-3">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => navigate(`/candidature/${app.id}`)}
-                              className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                            >
-                              Voir Détails
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center mt-6">
-                <nav className="flex items-center space-x-2">
-                  <button
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                  >
-                    Précédent
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                      key={i + 1}
-                      onClick={() => paginate(i + 1)}
-                      className={`px-3 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                        currentPage === i + 1
-                          ? "bg-coke-red text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                  >
-                    Suivant
-                  </button>
-                </nav>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Application Details Modal */}
-        {selectedApplication && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-              <button 
-                onClick={() => setSelectedApplication(null)}
-                className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
-              >
-                &times;
-              </button>
-              <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
-                Détails de la candidature
-              </h3>
-              <div className="space-y-3">
-                {selectedApplication.imageurl && (
-                  <div className="flex justify-center mb-2">
-                    <img src={`${API_BASE_URL}${selectedApplication.imageurl}`} alt="Photo" className="h-24 w-24 rounded-full object-cover border" />
-                  </div>
-                )}
-                <div><b>Prénom:</b> {parseJsonString(selectedApplication.prenom) || "Non disponible"}</div>
-                <div><b>Nom:</b> {parseJsonString(selectedApplication.nom) || "Non disponible"}</div>
-                <div><b>Nom complet:</b> {selectedApplication.fullName}</div>
-                <div><b>Institution:</b> {selectedApplication.institution}</div>
-                <div><b>Domaine:</b> {selectedApplication.fieldOfStudy}</div>
-                <div><b>Email:</b> {selectedApplication.email}</div>
-                <div><b>Téléphone:</b> {selectedApplication.phone}</div>
-                <div><b>Type de stage:</b> {selectedApplication.typestage}</div>
-                <div><b>Domaine d'Étude/Spécialisation:</b> {selectedApplication.domaine || "Non spécifié"}</div>
-                <div><b>Domaines d'intérêt:</b> {(() => {
-                  try {
-                    console.log("Modal areas of interest:", selectedApplication.areasOfInterest);
-                    if (selectedApplication.areasOfInterest && selectedApplication.areasOfInterest.length > 0) {
-                      const result = selectedApplication.areasOfInterest.join(", ");
-                      console.log("Modal display result:", result);
-                      return result;
-                    }
-                    return "Aucun domaine sélectionné";
-                  } catch (error) {
-                    console.error("Error displaying areas of interest:", error);
-                    return "Erreur d'affichage";
-                  }
-                })()}</div>
-                <div><b>Demande de stage:</b></div>
-                <div className="bg-gray-50 p-3 rounded-lg text-sm max-h-32 overflow-y-auto">
-                  {selectedApplication.demandeStage || "Aucune demande fournie"}
-                </div>
-                <div><b>Date de soumission:</b> {selectedApplication.date}</div>
-                <div><b>Durée du stage:</b> {selectedApplication.periode}</div>
-                <div><b>Statut:</b> 
-                  <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedApplication.status)}`}>
-                    {selectedApplication.status}
-                  </span>
-                </div>
-                {selectedApplication.cvUrl && (
-                  <div>
-                    <b>CV:</b> 
-                    <button 
-                      onClick={() => handleViewCV(selectedApplication.cvUrl)}
-                      className="ml-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 font-semibold text-sm"
-                    >
-                      Télécharger CV
-                    </button>
-                  </div>
-                )}
-
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Assignment Modal */}
-        {showAssignmentModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-              <button 
-                onClick={() => {
-                  setShowAssignmentModal(false);
-                  setSelectedSupervisor("");
-                  setAssignmentStatus("");
-                }}
-                className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
-              >
-                &times;
-              </button>
-              <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
-                Assigner à un Responsable de Stage
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Responsable de Stage
-                  </label>
-                  <select
-                    value={selectedSupervisor}
-                    onChange={(e) => setSelectedSupervisor(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent"
-                  >
-                    <option value="">Sélectionner un responsable</option>
-                    {supervisors.map((supervisor) => (
-                      <option key={supervisor.resid} value={supervisor.resid}>
-                        {supervisor.prenom} {supervisor.nom} - {supervisor.service}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                {assignmentStatus && (
-                  <div className={`p-3 rounded-lg text-sm font-medium ${
-                    assignmentStatus.includes("succès") 
-                      ? "bg-green-100 text-green-700" 
-                      : "bg-red-100 text-red-700"
-                  }`}>
-                    {assignmentStatus}
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    onClick={() => {
-                      setShowAssignmentModal(false);
-                      setSelectedSupervisor("");
-                      setAssignmentStatus("");
-                    }}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={handleAssignToSupervisor}
-                    className="flex-1 px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
-                  >
-                    Assigner
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Approved Candidates View */}
-        {currentView === "reports" && (
+        {currentView === "reports" ? (
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="coke-gradient px-6 py-4">
@@ -1039,8 +660,411 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="coke-gradient px-6 py-4">
+              <h2 className="text-2xl font-bold text-white">Tableau de bord RH</h2>
+              <p className="text-coke-light">Gérez les candidatures de stage</p>
+            </div>
+            
+            <div className="p-6">
+              {/* Search and Filter */}
+              <div className="mb-6">
+                {/* Basic Search and Status Filter */}
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Rechercher par nom, école ou filière..."
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red text-lg"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red"
+                  >
+                    <option value="all">Tous les statuts</option>
+                    <option value="En attente">En attente</option>
+                    <option value="Accepté">Accepté</option>
+                    <option value="Rejeté">Rejeté</option>
+                  </select>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                    title={showFilters ? "Masquer les filtres avancés" : "Afficher les filtres avancés"}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <span className="text-sm font-medium">{showFilters ? "Masquer" : "Filtres"}</span>
+                  </button>
+                </div>
+
+                {/* Advanced Filters */}
+                {showFilters && (
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <h3 className="font-semibold text-gray-700 mb-3">Filtres Avancés</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {/* Date Range */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Date de soumission</label>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="block text-xs text-gray-500 mb-1">De</label>
+                            <input
+                              type="date"
+                              value={dateFrom}
+                              onChange={(e) => setDateFrom(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
+                              placeholder="Date de début"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="block text-xs text-gray-500 mb-1">À</label>
+                            <input
+                              type="date"
+                              value={dateTo}
+                              onChange={(e) => setDateTo(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
+                              placeholder="Date de fin"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* University Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Établissement</label>
+                        <select
+                          value={filterUniversity}
+                          onChange={(e) => setFilterUniversity(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
+                        >
+                          <option value="all">Tous les établissements</option>
+                          {universities.map((university) => (
+                            <option key={university.ecoleid} value={university.nom}>
+                              {university.nom} - {university.ville}
+                            </option>
+                          ))}
+                          <option value="Non spécifié">Non spécifié</option>
+                        </select>
+                      </div>
+
+                      {/* Internship Type Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Type de Stage</label>
+                        <select
+                          value={filterInternshipType}
+                          onChange={(e) => setFilterInternshipType(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
+                        >
+                          <option value="all">Tous les types</option>
+                          <option value="stage d'observation">Stage d'Observation</option>
+                          <option value="stage projet de fin d'année">Stage Projet de Fin d'Année</option>
+                          <option value="stage projet de fin d'études">Stage Projet de Fin d'Études</option>
+                          <option value="stage pré-embauche">Stage Pré-embauche</option>
+                        </select>
+                      </div>
+
+                      {/* Year Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Année d'Étude</label>
+                        <select
+                          value={filterYear}
+                          onChange={(e) => setFilterYear(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coke-red text-sm"
+                        >
+                          <option value="all">Toutes les années</option>
+                          <option value="1st Year">1ère Année</option>
+                          <option value="2nd Year">2ème Année</option>
+                          <option value="3rd Year">3ème Année</option>
+                          <option value="4th Year">4ème Année</option>
+                          <option value="5th Year">5ème Année</option>
+                          <option value="Graduate">Diplômé</option>
+                        </select>
+                      </div>
+
+                      {/* Clear Filters Button */}
+                      <div className="flex items-end">
+                        <button
+                          onClick={() => {
+                            setDateFrom("");
+                            setDateTo("");
+                            setFilterUniversity("all");
+                            setFilterInternshipType("all");
+                            setFilterYear("all");
+                            setSearch("");
+                            setFilterStatus("all");
+                          }}
+                          className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors text-sm"
+                        >
+                          Effacer Tous les Filtres
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Applications Table */}
+              <div className="overflow-x-auto">
+                {/* Page Info */}
+                <div className="mb-4 text-sm text-gray-600">
+                  Affichage de {indexOfFirstApplication + 1} à {Math.min(indexOfLastApplication, filteredApplications.length)} sur {filteredApplications.length} candidatures
+                </div>
+                
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700">
+                      <th className="p-3">Candidat</th>
+                      <th className="p-3">Institution</th>
+                      <th className="p-3">Type de stage</th>
+                      <th className="p-3">Date de soumission</th>
+                      <th className="p-3">Durée</th>
+                      <th className="p-3">Statut</th>
+                      <th className="p-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentApplications.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center p-6 text-gray-400">
+                          Aucune candidature trouvée.
+                        </td>
+                      </tr>
+                    ) : (
+                      currentApplications.map((app, idx) => (
+                        <tr key={app.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                          <td className="p-3">
+                            <div className="flex items-center gap-3">
+                              {app.imageurl ? (
+                                <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover border" />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?
+                                </div>
+                              )}
+                              <div>
+                                <div className="font-semibold">{app.fullName}</div>
+                                <div className="text-sm text-gray-600">{app.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3">{app.institution}</td>
+                          <td className="p-3">{app.typestage}</td>
+                          <td className="p-3">{app.date}</td>
+                          <td className="p-3">{app.periode}</td>
+                          <td className="p-3">
+                            <span
+                              className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-center align-middle ${getStatusColor(app.status)}`}
+                              style={{
+                                minWidth: "90px",
+                                maxWidth: "120px",
+                                whiteSpace: "normal",
+                                wordBreak: "break-word",
+                                lineHeight: "1.1",
+                                display: "inline-block"
+                              }}
+                            >
+                              {app.status}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => navigate(`/candidature/${app.id}`)}
+                                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                              >
+                                Voir Détails
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-6">
+                  <nav className="flex items-center space-x-2">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                    >
+                      Précédent
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i + 1}
+                        onClick={() => paginate(i + 1)}
+                        className={`px-3 py-2 rounded-lg font-semibold text-sm transition-colors ${
+                          currentPage === i + 1
+                            ? "bg-coke-red text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                    >
+                      Suivant
+                    </button>
+                  </nav>
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
+
+      {/* Application Details Modal */}
+      {selectedApplication && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button 
+              onClick={() => setSelectedApplication(null)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
+              Détails de la candidature
+            </h3>
+            <div className="space-y-3">
+              {selectedApplication.imageurl && (
+                <div className="flex justify-center mb-2">
+                  <img src={`${API_BASE_URL}${selectedApplication.imageurl}`} alt="Photo" className="h-24 w-24 rounded-full object-cover border" />
+                </div>
+              )}
+              <div><b>Prénom:</b> {parseJsonString(selectedApplication.prenom) || "Non disponible"}</div>
+              <div><b>Nom:</b> {parseJsonString(selectedApplication.nom) || "Non disponible"}</div>
+              <div><b>Nom complet:</b> {selectedApplication.fullName}</div>
+              <div><b>Institution:</b> {selectedApplication.institution}</div>
+              <div><b>Domaine:</b> {selectedApplication.fieldOfStudy}</div>
+              <div><b>Email:</b> {selectedApplication.email}</div>
+              <div><b>Téléphone:</b> {selectedApplication.phone}</div>
+              <div><b>Type de stage:</b> {selectedApplication.typestage}</div>
+              <div><b>Domaine d'Étude/Spécialisation:</b> {selectedApplication.domaine || "Non spécifié"}</div>
+              <div><b>Domaines d'intérêt:</b> {(() => {
+                try {
+                  console.log("Modal areas of interest:", selectedApplication.areasOfInterest);
+                  if (selectedApplication.areasOfInterest && selectedApplication.areasOfInterest.length > 0) {
+                    const result = selectedApplication.areasOfInterest.join(", ");
+                    console.log("Modal display result:", result);
+                    return result;
+                  }
+                  return "Aucun domaine sélectionné";
+                } catch (error) {
+                  console.error("Error displaying areas of interest:", error);
+                  return "Erreur d'affichage";
+                }
+              })()}</div>
+              <div><b>Demande de stage:</b></div>
+              <div className="bg-gray-50 p-3 rounded-lg text-sm max-h-32 overflow-y-auto">
+                {selectedApplication.demandeStage || "Aucune demande fournie"}
+              </div>
+              <div><b>Date de soumission:</b> {selectedApplication.date}</div>
+              <div><b>Durée du stage:</b> {selectedApplication.periode}</div>
+              <div><b>Statut:</b> 
+                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedApplication.status)}`}>
+                  {selectedApplication.status}
+                </span>
+              </div>
+              {selectedApplication.cvUrl && (
+                <div>
+                  <b>CV:</b> 
+                  <button 
+                    onClick={() => handleViewCV(selectedApplication.cvUrl)}
+                    className="ml-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 hover:bg-blue-200 font-semibold text-sm"
+                  >
+                    Télécharger CV
+                  </button>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Assignment Modal */}
+      {showAssignmentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button 
+              onClick={() => {
+                setShowAssignmentModal(false);
+                setSelectedSupervisor("");
+                setAssignmentStatus("");
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-coke-red text-2xl"
+            >
+              &times;
+            </button>
+            <h3 className="font-bold text-2xl mb-4" style={{ color: '#F40009' }}>
+              Assigner à un Responsable de Stage
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Responsable de Stage
+                </label>
+                <select
+                  value={selectedSupervisor}
+                  onChange={(e) => setSelectedSupervisor(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent"
+                >
+                  <option value="">Sélectionner un responsable</option>
+                  {supervisors.map((supervisor) => (
+                    <option key={supervisor.resid} value={supervisor.resid}>
+                      {supervisor.prenom} {supervisor.nom} - {supervisor.service}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {assignmentStatus && (
+                <div className={`p-3 rounded-lg text-sm font-medium ${
+                  assignmentStatus.includes("succès") 
+                    ? "bg-green-100 text-green-700" 
+                    : "bg-red-100 text-red-700"
+                  }`}>
+                  {assignmentStatus}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowAssignmentModal(false);
+                    setSelectedSupervisor("");
+                    setAssignmentStatus("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleAssignToSupervisor}
+                  className="flex-1 px-4 py-2 bg-coke-red text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                >
+                  Assigner
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      
     </section>
   );
 }
