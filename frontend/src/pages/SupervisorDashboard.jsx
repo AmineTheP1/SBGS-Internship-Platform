@@ -391,8 +391,7 @@ export default function SupervisorDashboard() {
 
                      <div 
                        className={`bg-white border ${currentView === 'present' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-                       onClick={() => setCurrentView('present')}
-                     >
+                       onClick={() => setCurrentView('present')}>
              <div className="flex items-center">
                <div className="bg-green-100 p-3 rounded-lg">
                  <FaClock className="text-2xl text-green-600" />
@@ -405,26 +404,10 @@ export default function SupervisorDashboard() {
                </div>
              </div>
            </div>
-
-          <div 
-            className={`bg-white border ${currentView === 'reports' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-            onClick={() => setCurrentView('reports')}
-          >
-            <div className="flex items-center">
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <FaFileAlt className="text-2xl text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Rapports à réviser</p>
-                <p className="text-2xl font-bold text-gray-800">{reports.filter(r => r.statut === 'En attente').length}</p>
-              </div>
-            </div>
-          </div>
-
+          
           <div 
             className={`bg-white border ${currentView === 'absences' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-            onClick={() => setCurrentView('absences')}
-          >
+            onClick={() => setCurrentView('absences')}>
             <div className="flex items-center">
               <div className="bg-purple-100 p-3 rounded-lg">
                 <FaCalendar className="text-2xl text-purple-600" />
@@ -452,6 +435,21 @@ export default function SupervisorDashboard() {
                </div>
              </div>
            </div>
+
+           <div 
+            className={`bg-white border ${currentView === 'reports' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+            onClick={() => setCurrentView('reports')}
+          >
+            <div className="flex items-center">
+              <div className="bg-yellow-100 p-3 rounded-lg">
+                <FaFileAlt className="text-2xl text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Rapports à réviser</p>
+                <p className="text-2xl font-bold text-gray-800">{reports.filter(r => r.statut === 'En attente').length}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
 
@@ -625,171 +623,7 @@ export default function SupervisorDashboard() {
           </>
         )}
 
-        {/* Interns Only View */}
-        {currentView === 'interns' && (
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Mes Stagiaires</h2>
-              <div className="text-sm text-gray-600">
-                {interns.length} stagiaire(s) assigné(s)
-              </div>
-            </div>
 
-            {/* Theme Status Message */}
-            {themeStatus && (
-              <div className={`p-3 rounded-lg text-sm font-medium mb-4 ${
-                themeStatus.includes("succès") 
-                  ? "bg-green-100 text-green-700" 
-                  : "bg-red-100 text-red-700"
-              }`}>
-                {themeStatus}
-              </div>
-            )}
-
-            {interns.length === 0 ? (
-              <div className="text-center py-12">
-                <FaUsers className="text-4xl text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500">Aucun stagiaire assigné pour le moment</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {currentCandidates.map((intern) => (
-                  <div key={intern.cdtid} className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-                    <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
-                        {intern.imageurl ? (
-                          <img
-                            src={`${API_BASE_URL}${intern.imageurl}`}
-                            alt={`${intern.prenom} ${intern.nom}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        <div className={`w-full h-full flex items-center justify-center ${intern.imageurl ? 'hidden' : ''}`}>
-                          <span className="text-white font-semibold text-lg">
-                            {intern.prenom ? intern.prenom.charAt(0).toUpperCase() : ''}{intern.nom ? intern.nom.charAt(0).toUpperCase() : ''}
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {intern.prenom} {intern.nom}
-                        </h3>
-                        <p className="text-sm text-gray-600">ID: {intern.cdtid}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 mb-4">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Statut:</span>
-                        <span className={`font-medium ${
-                          intern.statut_candidature === 'Accepté' ? 'text-green-600' : 
-                          intern.statut_candidature === 'En attente' ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {intern.statut_candidature}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Type:</span>
-                        <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Durée:</span>
-                        <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Thème:</span>
-                        <span className="font-medium text-blue-600 max-w-[80%] text-right">{intern.theme_stage || 'Non défini'}</span>
-                      </div>
-                    </div>
-
-                    {/* Theme Selection */}
-                    {editingTheme === intern.cdtid ? (
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Thème de stage
-                        </label>
-                        <div className="space-y-2">
-                          <textarea
-                            value={newTheme}
-                            onChange={(e) => setNewTheme(e.target.value)}
-                            placeholder="Saisissez le thème de stage..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent text-sm resize-none"
-                            rows="3"
-                          />
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleSaveTheme(intern.cdtid)}
-                              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
-                            >
-                              Sauvegarder
-                            </button>
-                            <button
-                              onClick={handleCancelEditTheme}
-                              className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
-                            >
-                              Annuler
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Thème de stage
-                        </label>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600 flex-1 mr-2">
-                            {intern.theme_stage || 'Non défini'}
-                          </span>
-                          <button
-                            onClick={() => handleStartEditTheme(intern.cdtid, intern.theme_stage)}
-                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-                          >
-                            Modifier
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      onClick={() => handleViewInternDetails(intern.cdtid)}
-                      className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                    >
-                      Voir détails
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {/* Candidates Pagination */}
-            {totalCandidatePages > 1 && (
-              <div className="flex justify-center items-center space-x-2 mt-6">
-                <button
-                  onClick={() => setCurrentCandidatePage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentCandidatePage === 1}
-                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Précédent
-                </button>
-                <span className="text-sm text-gray-600">
-                  Page {currentCandidatePage} sur {totalCandidatePages}
-                </span>
-                <button
-                  onClick={() => setCurrentCandidatePage(prev => Math.min(prev + 1, totalCandidatePages))}
-                  disabled={currentCandidatePage === totalCandidatePages}
-                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Suivant
-                </button>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Present Interns View */}
         {currentView === 'present' && (
