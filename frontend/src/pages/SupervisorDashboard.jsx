@@ -373,7 +373,7 @@ export default function SupervisorDashboard() {
         {/* Stats Cards */}
         <div className="grid md:grid-cols-5 gap-6 mb-8">
           <div 
-            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+            className={`bg-white border ${currentView === 'interns' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
             onClick={() => setCurrentView('interns')}
           >
             <div className="flex items-center">
@@ -388,7 +388,7 @@ export default function SupervisorDashboard() {
           </div>
 
                      <div 
-                       className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                       className={`bg-white border ${currentView === 'present' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
                        onClick={() => setCurrentView('present')}
                      >
              <div className="flex items-center">
@@ -405,7 +405,7 @@ export default function SupervisorDashboard() {
            </div>
 
           <div 
-            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+            className={`bg-white border ${currentView === 'reports' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
             onClick={() => setCurrentView('reports')}
           >
             <div className="flex items-center">
@@ -420,7 +420,7 @@ export default function SupervisorDashboard() {
           </div>
 
           <div 
-            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+            className={`bg-white border ${currentView === 'absences' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
             onClick={() => setCurrentView('absences')}
           >
             <div className="flex items-center">
@@ -435,7 +435,7 @@ export default function SupervisorDashboard() {
           </div>
 
                      <div 
-                       className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                       className={`bg-white border ${currentView === 'confirmations' ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
                        onClick={() => setCurrentView('confirmations')}
                      >
              <div className="flex items-center">
@@ -452,18 +452,7 @@ export default function SupervisorDashboard() {
            </div>
         </div>
 
-        {/* Back to Main Button - Show when not on main view */}
-        {currentView !== 'main' && (
-          <div className="mb-6">
-            <button
-              onClick={() => setCurrentView('main')}
-              className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              <FaTimes className="mr-2" />
-              Retour au tableau de bord
-            </button>
-          </div>
-        )}
+
 
         {/* Main View - Show all sections */}
         {currentView === 'main' && (
