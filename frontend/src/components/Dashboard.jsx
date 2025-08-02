@@ -670,36 +670,26 @@ export default function Dashboard() {
             <div className="p-6">
               {/* Search and Filter */}
               <div className="mb-6">
-                {/* Basic Search and Status Filter */}
-                <div className="flex flex-col md:flex-row gap-4 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Rechercher par nom, école ou filière..."
-                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red text-lg"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red"
-                  >
-                    <option value="all">Tous les statuts</option>
-                    <option value="En attente">En attente</option>
-                    <option value="Accepté">Accepté</option>
-                    <option value="Rejeté">Rejeté</option>
-                  </select>
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
-                    title={showFilters ? "Masquer les filtres avancés" : "Afficher les filtres avancés"}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    <span className="text-sm font-medium">{showFilters ? "Masquer" : "Filtres"}</span>
-                  </button>
-                </div>
+                                 {/* Basic Search */}
+                 <div className="flex flex-col md:flex-row gap-4 mb-4">
+                   <input
+                     type="text"
+                     placeholder="Rechercher par nom, école ou filière..."
+                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red text-lg"
+                     value={search}
+                     onChange={(e) => setSearch(e.target.value)}
+                   />
+                   <button
+                     onClick={() => setShowFilters(!showFilters)}
+                     className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                     title={showFilters ? "Masquer les filtres avancés" : "Afficher les filtres avancés"}
+                   >
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                     </svg>
+                     <span className="text-sm font-medium">{showFilters ? "Masquer" : "Filtres"}</span>
+                   </button>
+                 </div>
 
                 {/* Advanced Filters */}
                 {showFilters && (
