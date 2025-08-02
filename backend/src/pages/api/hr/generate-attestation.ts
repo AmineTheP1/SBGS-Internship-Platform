@@ -78,6 +78,8 @@ const generateAttestationPDF = (attestationData: any) => {
            overflow: hidden;
            position: relative;
            min-height: 100vh;
+           display: flex;
+           flex-direction: column;
          }
         
                  .header {
@@ -167,6 +169,9 @@ const generateAttestationPDF = (attestationData: any) => {
                  .content {
            padding: 25px 20px;
            position: relative;
+           flex: 1;
+           display: flex;
+           flex-direction: column;
          }
         
         .content::before {
@@ -277,13 +282,69 @@ const generateAttestationPDF = (attestationData: any) => {
            padding: 15px;
            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
            border-radius: 10px;
+           margin-top: auto;
          }
         
-        .date-text {
-          font-size: 16px;
-          color: #374151;
-          font-weight: 500;
-        }
+                 .date-text {
+           font-size: 16px;
+           color: #374151;
+           font-weight: 500;
+         }
+         
+         .additional-info {
+           background: white;
+           border: 2px solid #e5e7eb;
+           border-radius: 12px;
+           padding: 15px;
+           margin: 15px 0;
+         }
+         
+         .additional-title {
+           font-family: 'Playfair Display', serif;
+           font-size: 16px;
+           font-weight: 700;
+           color: #dc2626;
+           margin-bottom: 12px;
+           text-align: center;
+         }
+         
+         .terms-section {
+           background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+           border-radius: 12px;
+           padding: 15px;
+           margin: 15px 0;
+           border-left: 4px solid #dc2626;
+         }
+         
+         .terms-title {
+           font-family: 'Playfair Display', serif;
+           font-size: 16px;
+           font-weight: 700;
+           color: #374151;
+           margin-bottom: 10px;
+           text-align: center;
+         }
+         
+         .terms-list {
+           list-style: none;
+           padding: 0;
+         }
+         
+         .terms-list li {
+           margin-bottom: 8px;
+           padding-left: 20px;
+           position: relative;
+           font-size: 13px;
+           color: #374151;
+         }
+         
+         .terms-list li::before {
+           content: '•';
+           color: #dc2626;
+           font-weight: bold;
+           position: absolute;
+           left: 0;
+         }
         
         .stamp {
           position: absolute;
@@ -466,6 +527,34 @@ const generateAttestationPDF = (attestationData: any) => {
              color: #000 !important;
              font-size: 11px;
            }
+           
+           .additional-info {
+             padding: 10px;
+             margin: 10px 0;
+             border: 2px solid #333 !important;
+           }
+           
+           .additional-title {
+             color: #dc2626 !important;
+             font-size: 14px;
+           }
+           
+           .terms-section {
+             padding: 10px;
+             margin: 10px 0;
+             background: #f8f9fa !important;
+             border-left: 4px solid #dc2626 !important;
+           }
+           
+           .terms-title {
+             color: #333 !important;
+             font-size: 14px;
+           }
+           
+           .terms-list li {
+             font-size: 10px;
+             margin-bottom: 6px;
+           }
            .stamp {
              width: 80px;
              height: 80px;
@@ -574,24 +663,51 @@ const generateAttestationPDF = (attestationData: any) => {
             </div>
           </div>
           
-          <div class="conclusion">
-            Cette attestation officielle est délivrée pour faire valoir ce que de droit et atteste de la réalisation complète du stage professionnel au sein de notre entreprise.
-          </div>
-          
-          <div class="signature-section">
-            <div class="signature-box">
-              <div class="signature-line"></div>
-              <div class="signature-text">Signature du Responsable RH</div>
-            </div>
-            <div class="signature-box">
-              <div class="signature-line"></div>
-              <div class="signature-text">Cachet de l'entreprise</div>
-            </div>
-          </div>
-          
-          <div class="date-section">
-            <div class="date-text">Fait à Agadir, le ${new Date().toLocaleDateString('fr-FR')}</div>
-          </div>
+                     <div class="conclusion">
+             Cette attestation officielle est délivrée pour faire valoir ce que de droit et atteste de la réalisation complète du stage professionnel au sein de notre entreprise.
+           </div>
+           
+           <div class="additional-info">
+             <div class="additional-title">Informations Complémentaires</div>
+             <div class="info-row">
+               <div class="info-label">Service d'affectation</div>
+               <div class="info-value">Service des Ressources Humaines</div>
+             </div>
+             <div class="info-row">
+               <div class="info-label">Superviseur</div>
+               <div class="info-value">Responsable RH - SBGS</div>
+             </div>
+             <div class="info-row">
+               <div class="info-label">Statut du stage</div>
+               <div class="info-value">Terminé avec succès</div>
+             </div>
+           </div>
+           
+           <div class="terms-section">
+             <div class="terms-title">Conditions et Validité</div>
+             <ul class="terms-list">
+               <li>Cette attestation est valable uniquement pour le stage mentionné ci-dessus</li>
+               <li>Elle ne peut être utilisée à des fins autres que celles déclarées</li>
+               <li>La durée et les conditions du stage sont conformes aux exigences académiques</li>
+               <li>L'évaluation du stagiaire a été effectuée selon les critères établis</li>
+               <li>Cette attestation est délivrée en un seul exemplaire original</li>
+             </ul>
+           </div>
+           
+           <div class="signature-section">
+             <div class="signature-box">
+               <div class="signature-line"></div>
+               <div class="signature-text">Signature du Responsable RH</div>
+             </div>
+             <div class="signature-box">
+               <div class="signature-line"></div>
+               <div class="signature-text">Cachet de l'entreprise</div>
+             </div>
+           </div>
+           
+           <div class="date-section">
+             <div class="date-text">Fait à Agadir, le ${new Date().toLocaleDateString('fr-FR')}</div>
+           </div>
         </div>
       </div>
     </body>
