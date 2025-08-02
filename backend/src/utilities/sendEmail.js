@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendEmail({ to, subject, text, html = undefined }) {
+async function sendEmail({ to, subject, text, html }) {
   try {
     const mailOptions = {
       from: `"SBGS Plateforme" <${process.env.SMTP_USER}>`,

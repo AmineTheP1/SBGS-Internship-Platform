@@ -60,7 +60,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const emailSubject = "Votre attestation de stage est prête - SBGS";
       const emailBodyHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px;">
-          <h2 style="color: #dc2626;">Attestation de Stage - SBGS</h2>
           <p>Bonjour ${candidate.prenom} ${candidate.nom},</p>
           <p>Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.</p>
           <p><strong>Détails de votre stage :</strong></p>
@@ -79,8 +78,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `;
       
       const emailBodyText = `
-Attestation de Stage - SBGS
-
 Bonjour ${candidate.prenom} ${candidate.nom},
 
 Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.
@@ -102,7 +99,25 @@ SBGS - Société des Boissons Gazeuse du Souss
       await sendEmail({
         to: candidate.email,
         subject: emailSubject,
-        text: emailBodyText
+        text: emailBodyText,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; text-align: left;">
+            <p>Bonjour ${candidate.prenom} ${candidate.nom},</p>
+            <p>Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.</p>
+            <p><strong>Détails de votre stage :</strong></p>
+            <ul>
+              <li><strong>Type de stage :</strong> ${formatStageType(candidate.typestage)}</li>
+              <li><strong>Période :</strong> Du ${candidate.datedebut ? new Date(candidate.datedebut).toLocaleDateString('fr-FR') : 'Non spécifié'} au ${candidate.datefin ? new Date(candidate.datefin).toLocaleDateString('fr-FR') : 'Non spécifié'}</li>
+              <li><strong>Établissement :</strong> ${candidate.ecole_nom || 'Non spécifié'}</li>
+            </ul>
+            <p>Votre attestation officielle est maintenant disponible et peut être récupérée auprès du service RH.</p>
+            <p>Nous vous remercions pour votre stage au sein de notre entreprise et vous souhaitons le meilleur pour la suite de votre parcours professionnel.</p>
+            <br>
+            <p>Cordialement,</p>
+            <p><strong>L'équipe des Ressources Humaines</strong><br>
+            SBGS - Société des Boissons Gazeuse du Souss</p>
+          </div>
+        `
       }); 
       console.log(`Email notification sent to ${candidate.email}`);
     } catch (emailError) {
