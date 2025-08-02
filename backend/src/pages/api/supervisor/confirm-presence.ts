@@ -27,6 +27,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const supervisor = jwt.verify(token, process.env.JWT_SECRET!) as any;
     const { cdtid, date, confirmed } = req.body;
 
+
+
     if (!cdtid || !date || confirmed === undefined) {
       return res.status(400).json({ 
         success: false, 
@@ -50,6 +52,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       `SELECT * FROM presence WHERE cdtid = $1 AND (DATE(date) = $2 OR date::text LIKE $3)`,
       [cdtid, date, `${date}%`]
     );
+
+
 
     if (attendanceCheck.rows.length === 0) {
       return res.status(404).json({ 

@@ -29,7 +29,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
-    const result = await pool.query(
+    // Get detailed absences data
+    const absencesResult = await pool.query(
+      `SELECT 
+        a.id as absenceid,
+        a.cdtid,
+        c.nom,
+        c.prenom,
+        c.imageurl,
+        a.date_absence,
+        a.date_creation as date_declaration,
+        a.motif as raison,
+        a.justifiee as type
+       FROM absences a
+       JOIN candidat c ON a.cdtid = c.cdtid
+       JOIN assignations_stage ast ON a.cdtid = ast.cdtid
+       WHERE ast.resid = $1 
+       AND ast.statut = 'Actif'
+       AND a.date_absence >= $2 
+       AND a.date_absence <= $3
+       ORDER BY a.date_absence DESC`,
+      [supervisor.resid, firstDayOfMonth.toISOString().split('T')[0], lastDayOfMonth.toISOString().split('T')[0]]
+    );
+
+    // Get count for backward compatibility
+    const countResult = await pool.query(
       `SELECT COUNT(*) as count 
        FROM absences a
        JOIN assignations_stage ast ON a.cdtid = ast.cdtid
@@ -42,7 +66,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({ 
       success: true, 
-      count: parseInt(result.rows[0].count) || 0
+      count: parseInt(countResult.rows[0].count) || 0,
+      absences: absencesResult.rows
     });
 
   } catch (error) {

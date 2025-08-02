@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes, FaDownload } from "react-icons/fa";
-import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api.js";
 
 export default function SupervisorDashboard() {
   const [supervisor, setSupervisor] = useState(null);
@@ -13,9 +13,11 @@ export default function SupervisorDashboard() {
   const [absenceReason, setAbsenceReason] = useState("");
   const [absenceStatus, setAbsenceStatus] = useState("");
   const [monthlyAbsences, setMonthlyAbsences] = useState(0);
+  const [absencesData, setAbsencesData] = useState([]);
   const [absenceType, setAbsenceType] = useState("justified"); // "justified" or "unjustified"
   const [confirmationStatus, setConfirmationStatus] = useState("");
   const [pendingConfirmations, setPendingConfirmations] = useState(0);
+  const [confirmationsData, setConfirmationsData] = useState([]);
   const [themeStatus, setThemeStatus] = useState("");
   const [editingTheme, setEditingTheme] = useState(null);
   const [newTheme, setNewTheme] = useState("");
@@ -34,6 +36,8 @@ export default function SupervisorDashboard() {
   const [currentView, setCurrentView] = useState('main'); // 'main', 'interns', 'reports', 'absences', 'confirmations'
   const navigate = useNavigate();
   const reportsSectionRef = useRef(null);
+
+
 
   useEffect(() => {
     const checkSession = async () => {
@@ -67,9 +71,18 @@ export default function SupervisorDashboard() {
         if (absencesRes.ok) {
           const absencesData = await absencesRes.json();
           setMonthlyAbsences(absencesData.count || 0);
+          setAbsencesData(absencesData.absences || []);
         }
 
-        setPendingConfirmations(0); // We'll calculate this later when needed
+        // Fetch pending confirmations
+        const confirmationsRes = await fetch(API_ENDPOINTS.SUPERVISOR_PENDING_CONFIRMATIONS, {
+          credentials: "include"
+        });
+        if (confirmationsRes.ok) {
+          const confirmationsData = await confirmationsRes.json();
+          setPendingConfirmations(confirmationsData.count || 0);
+          setConfirmationsData(confirmationsData.confirmations || []);
+        }
 
         // Fetch intern reports
         console.log('Fetching reports for supervisor resid:', data.supervisor.resid);
@@ -430,7 +443,7 @@ export default function SupervisorDashboard() {
                <div className="ml-4">
                  <p className="text-sm font-medium text-gray-600">Confirmations en attente</p>
                  <p className="text-2xl font-bold text-gray-800">
-                   {interns.filter(intern => intern.pending_confirmations > 0).reduce((sum, intern) => sum + intern.pending_confirmations, 0)}
+                   {pendingConfirmations}
                  </p>
                </div>
              </div>
@@ -459,6 +472,8 @@ export default function SupervisorDashboard() {
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Tableau de bord Responsable de Stage</h1>
             <p className="text-gray-600 text-lg">Sélectionnez une carte ci-dessus pour afficher les données correspondantes</p>
+            
+
           </div>
         )}
 
@@ -706,11 +721,74 @@ export default function SupervisorDashboard() {
               </div>
             </div>
 
-            <div className="text-center py-12">
-              <FaCalendar className="text-4xl text-purple-300 mx-auto mb-4" />
-              <p className="text-gray-500">Vue détaillée des absences à implémenter</p>
-              <p className="text-sm text-gray-400 mt-2">Total des absences ce mois : {monthlyAbsences}</p>
-            </div>
+            {absencesData.length === 0 ? (
+              <div className="text-center py-12">
+                <FaCalendar className="text-4xl text-purple-300 mx-auto mb-4" />
+                <p className="text-gray-500">Aucune absence enregistrée ce mois</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {absencesData.map((absence) => (
+                  <div key={absence.absenceid} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
+                          {absence.imageurl ? (
+                            <img
+                              src={`${API_BASE_URL}${absence.imageurl}`}
+                              alt={`${absence.prenom} ${absence.nom}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div className={`w-full h-full flex items-center justify-center ${absence.imageurl ? 'hidden' : ''}`}>
+                            <span className="text-white font-semibold text-lg">
+                              {absence.prenom ? absence.prenom.charAt(0).toUpperCase() : ''}{absence.nom ? absence.nom.charAt(0).toUpperCase() : ''}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-800">
+                            {absence.prenom} {absence.nom}
+                          </h3>
+                          <p className="text-sm text-gray-600">ID: {absence.cdtid}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          absence.type === 'justified' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {absence.type === 'justified' ? 'Justifiée' : 'Non justifiée'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Date d'absence</p>
+                        <p className="font-medium">{new Date(absence.date_absence).toLocaleDateString('fr-FR')}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Date de déclaration</p>
+                        <p className="font-medium">{new Date(absence.date_declaration).toLocaleDateString('fr-FR')}</p>
+                      </div>
+                    </div>
+                    
+                    {absence.raison && (
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-600 mb-1">Raison</p>
+                        <p className="text-gray-800 bg-white p-3 rounded border">{absence.raison}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -720,17 +798,87 @@ export default function SupervisorDashboard() {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Confirmations en attente</h2>
               <div className="text-sm text-gray-600">
-                {interns.filter(intern => intern.pending_confirmations > 0).reduce((sum, intern) => sum + intern.pending_confirmations, 0)} confirmation(s) en attente
+                {pendingConfirmations} confirmation(s) en attente
               </div>
             </div>
 
-            <div className="text-center py-12">
-              <FaClock className="text-4xl text-orange-300 mx-auto mb-4" />
-              <p className="text-gray-500">Vue détaillée des confirmations à implémenter</p>
-              <p className="text-sm text-gray-400 mt-2">
-                Total des confirmations en attente : {interns.filter(intern => intern.pending_confirmations > 0).reduce((sum, intern) => sum + intern.pending_confirmations, 0)}
-              </p>
-            </div>
+            {confirmationsData.length === 0 ? (
+              <div className="text-center py-12">
+                <FaClock className="text-4xl text-orange-300 mx-auto mb-4" />
+                <p className="text-gray-500">Aucune confirmation en attente</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {confirmationsData.map((confirmation) => (
+                  <div key={confirmation.confirmationid} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                         <div className="flex items-center justify-between mb-4">
+                       <div className="flex items-center">
+                         <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
+                           {confirmation.imageurl ? (
+                             <img
+                               src={`${API_BASE_URL}${confirmation.imageurl}`}
+                               alt={`${confirmation.prenom} ${confirmation.nom}`}
+                               className="w-full h-full object-cover"
+                               onError={(e) => {
+                                 e.target.style.display = 'none';
+                                 e.target.nextSibling.style.display = 'flex';
+                               }}
+                             />
+                           ) : null}
+                           <div className={`w-full h-full flex items-center justify-center ${confirmation.imageurl ? 'hidden' : ''}`}>
+                             <span className="text-white font-semibold text-lg">
+                               {confirmation.prenom ? confirmation.prenom.charAt(0).toUpperCase() : ''}{confirmation.nom ? confirmation.nom.charAt(0).toUpperCase() : ''}
+                             </span>
+                           </div>
+                         </div>
+                         <div>
+                           <h3 className="font-semibold text-gray-800">
+                             {confirmation.prenom} {confirmation.nom}
+                           </h3>
+                           <p className="text-sm text-gray-600">ID: {confirmation.cdtid}</p>
+                         </div>
+                       </div>
+                      <div className="text-right">
+                        <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">
+                          En attente
+                        </span>
+                      </div>
+                    </div>
+                    
+                                         <div className="grid md:grid-cols-2 gap-4">
+                       <div>
+                         <p className="text-sm text-gray-600 mb-1">Date de présence</p>
+                         <p className="font-medium">{new Date(confirmation.date_presence).toLocaleDateString('fr-FR')}</p>
+                       </div>
+                       <div>
+                         <p className="text-sm text-gray-600 mb-1">Heure de pointage</p>
+                         <p className="font-medium">
+                           {confirmation.heure_pointage 
+                             ? confirmation.heure_pointage.substring(0, 5) 
+                             : 'Non spécifiée'
+                           }
+                         </p>
+                       </div>
+                     </div>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <button
+                        onClick={() => handleConfirmPresence(confirmation.cdtid, confirmation.date_presence.split('T')[0], true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                      >
+                        Confirmer présence
+                      </button>
+                      <button
+                        onClick={() => handleConfirmPresence(confirmation.cdtid, confirmation.date_presence.split('T')[0], false)}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                      >
+                        Marquer absence
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
