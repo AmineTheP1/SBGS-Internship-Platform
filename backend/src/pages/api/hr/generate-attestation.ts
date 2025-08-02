@@ -59,32 +59,34 @@ const generateAttestationPDF = (attestationData: any) => {
           box-sizing: border-box;
         }
         
-        body {
-          font-family: 'Inter', sans-serif;
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          min-height: 100vh;
-          padding: 20px 10px;
-          color: #1e293b;
-          line-height: 1.4;
-        }
+                 body {
+           font-family: 'Inter', sans-serif;
+           background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+           min-height: 100vh;
+           padding: 10px 5px;
+           color: #1e293b;
+           line-height: 1.3;
+           margin: 0;
+         }
         
-        .attestation-container {
-          max-width: 800px;
-          margin: 0 auto;
-          background: white;
-          border-radius: 15px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-          overflow: hidden;
-          position: relative;
-        }
+                 .attestation-container {
+           max-width: 800px;
+           margin: 0 auto;
+           background: white;
+           border-radius: 15px;
+           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+           overflow: hidden;
+           position: relative;
+           min-height: 100vh;
+         }
         
-        .header {
-          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-          color: white;
-          padding: 25px;
-          text-align: center;
-          position: relative;
-        }
+                 .header {
+           background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+           color: white;
+           padding: 20px;
+           text-align: center;
+           position: relative;
+         }
         
         .header::before {
           content: '';
@@ -97,14 +99,14 @@ const generateAttestationPDF = (attestationData: any) => {
           opacity: 0.3;
         }
         
-        .logo-section {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 20px;
-          position: relative;
-          z-index: 1;
-        }
+                 .logo-section {
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           margin-bottom: 15px;
+           position: relative;
+           z-index: 1;
+         }
         
         .logo {
           width: 60px;
@@ -142,11 +144,11 @@ const generateAttestationPDF = (attestationData: any) => {
           font-weight: 300;
         }
         
-        .title-section {
-          margin-top: 20px;
-          position: relative;
-          z-index: 1;
-        }
+                 .title-section {
+           margin-top: 15px;
+           position: relative;
+           z-index: 1;
+         }
         
         .main-title {
           font-family: 'Playfair Display', serif;
@@ -162,10 +164,10 @@ const generateAttestationPDF = (attestationData: any) => {
           font-weight: 300;
         }
         
-        .content {
-          padding: 30px 25px;
-          position: relative;
-        }
+                 .content {
+           padding: 25px 20px;
+           position: relative;
+         }
         
         .content::before {
           content: '';
@@ -178,20 +180,20 @@ const generateAttestationPDF = (attestationData: any) => {
           border-radius: 2px;
         }
         
-        .intro-text {
-          font-size: 16px;
-          color: #374151;
-          margin-bottom: 20px;
-          font-weight: 500;
-        }
+                 .intro-text {
+           font-size: 15px;
+           color: #374151;
+           margin-bottom: 15px;
+           font-weight: 500;
+         }
         
-        .candidate-info {
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-radius: 12px;
-          padding: 20px;
-          margin: 20px 0;
-          border-left: 4px solid #dc2626;
-        }
+                 .candidate-info {
+           background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+           border-radius: 12px;
+           padding: 15px;
+           margin: 15px 0;
+           border-left: 4px solid #dc2626;
+         }
         
         .info-row {
           display: flex;
@@ -218,13 +220,13 @@ const generateAttestationPDF = (attestationData: any) => {
           font-size: 14px;
         }
         
-        .stage-details {
-          background: white;
-          border: 2px solid #e5e7eb;
-          border-radius: 12px;
-          padding: 20px;
-          margin: 20px 0;
-        }
+                 .stage-details {
+           background: white;
+           border: 2px solid #e5e7eb;
+           border-radius: 12px;
+           padding: 15px;
+           margin: 15px 0;
+         }
         
         .stage-title {
           font-family: 'Playfair Display', serif;
@@ -235,20 +237,20 @@ const generateAttestationPDF = (attestationData: any) => {
           text-align: center;
         }
         
-        .conclusion {
-          font-size: 14px;
-          color: #374151;
-          margin: 20px 0;
-          text-align: center;
-          font-style: italic;
-        }
+                 .conclusion {
+           font-size: 13px;
+           color: #374151;
+           margin: 15px 0;
+           text-align: center;
+           font-style: italic;
+         }
         
-        .signature-section {
-          margin-top: 30px;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-end;
-        }
+                 .signature-section {
+           margin-top: 20px;
+           display: flex;
+           justify-content: space-between;
+           align-items: flex-end;
+         }
         
         .signature-box {
           text-align: center;
@@ -269,13 +271,13 @@ const generateAttestationPDF = (attestationData: any) => {
           font-weight: 500;
         }
         
-        .date-section {
-          text-align: center;
-          margin-top: 30px;
-          padding: 20px;
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-radius: 10px;
-        }
+                 .date-section {
+           text-align: center;
+           margin-top: 20px;
+           padding: 15px;
+           background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+           border-radius: 10px;
+         }
         
         .date-text {
           font-size: 16px;
@@ -325,67 +327,193 @@ const generateAttestationPDF = (attestationData: any) => {
           backdrop-filter: blur(10px);
         }
         
-        @media print {
-          body {
-            background: white;
-            padding: 0;
-            margin: 0;
-            font-size: 12px;
-          }
-          .attestation-container {
-            box-shadow: none;
-            border-radius: 0;
-            max-width: 100%;
-            margin: 0;
-          }
-          .header {
-            padding: 15px;
-          }
-          .content {
-            padding: 20px;
-          }
-          .logo {
-            width: 50px;
-            height: 50px;
-          }
-          .logo img {
-            width: 35px;
-            height: 35px;
-          }
-          .company-name {
-            font-size: 20px;
-          }
-          .main-title {
-            font-size: 24px;
-          }
-          .intro-text {
-            font-size: 14px;
-            margin-bottom: 15px;
-          }
-          .candidate-info, .stage-details {
-            padding: 15px;
-            margin: 15px 0;
-          }
-          .info-label {
-            font-size: 11px;
-            min-width: 100px;
-          }
-          .info-value {
-            font-size: 13px;
-          }
-          .conclusion {
-            font-size: 13px;
-            margin: 15px 0;
-          }
-          .signature-section {
-            margin-top: 20px;
-          }
-          .stamp {
-            width: 80px;
-            height: 80px;
-            font-size: 10px;
-          }
-        }
+                 @media print {
+           @page {
+             size: A4;
+             margin: 15mm;
+           }
+           
+           /* Hide browser-generated headers and footers */
+           @page :first {
+             margin-top: 0;
+           }
+           
+           @page :left {
+             margin-left: 0;
+           }
+           
+           @page :right {
+             margin-right: 0;
+           }
+           body {
+             background: white;
+             padding: 0;
+             margin: 0;
+             font-size: 11px;
+             color: #000;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .attestation-container {
+             box-shadow: none;
+             border-radius: 0;
+             max-width: 100%;
+             margin: 0;
+             border: 2px solid #333;
+             min-height: auto;
+             height: 100vh;
+           }
+           .header {
+             padding: 12px;
+             background: #dc2626 !important;
+             color: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .content {
+             padding: 15px;
+           }
+           .logo {
+             width: 50px;
+             height: 50px;
+             background: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .logo img {
+             width: 35px;
+             height: 35px;
+           }
+           .company-name {
+             font-size: 20px;
+             color: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .company-subtitle {
+             color: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .main-title {
+             font-size: 24px;
+             color: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .subtitle {
+             color: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .intro-text {
+             font-size: 12px;
+             margin-bottom: 10px;
+             color: #000 !important;
+           }
+           .candidate-info {
+             padding: 10px;
+             margin: 10px 0;
+             background: #f8f9fa !important;
+             border-left: 4px solid #dc2626 !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .stage-details {
+             padding: 10px;
+             margin: 10px 0;
+             border: 2px solid #333 !important;
+           }
+           .stage-title {
+             color: #dc2626 !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .info-label {
+             font-size: 11px;
+             min-width: 100px;
+             color: #333 !important;
+             font-weight: bold !important;
+           }
+           .info-value {
+             font-size: 13px;
+             color: #000 !important;
+           }
+           .conclusion {
+             font-size: 11px;
+             margin: 10px 0;
+             color: #000 !important;
+           }
+           .signature-section {
+             margin-top: 15px;
+           }
+           .signature-line {
+             background: #333 !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .signature-text {
+             color: #333 !important;
+           }
+           .date-section {
+             background: #f8f9fa !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+             padding: 10px;
+             margin-top: 15px;
+           }
+           .date-text {
+             color: #000 !important;
+             font-size: 11px;
+           }
+           .stamp {
+             width: 80px;
+             height: 80px;
+             font-size: 10px;
+             background: #dc2626 !important;
+             color: white !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           .attestation-number {
+             background: rgba(255, 255, 255, 0.9) !important;
+             color: #333 !important;
+             -webkit-print-color-adjust: exact;
+             print-color-adjust: exact;
+           }
+           
+           /* Ensure content fits on one page */
+           .info-row {
+             margin-bottom: 8px;
+           }
+           
+           .info-label {
+             font-size: 10px;
+             min-width: 80px;
+           }
+           
+           .info-value {
+             font-size: 11px;
+           }
+           
+           .main-title {
+             font-size: 20px;
+           }
+           
+           .company-name {
+             font-size: 18px;
+           }
+           
+           .logo {
+             width: 40px;
+             height: 40px;
+           }
+           
+           .logo img {
+             width: 30px;
+             height: 30px;
+           }
+         }
       </style>
     </head>
     <body>
