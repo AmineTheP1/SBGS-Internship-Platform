@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get candidates with approved reports
+    // Get candidates with approved reports (excluding those with downloaded attestations)
     const result = await pool.query(`
       SELECT DISTINCT
         c.cdtid,
@@ -41,7 +41,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       JOIN rapports_stage r ON c.cdtid = r.cdtid
       JOIN stages s ON r.stagesid = s.stagesid
       LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
+      LEFT JOIN attestations_stage ats ON s.stagesid = ats.stagesid
       WHERE r.statut = 'Approuvé'
+      AND (ats.downloaded IS NULL OR ats.downloaded = FALSE)
       ORDER BY r.datevalidation DESC
     `);
 

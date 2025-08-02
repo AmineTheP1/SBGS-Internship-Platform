@@ -489,6 +489,24 @@ export default function Dashboard() {
           return filtered;
         });
         
+        // Mark attestation as downloaded in database
+        try {
+          const markResponse = await fetch(API_ENDPOINTS.HR_MARK_ATTESTATION_DOWNLOADED, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              cdtid,
+              rapportid
+            }),
+          });
+          console.log("Mark downloaded response:", markResponse.status); // Debug
+        } catch (error) {
+          console.error("Error marking attestation as downloaded:", error);
+        }
+
         // Send email notification
         try {
           const response = await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {

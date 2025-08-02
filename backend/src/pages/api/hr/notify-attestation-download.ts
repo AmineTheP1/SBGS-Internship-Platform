@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Send email notification to candidate
     try {
       const emailSubject = "Votre attestation de stage est prête - SBGS";
-      const emailBody = `
+      const emailBodyHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #dc2626;">Attestation de Stage - SBGS</h2>
           <p>Bonjour ${candidate.prenom} ${candidate.nom},</p>
@@ -78,11 +78,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         </div>
       `;
       
+      const emailBodyText = `
+Attestation de Stage - SBGS
+
+Bonjour ${candidate.prenom} ${candidate.nom},
+
+Nous avons le plaisir de vous informer que votre attestation de stage a été générée avec succès.
+
+Détails de votre stage :
+- Type de stage : ${formatStageType(candidate.typestage)}
+- Période : Du ${candidate.datedebut ? new Date(candidate.datedebut).toLocaleDateString('fr-FR') : 'Non spécifié'} au ${candidate.datefin ? new Date(candidate.datefin).toLocaleDateString('fr-FR') : 'Non spécifié'}
+- Établissement : ${candidate.ecole_nom || 'Non spécifié'}
+
+Votre attestation officielle est maintenant disponible et peut être téléchargée depuis votre espace candidat.
+
+Nous vous remercions pour votre stage au sein de notre entreprise et vous souhaitons le meilleur pour la suite de votre parcours professionnel.
+
+Cordialement,
+L'équipe des Ressources Humaines
+SBGS - Société des Boissons Gazeuse du Souss
+      `;
+      
       await sendEmail({
         to: candidate.email,
         subject: emailSubject,
-        html: emailBody,
-        text: emailBody
+        html: emailBodyHTML,
+        text: emailBodyText
       }); 
       console.log(`Email notification sent to ${candidate.email}`);
     } catch (emailError) {
