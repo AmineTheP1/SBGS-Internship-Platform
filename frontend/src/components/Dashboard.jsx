@@ -478,13 +478,42 @@ export default function Dashboard() {
       if (selectedAttestation?.candidateToRemove) {
         const { cdtid, rapportid } = selectedAttestation.candidateToRemove;
         console.log("Removing candidate:", { cdtid, rapportid }); // Debug
+        console.log("cdtid type:", typeof cdtid, "value:", cdtid); // Debug
+        console.log("rapportid type:", typeof rapportid, "value:", rapportid); // Debug
+        
+        // Safety check: don't proceed if values are empty
+        if (!cdtid || !rapportid) {
+          console.log("Empty cdtid or rapportid, skipping removal"); // Debug
+          return;
+        }
         
         // Remove from local state
         setApprovedCandidates(prevCandidates => {
           console.log("Previous candidates:", prevCandidates); // Debug
-          const filtered = prevCandidates.filter(candidate => 
-  !(candidate.cdtid === cdtid && candidate.rapportid === rapportid)
-);
+          console.log("First candidate example:", prevCandidates[0]); // Debug
+          console.log("All candidate IDs:", prevCandidates.map(c => ({ cdtid: c.cdtid, rapportid: c.rapportid }))); // Debug
+          
+          const filtered = prevCandidates.filter(candidate => {
+            console.log("Checking candidate:", candidate.cdtid, "vs", cdtid, "and", candidate.rapportid, "vs", rapportid); // Debug
+            
+            // Convert to strings for comparison to handle type mismatches
+            const candidateCdtid = String(candidate.cdtid || '');
+            const candidateRapportid = String(candidate.rapportid || '');
+            const targetCdtid = String(cdtid || '');
+            const targetRapportid = String(rapportid || '');
+            
+            console.log("String comparison:", {
+              candidateCdtid,
+              targetCdtid,
+              candidateRapportid,
+              targetRapportid
+            }); // Debug
+            
+            const shouldKeep = !(candidateCdtid === targetCdtid && candidateRapportid === targetRapportid);
+            console.log("Should keep this candidate:", shouldKeep); // Debug
+            return shouldKeep;
+          });
+          
           console.log("Filtered candidates:", filtered); // Debug
           return filtered;
         });

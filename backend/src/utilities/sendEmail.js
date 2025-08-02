@@ -10,15 +10,21 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendEmail({ to, subject, text, html }) {
+async function sendEmail({ to, subject, text, html = undefined }) {
   try {
-    await transporter.sendMail({
+    const mailOptions = {
       from: `"SBGS Plateforme" <${process.env.SMTP_USER}>`,
       to,
       subject,
       text: text || "", // Plain text fallback
-      html: html || text, // Use html if provided, otherwise use text
-    });
+    };
+    
+    // Only add html if it's explicitly provided and not undefined
+    if (html !== undefined) {
+      mailOptions.html = html;
+    }
+    
+    await transporter.sendMail(mailOptions);
   } catch (error) {
     console.error('Email send error:', error);
     throw error;
