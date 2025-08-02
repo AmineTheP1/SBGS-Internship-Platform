@@ -31,6 +31,7 @@ export default function SupervisorDashboard() {
   const [currentReportPage, setCurrentReportPage] = useState(1);
   const [candidatesPerPage] = useState(6);
   const [reportsPerPage] = useState(6);
+  const [currentView, setCurrentView] = useState('main'); // 'main', 'interns', 'reports', 'absences', 'confirmations'
   const navigate = useNavigate();
   const reportsSectionRef = useRef(null);
 
@@ -371,7 +372,10 @@ export default function SupervisorDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid md:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
+          <div 
+            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+            onClick={() => setCurrentView('interns')}
+          >
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-lg">
                 <FaUsers className="text-2xl text-blue-600" />
@@ -383,7 +387,10 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-                     <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105">
+                     <div 
+                       className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                       onClick={() => setCurrentView('present')}
+                     >
              <div className="flex items-center">
                <div className="bg-green-100 p-3 rounded-lg">
                  <FaClock className="text-2xl text-green-600" />
@@ -398,22 +405,8 @@ export default function SupervisorDashboard() {
            </div>
 
           <div 
-            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200  cursor-pointer hover:scale-105"
-            onClick={() => {
-              console.log('Clicked on Rapports à réviser card');
-              console.log('Current reports:', reports);
-              console.log('Reports with En attente status:', reports.filter(r => r.statut === 'En attente'));
-              setShowReportsSection(true);
-              // Scroll to reports section after a short delay to ensure it's rendered
-              setTimeout(() => {
-                if (reportsSectionRef.current) {
-                  reportsSectionRef.current.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                  });
-                }
-              }, 100);
-            }}
+            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+            onClick={() => setCurrentView('reports')}
           >
             <div className="flex items-center">
               <div className="bg-yellow-100 p-3 rounded-lg">
@@ -426,7 +419,10 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-200 transform hover:scale-105">
+          <div 
+            className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+            onClick={() => setCurrentView('absences')}
+          >
             <div className="flex items-center">
               <div className="bg-purple-100 p-3 rounded-lg">
                 <FaCalendar className="text-2xl text-purple-600" />
@@ -438,7 +434,10 @@ export default function SupervisorDashboard() {
             </div>
           </div>
 
-                     <div className="bg-white rounded-xl shadow-lg p-6 cursor-pointer  transition-all duration-200 transform hover:scale-105 ">
+                     <div 
+                       className="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                       onClick={() => setCurrentView('confirmations')}
+                     >
              <div className="flex items-center">
                <div className="bg-orange-100 p-3 rounded-lg">
                  <FaClock className="text-2xl text-orange-600" />
@@ -453,6 +452,22 @@ export default function SupervisorDashboard() {
            </div>
         </div>
 
+        {/* Back to Main Button - Show when not on main view */}
+        {currentView !== 'main' && (
+          <div className="mb-6">
+            <button
+              onClick={() => setCurrentView('main')}
+              className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              <FaTimes className="mr-2" />
+              Retour au tableau de bord
+            </button>
+          </div>
+        )}
+
+        {/* Main View - Show all sections */}
+        {currentView === 'main' && (
+          <>
                  {/* Interns List */}
          <div className="bg-white rounded-xl shadow-lg p-8">
            <div className="flex justify-between items-center mb-6">
@@ -609,19 +624,298 @@ export default function SupervisorDashboard() {
               </div>
             )}
         </div>
+          </>
+        )}
+
+        {/* Interns Only View */}
+        {currentView === 'interns' && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Mes Stagiaires</h2>
+              <div className="text-sm text-gray-600">
+                {interns.length} stagiaire(s) assigné(s)
+              </div>
+            </div>
+
+            {/* Theme Status Message */}
+            {themeStatus && (
+              <div className={`p-3 rounded-lg text-sm font-medium mb-4 ${
+                themeStatus.includes("succès") 
+                  ? "bg-green-100 text-green-700" 
+                  : "bg-red-100 text-red-700"
+              }`}>
+                {themeStatus}
+              </div>
+            )}
+
+            {interns.length === 0 ? (
+              <div className="text-center py-12">
+                <FaUsers className="text-4xl text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">Aucun stagiaire assigné pour le moment</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentCandidates.map((intern) => (
+                  <div key={intern.cdtid} className="bg-gray-50 rounded-lg p-6 border">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full bg-coke-red flex items-center justify-center mr-4 overflow-hidden">
+                        {intern.imageurl ? (
+                          <img
+                            src={`${API_BASE_URL}${intern.imageurl}`}
+                            alt={`${intern.prenom} ${intern.nom}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-full h-full flex items-center justify-center ${intern.imageurl ? 'hidden' : ''}`}>
+                          <span className="text-white font-semibold text-lg">
+                            {intern.prenom ? intern.prenom.charAt(0).toUpperCase() : ''}{intern.nom ? intern.nom.charAt(0).toUpperCase() : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800">
+                          {intern.prenom} {intern.nom}
+                        </h3>
+                        <p className="text-sm text-gray-600">ID: {intern.cdtid}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Statut:</span>
+                        <span className={`font-medium ${
+                          intern.statut_candidature === 'Accepté' ? 'text-green-600' : 
+                          intern.statut_candidature === 'En attente' ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {intern.statut_candidature}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Durée:</span>
+                        <span className="font-medium">{intern.periode || 'Non spécifiée'}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Thème:</span>
+                        <span className="font-medium text-blue-600 max-w-[80%] text-right">{intern.theme_stage || 'Non défini'}</span>
+                      </div>
+                    </div>
+
+                    {/* Theme Selection */}
+                    {editingTheme === intern.cdtid ? (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Thème de stage
+                        </label>
+                        <div className="space-y-2">
+                          <textarea
+                            value={newTheme}
+                            onChange={(e) => setNewTheme(e.target.value)}
+                            placeholder="Saisissez le thème de stage..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-coke-red focus:border-transparent text-sm resize-none"
+                            rows="3"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveTheme(intern.cdtid)}
+                              className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+                            >
+                              Sauvegarder
+                            </button>
+                            <button
+                              onClick={handleCancelEditTheme}
+                              className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Thème de stage
+                        </label>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 flex-1 mr-2">
+                            {intern.theme_stage || 'Non défini'}
+                          </span>
+                          <button
+                            onClick={() => handleStartEditTheme(intern.cdtid, intern.theme_stage)}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                          >
+                            Modifier
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleViewInternDetails(intern.cdtid)}
+                        className="flex-1 flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                      >
+                        <FaEye className="mr-1" />
+                        Voir détails
+                      </button>
+                      <button
+                        onClick={() => handleMarkAbsence(intern.cdtid)}
+                        className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                      >
+                        Absence
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Candidates Pagination */}
+            {totalCandidatePages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentCandidatePage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentCandidatePage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentCandidatePage} sur {totalCandidatePages}
+                </span>
+                <button
+                  onClick={() => setCurrentCandidatePage(prev => Math.min(prev + 1, totalCandidatePages))}
+                  disabled={currentCandidatePage === totalCandidatePages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Present Interns View */}
+        {currentView === 'present' && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Stagiaires présents aujourd'hui</h2>
+              <div className="text-sm text-gray-600">
+                {interns.filter(intern => intern.today_attendance === true).length} stagiaire(s) présent(s)
+              </div>
+            </div>
+
+            {interns.filter(intern => intern.today_attendance === true).length === 0 ? (
+              <div className="text-center py-12">
+                <FaClock className="text-4xl text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">Aucun stagiaire présent aujourd'hui</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {interns.filter(intern => intern.today_attendance === true).map((intern) => (
+                  <div key={intern.cdtid} className="bg-green-50 rounded-lg p-6 border border-green-200">
+                    <div className="flex items-center mb-4">
+                      <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center mr-4 overflow-hidden">
+                        {intern.imageurl ? (
+                          <img
+                            src={`${API_BASE_URL}${intern.imageurl}`}
+                            alt={`${intern.prenom} ${intern.nom}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-full h-full flex items-center justify-center ${intern.imageurl ? 'hidden' : ''}`}>
+                          <span className="text-white font-semibold text-lg">
+                            {intern.prenom ? intern.prenom.charAt(0).toUpperCase() : ''}{intern.nom ? intern.nom.charAt(0).toUpperCase() : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800">
+                          {intern.prenom} {intern.nom}
+                        </h3>
+                        <p className="text-sm text-green-600">Présent aujourd'hui</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="font-medium">{intern.typestage || 'Non spécifié'}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Thème:</span>
+                        <span className="font-medium text-blue-600 max-w-[80%] text-right">{intern.theme_stage || 'Non défini'}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleViewInternDetails(intern.cdtid)}
+                      className="w-full flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                    >
+                      <FaEye className="mr-1" />
+                      Voir détails
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Absences View */}
+        {currentView === 'absences' && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Absences ce mois</h2>
+              <div className="text-sm text-gray-600">
+                {monthlyAbsences} absence(s) enregistrée(s)
+              </div>
+            </div>
+
+            <div className="text-center py-12">
+              <FaCalendar className="text-4xl text-purple-300 mx-auto mb-4" />
+              <p className="text-gray-500">Vue détaillée des absences à implémenter</p>
+              <p className="text-sm text-gray-400 mt-2">Total des absences ce mois : {monthlyAbsences}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmations View */}
+        {currentView === 'confirmations' && (
+          <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Confirmations en attente</h2>
+              <div className="text-sm text-gray-600">
+                {interns.filter(intern => intern.pending_confirmations > 0).reduce((sum, intern) => sum + intern.pending_confirmations, 0)} confirmation(s) en attente
+              </div>
+            </div>
+
+            <div className="text-center py-12">
+              <FaClock className="text-4xl text-orange-300 mx-auto mb-4" />
+              <p className="text-gray-500">Vue détaillée des confirmations à implémenter</p>
+              <p className="text-sm text-gray-400 mt-2">
+                Total des confirmations en attente : {interns.filter(intern => intern.pending_confirmations > 0).reduce((sum, intern) => sum + intern.pending_confirmations, 0)}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Reports Section */}
-        {console.log('showReportsSection:', showReportsSection)}
-        {showReportsSection && (
-          <div ref={reportsSectionRef} className="bg-white rounded-xl shadow-lg p-8 mt-8">
+        {currentView === 'reports' && (
+          <div ref={reportsSectionRef} className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Rapports de stage à réviser</h2>
-              <button
-                onClick={() => setShowReportsSection(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FaTimes className="text-xl" />
-              </button>
             </div>
 
             {reports.length === 0 ? (
