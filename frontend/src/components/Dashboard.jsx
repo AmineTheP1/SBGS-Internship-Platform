@@ -30,7 +30,7 @@ export default function Dashboard() {
   const [attestationStatus, setAttestationStatus] = useState("");
   
   // New state variable for tracking the current view
-  const [currentView, setCurrentView] = useState("main");
+  const [currentView, setCurrentView] = useState("initial");
   
   const navigate = useNavigate();
 
@@ -477,93 +477,98 @@ export default function Dashboard() {
 
   return (
     <section className="min-h-screen bg-gray-50 py-12">
-      <div className="flex flex-row gap-4 mb-8 justify-center flex-wrap">
-        {/* Total Submissions */}
-        <div 
-          className={`min-w-[200px] bg-white border ${currentView === "main" ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-          onClick={() => {
-            setCurrentView("main");
-            setShowApprovedCandidates(false);
-          }}
-        >
-          <div className="bg-blue-100 p-3 rounded-full flex items-center justify-center">
-            <DocumentTextIcon className="h-7 w-7 text-blue-500" />
-          </div>
-          <div>
-            <div className="text-gray-500 text-xs font-medium">Candidatures totales</div>
-            <div className="text-xl font-bold">{totalSubmissions}</div>
-          </div>
-        </div>
-        {/* Pending Review */}
-        <div 
-          className={`min-w-[200px] bg-white border ${currentView === "pending" ? "border-yellow-500 ring-2 ring-yellow-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-          onClick={() => {
-            setCurrentView("pending");
-            setShowApprovedCandidates(false);
-          }}
-        >
-          <div className="bg-yellow-100 p-3 rounded-full flex items-center justify-center">
-            <ClockIcon className="h-7 w-7 text-yellow-500" />
-          </div>
-          <div>
-            <div className="text-gray-500 text-xs font-medium"> En attente</div>
-            <div className="text-xl font-bold">{pendingReview}</div>
-          </div>
-        </div>
-        {/* Approved */}
-        <div 
-          className={`min-w-[200px] bg-white border ${currentView === "approved" ? "border-green-500 ring-2 ring-green-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-          onClick={() => {
-            setCurrentView("approved");
-            setShowApprovedCandidates(false);
-          }}
-        >
-          <div className="bg-green-100 p-3 rounded-full flex items-center justify-center">
-            <CheckCircleIcon className="h-7 w-7 text-green-500" />
-          </div>
-          <div>
-            <div className="text-gray-500 text-xs font-medium">Accepté</div>
-            <div className="text-xl font-bold">{approved}</div>
-          </div>
-        </div>
-        {/* Rejected */}
-        <div 
-          className={`min-w-[200px] bg-white border ${currentView === "rejected" ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-          onClick={() => {
-            setCurrentView("rejected");
-            setShowApprovedCandidates(false);
-          }}
-        >
-          <div className="bg-red-100 p-3 rounded-full flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-gray-500 text-xs font-medium">Refusé</div>
-            <div className="text-xl font-bold">{rejected}</div>
-          </div>
-        </div>
-        {/* Approved Reports */}
-        <div 
-          className={`min-w-[200px] bg-white border ${currentView === "reports" ? "border-purple-500 ring-2 ring-purple-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-          onClick={() => {
-            setCurrentView("reports");
-            setShowApprovedCandidates(true);
-          }}
-        >
-          <div className="bg-purple-100 p-3 rounded-full flex items-center justify-center">
-            <DocumentTextIcon className="h-7 w-7 text-purple-500" />
-          </div>
-          <div>
-            <div className="text-gray-500 text-xs font-medium">Rapports approuvés</div>
-            <div className="text-xl font-bold">{approvedCandidates.length}</div>
-          </div>
-        </div>
-      </div>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {currentView === "reports" ? (
+             <div className="flex flex-row gap-4 mb-8 justify-center flex-wrap">
+         {/* Total Submissions */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "main" ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setCurrentView("main");
+             setShowApprovedCandidates(false);
+           }}
+         >
+           <div className="bg-blue-100 p-3 rounded-full flex items-center justify-center">
+             <DocumentTextIcon className="h-7 w-7 text-blue-500" />
+           </div>
+           <div>
+             <div className="text-gray-500 text-xs font-medium">Candidatures totales</div>
+             <div className="text-xl font-bold">{totalSubmissions}</div>
+           </div>
+         </div>
+         {/* Pending Review */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "pending" ? "border-yellow-500 ring-2 ring-yellow-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setCurrentView("pending");
+             setShowApprovedCandidates(false);
+           }}
+         >
+           <div className="bg-yellow-100 p-3 rounded-full flex items-center justify-center">
+             <ClockIcon className="h-7 w-7 text-yellow-500" />
+           </div>
+           <div>
+             <div className="text-gray-500 text-xs font-medium"> En attente</div>
+             <div className="text-xl font-bold">{pendingReview}</div>
+           </div>
+         </div>
+         {/* Approved */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "approved" ? "border-green-500 ring-2 ring-green-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setCurrentView("approved");
+             setShowApprovedCandidates(false);
+           }}
+         >
+           <div className="bg-green-100 p-3 rounded-full flex items-center justify-center">
+             <CheckCircleIcon className="h-7 w-7 text-green-500" />
+           </div>
+           <div>
+             <div className="text-gray-500 text-xs font-medium">Accepté</div>
+             <div className="text-xl font-bold">{approved}</div>
+           </div>
+         </div>
+         {/* Rejected */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "rejected" ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setCurrentView("rejected");
+             setShowApprovedCandidates(false);
+           }}
+         >
+           <div className="bg-red-100 p-3 rounded-full flex items-center justify-center">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+             </svg>
+           </div>
+           <div>
+             <div className="text-gray-500 text-xs font-medium">Refusé</div>
+             <div className="text-xl font-bold">{rejected}</div>
+           </div>
+         </div>
+         {/* Approved Reports */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "reports" ? "border-purple-500 ring-2 ring-purple-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setCurrentView("reports");
+             setShowApprovedCandidates(true);
+           }}
+         >
+           <div className="bg-purple-100 p-3 rounded-full flex items-center justify-center">
+             <DocumentTextIcon className="h-7 w-7 text-purple-500" />
+           </div>
+           <div>
+             <div className="text-gray-500 text-xs font-medium">Rapports approuvés</div>
+             <div className="text-xl font-bold">{approvedCandidates.length}</div>
+           </div>
+         </div>
+       </div>
+       
+               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {currentView === "initial" ? (
+            <div className="text-center py-20">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Tableau de bord RH</h2>
+              <p className="text-lg text-gray-600 mb-8">Cliquez sur une carte ci-dessus pour afficher les données correspondantes</p>
+            </div>
+          ) : currentView === "reports" ? (
           <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="coke-gradient px-6 py-4">
@@ -571,40 +576,27 @@ export default function Dashboard() {
                 <p className="text-coke-light">Candidats avec rapports de stage approuvés</p>
               </div>
               
-              <div className="p-6">
-                {approvedCandidates.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    Aucun rapport approuvé trouvé.
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Candidat
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            CIN
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Rapport
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date d'approbation
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            École
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {approvedCandidates.map((candidate) => (
-                          <tr key={`${candidate.cdtid}-${candidate.rapportid}`} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
+                             <div className="p-6">
+                 {approvedCandidates.length === 0 ? (
+                   <div className="text-center py-8 text-gray-500">
+                     Aucun rapport approuvé trouvé.
+                   </div>
+                 ) : (
+                                   <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700">
+                      <th className="p-3">Candidat</th>
+                      <th className="p-3">CIN</th>
+                      <th className="p-3">Rapport</th>
+                      <th className="p-3">Date d'approbation</th>
+                      <th className="p-3">École</th>
+                      <th className="p-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                                               {approvedCandidates.map((candidate) => (
+                          <tr key={`${candidate.cdtid}-${candidate.rapportid}`} className="border-b border-gray-200 hover:bg-gray-50">
+                            <td className="p-3">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-10 w-10">
                                   <img
@@ -614,37 +606,36 @@ export default function Dashboard() {
                                   />
                                 </div>
                                 <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">{candidate.prenom} {candidate.nom}</div>
-                                  <div className="text-sm text-gray-500">{candidate.email}</div>
+                                  <div className="font-medium text-gray-900">{candidate.prenom} {candidate.nom}</div>
+                                  <div className="text-gray-500">{candidate.email}</div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="p-3 text-gray-900">
                               {candidate.cin || 'Non spécifié'}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="p-3 text-gray-900">
                               {candidate.rapport_titre}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="p-3 text-gray-500">
                               {candidate.datevalidation ? new Date(candidate.datevalidation).toLocaleDateString('fr-FR') : 'N/A'}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="p-3 text-gray-500">
                               {candidate.ecole_nom || 'Non spécifié'}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
-                                className="text-coke-red hover:text-red-700 mr-3"
-                              >
-                                Attestation de stage
-                              </button>
-                            </td>
+                                                         <td className="p-3 font-medium">
+                               <button
+                                 onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
+                                 className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                               >
+                                 Attestation de stage
+                               </button>
+                             </td>
                           </tr>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                     </tbody>
+                   </table>
+                 )}
                 
                 {attestationStatus && (
                   <div className={`mt-4 p-4 rounded-lg ${
@@ -797,14 +788,13 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* Applications Table */}
-              <div className="overflow-x-auto">
-                {/* Page Info */}
-                <div className="mb-4 text-sm text-gray-600">
-                  Affichage de {indexOfFirstApplication + 1} à {Math.min(indexOfLastApplication, filteredApplications.length)} sur {filteredApplications.length} candidatures
-                </div>
-                
-                <table className="w-full text-left">
+                             {/* Applications Table */}
+               {/* Page Info */}
+               <div className="mb-4 text-sm text-gray-600">
+                 Affichage de {indexOfFirstApplication + 1} à {Math.min(indexOfLastApplication, filteredApplications.length)} sur {filteredApplications.length} candidatures
+               </div>
+               
+                               <table className="w-full text-left">
                   <thead>
                     <tr className="bg-gray-100 text-gray-700">
                       <th className="p-3">Candidat</th>
@@ -817,64 +807,60 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentApplications.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="text-center p-6 text-gray-400">
-                          Aucune candidature trouvée.
-                        </td>
-                      </tr>
-                    ) : (
-                      currentApplications.map((app, idx) => (
-                        <tr key={app.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                   {currentApplications.length === 0 ? (
+                     <tr>
+                       <td colSpan={7} className="text-center py-8 text-gray-500">
+                         Aucune candidature trouvée.
+                       </td>
+                     </tr>
+                   ) : (
+                                           currentApplications.map((app) => (
+                        <tr key={app.id} className="border-b border-gray-200 hover:bg-gray-50">
                           <td className="p-3">
-                            <div className="flex items-center gap-3">
-                              {app.imageurl ? (
-                                <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover border" />
-                              ) : (
-                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?
-                                </div>
-                              )}
-                              <div>
-                                <div className="font-semibold">{app.fullName}</div>
-                                <div className="text-sm text-gray-600">{app.email}</div>
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                {app.imageurl ? (
+                                  <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?</div>
+                                )}
+                              </div>
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">{app.fullName}</div>
+                                <div className="text-gray-500">{app.email}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="p-3">{app.institution}</td>
-                          <td className="p-3">{app.typestage}</td>
-                          <td className="p-3">{app.date}</td>
-                          <td className="p-3">{app.periode}</td>
-                          <td className="p-3">
-                            <span
-                              className={`inline-block px-2 py-1 rounded-full text-xs font-medium text-center align-middle ${getStatusColor(app.status)}`}
-                              style={{
-                                minWidth: "90px",
-                                maxWidth: "120px",
-                                whiteSpace: "normal",
-                                wordBreak: "break-word",
-                                lineHeight: "1.1",
-                                display: "inline-block"
-                              }}
-                            >
-                              {app.status}
-                            </span>
+                          <td className="p-3 text-gray-900">
+                            {app.institution}
                           </td>
-                          <td className="p-3">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => navigate(`/candidature/${app.id}`)}
-                                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                              >
-                                Voir Détails
-                              </button>
-                            </div>
+                          <td className="p-3 text-gray-900">
+                            {app.typestage}
                           </td>
+                          <td className="p-3 text-gray-500">
+                            {app.date}
+                          </td>
+                          <td className="p-3 text-gray-500">
+                            {app.periode}
+                          </td>
+                                                     <td className="p-3 text-center">
+                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(app.status)}`}>
+                               {app.status}
+                             </span>
+                           </td>
+                                                     <td className="p-3 font-medium">
+                             <button
+                               onClick={() => navigate(`/candidature/${app.id}`)}
+                               className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                             >
+                               Voir Détails
+                             </button>
+                           </td>
                         </tr>
                       ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                   )}
+                 </tbody>
+               </table>
 
               {/* Pagination */}
               {totalPages > 1 && (
