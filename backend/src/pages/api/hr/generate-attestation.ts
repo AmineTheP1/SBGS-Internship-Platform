@@ -1,10 +1,408 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+
+// Function to convert image to base64
+const getLogoBase64 = () => {
+  try {
+    const logoPath = path.join(process.cwd(), 'public', 'sbgs-logo.jpeg');
+    if (fs.existsSync(logoPath)) {
+      const logoBuffer = fs.readFileSync(logoPath);
+      return logoBuffer.toString('base64');
+    }
+  } catch (error) {
+    console.log('Error reading logo:', error);
+  }
+  // Fallback to a simple placeholder if logo not found
+  return 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+};
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
+
+// Professional HTML to PDF generation function
+const generateAttestationPDF = (attestationData: any) => {
+  const logoBase64 = getLogoBase64();
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Attestation de Stage - SBGS</title>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Inter', sans-serif;
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          min-height: 100vh;
+          padding: 40px 20px;
+          color: #1e293b;
+          line-height: 1.6;
+        }
+        
+        .attestation-container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .header {
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          color: white;
+          padding: 40px;
+          text-align: center;
+          position: relative;
+        }
+        
+        .header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+          opacity: 0.3;
+        }
+        
+        .logo-section {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 20px;
+          position: relative;
+          z-index: 1;
+        }
+        
+        .logo {
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          background: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-right: 20px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .logo img {
+          width: 60px;
+          height: 60px;
+          object-fit: contain;
+        }
+        
+        .company-info {
+          text-align: left;
+        }
+        
+        .company-name {
+          font-family: 'Playfair Display', serif;
+          font-size: 28px;
+          font-weight: 900;
+          margin-bottom: 5px;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .company-subtitle {
+          font-size: 14px;
+          opacity: 0.9;
+          font-weight: 300;
+        }
+        
+        .title-section {
+          margin-top: 30px;
+          position: relative;
+          z-index: 1;
+        }
+        
+        .main-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 36px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+          font-size: 16px;
+          opacity: 0.9;
+          font-weight: 300;
+        }
+        
+        .content {
+          padding: 50px 40px;
+          position: relative;
+        }
+        
+        .content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 40px;
+          right: 40px;
+          height: 3px;
+          background: linear-gradient(90deg, #dc2626, #b91c1c);
+          border-radius: 2px;
+        }
+        
+        .intro-text {
+          font-size: 18px;
+          color: #374151;
+          margin-bottom: 30px;
+          font-weight: 500;
+        }
+        
+        .candidate-info {
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border-radius: 15px;
+          padding: 30px;
+          margin: 30px 0;
+          border-left: 5px solid #dc2626;
+        }
+        
+        .info-row {
+          display: flex;
+          margin-bottom: 15px;
+          align-items: center;
+        }
+        
+        .info-row:last-child {
+          margin-bottom: 0;
+        }
+        
+        .info-label {
+          font-weight: 600;
+          color: #374151;
+          min-width: 150px;
+          font-size: 14px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+          font-weight: 500;
+          color: #1e293b;
+          font-size: 16px;
+        }
+        
+        .stage-details {
+          background: white;
+          border: 2px solid #e5e7eb;
+          border-radius: 15px;
+          padding: 30px;
+          margin: 30px 0;
+        }
+        
+        .stage-title {
+          font-family: 'Playfair Display', serif;
+          font-size: 20px;
+          font-weight: 700;
+          color: #dc2626;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+        
+        .conclusion {
+          font-size: 16px;
+          color: #374151;
+          margin: 30px 0;
+          text-align: center;
+          font-style: italic;
+        }
+        
+        .signature-section {
+          margin-top: 50px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+        }
+        
+        .signature-box {
+          text-align: center;
+          flex: 1;
+        }
+        
+        .signature-line {
+          width: 200px;
+          height: 2px;
+          background: #374151;
+          margin: 20px auto 10px;
+          border-radius: 1px;
+        }
+        
+        .signature-text {
+          font-size: 14px;
+          color: #6b7280;
+          font-weight: 500;
+        }
+        
+        .date-section {
+          text-align: center;
+          margin-top: 30px;
+          padding: 20px;
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border-radius: 10px;
+        }
+        
+        .date-text {
+          font-size: 16px;
+          color: #374151;
+          font-weight: 500;
+        }
+        
+        .stamp {
+          position: absolute;
+          top: 30px;
+          right: 30px;
+          width: 120px;
+          height: 120px;
+          background: linear-gradient(135deg, #dc2626, #b91c1c);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 700;
+          font-size: 12px;
+          text-align: center;
+          box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+          transform: rotate(15deg);
+        }
+        
+        .stamp::before {
+          content: '';
+          position: absolute;
+          top: -5px;
+          left: -5px;
+          right: -5px;
+          bottom: -5px;
+          border: 2px dashed rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+        }
+        
+        .attestation-number {
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 8px 15px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 500;
+          backdrop-filter: blur(10px);
+        }
+        
+        @media print {
+          body {
+            background: white;
+            padding: 0;
+          }
+          .attestation-container {
+            box-shadow: none;
+            border-radius: 0;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="attestation-container">
+        <div class="stamp">ATTESTATION<br>OFFICIELLE</div>
+        <div class="attestation-number">N° ${attestationData.attestationid}</div>
+        
+        <div class="header">
+                     <div class="logo-section">
+             <div class="logo">
+               <img src="data:image/jpeg;base64,${logoBase64}" alt="SBGS Logo" />
+             </div>
+            <div class="company-info">
+              <div class="company-name">SBGS</div>
+              <div class="company-subtitle">Société des Boissons Gazeuse du Souss</div>
+            </div>
+          </div>
+          
+          <div class="title-section">
+            <div class="main-title">ATTESTATION DE STAGE</div>
+            <div class="subtitle">Certificat officiel de stage professionnel</div>
+          </div>
+        </div>
+        
+        <div class="content">
+          <div class="intro-text">
+            La présente attestation certifie officiellement que :
+          </div>
+          
+          <div class="candidate-info">
+            <div class="info-row">
+              <div class="info-label">Nom et Prénom</div>
+              <div class="info-value">${attestationData.candidateName}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">CIN</div>
+              <div class="info-value">${attestationData.cin || 'Non spécifié'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Établissement</div>
+              <div class="info-value">${attestationData.ecole || 'Non spécifié'}</div>
+            </div>
+          </div>
+          
+          <div class="stage-details">
+            <div class="stage-title">Détails du Stage</div>
+            <div class="info-row">
+              <div class="info-label">Période</div>
+              <div class="info-value">Du ${attestationData.dateDebut ? new Date(attestationData.dateDebut).toLocaleDateString('fr-FR') : 'Non spécifié'} au ${attestationData.dateFin ? new Date(attestationData.dateFin).toLocaleDateString('fr-FR') : 'Non spécifié'}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Rapport</div>
+              <div class="info-value">${attestationData.rapportTitre}</div>
+            </div>
+            <div class="info-row">
+              <div class="info-label">Approbation</div>
+              <div class="info-value">${attestationData.dateValidation ? new Date(attestationData.dateValidation).toLocaleDateString('fr-FR') : 'Non spécifié'}</div>
+            </div>
+          </div>
+          
+          <div class="conclusion">
+            Cette attestation officielle est délivrée pour faire valoir ce que de droit et atteste de la réalisation complète du stage professionnel au sein de notre entreprise.
+          </div>
+          
+          <div class="signature-section">
+            <div class="signature-box">
+              <div class="signature-line"></div>
+              <div class="signature-text">Signature du Responsable RH</div>
+            </div>
+            <div class="signature-box">
+              <div class="signature-line"></div>
+              <div class="signature-text">Cachet de l'entreprise</div>
+            </div>
+          </div>
+          
+          <div class="date-section">
+            <div class="date-text">Fait à Agadir, le ${new Date().toLocaleDateString('fr-FR')}</div>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  return html;
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost");
@@ -32,7 +430,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       SELECT 
         c.cdtid, c.nom, c.prenom, c.email, c.cin, c.statutetudiant,
         r.rstid, r.titre, r.datevalidation, r.stagesid,
-        s.date_debut, s.date_fin,
+        s.datedebut, s.datefin,
         e.nom as ecole_nom
       FROM candidat c
       JOIN rapports_stage r ON c.cdtid = r.cdtid
@@ -48,40 +446,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const candidate = candidateResult.rows[0];
     const attestationid = crypto.randomBytes(8).toString('hex');
 
-    // Check if attestation already exists
+    // First, ensure the cdtid column exists in attestations_stage table
+    try {
+      await pool.query(`ALTER TABLE attestations_stage ADD COLUMN IF NOT EXISTS cdtid VARCHAR(16) REFERENCES candidat(cdtid)`);
+    } catch (error) {
+      console.log("cdtid column might already exist or error occurred:", error);
+    }
+
+    // Check if attestation already exists for this specific candidate and stage
     const existingAttestation = await pool.query(
-      `SELECT atsid FROM attestations_stage WHERE stagesid = $1`,
-      [candidate.stagesid]
+      `SELECT atsid FROM attestations_stage WHERE stagesid = $1 AND cdtid = $2`,
+      [candidate.stagesid, candidate.cdtid]
     );
 
     if (existingAttestation.rows.length > 0) {
-      return res.status(400).json({ success: false, error: "Une attestation existe déjà pour ce stage." });
+      return res.status(400).json({ success: false, error: "Une attestation existe déjà pour ce candidat et ce stage." });
     }
 
-    // Insert attestation record
-    await pool.query(
-      `INSERT INTO attestations_stage (atsid, stagesid, url, dategeneration, cdtid) 
-       VALUES ($1, $2, $3, NOW(), $4)`,
-      [attestationid, candidate.stagesid, null, candidate.cdtid]
-    );
-
-    // Generate attestation data (this would normally generate a PDF)
+    // Generate attestation data
     const attestationData = {
       attestationid,
       candidateName: `${candidate.prenom} ${candidate.nom}`,
       cin: candidate.cin,
       rapportTitre: candidate.titre,
       dateValidation: candidate.datevalidation,
-      dateDebut: candidate.date_debut,
-      dateFin: candidate.date_fin,
+      dateDebut: candidate.datedebut,
+      dateFin: candidate.datefin,
       ecole: candidate.ecole_nom,
       dateGeneration: new Date().toISOString()
     };
 
+    // Generate PDF content (HTML for now, can be converted to PDF later)
+    const pdfContent = generateAttestationPDF(attestationData);
+    
+    // Create filename
+    const filename = `attestation_${attestationid}_${Date.now()}.html`;
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    const filePath = path.join(uploadsDir, filename);
+    
+    // Ensure uploads directory exists
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    
+    // Write the file
+    fs.writeFileSync(filePath, pdfContent);
+    
+    // File URL for database
+    const fileUrl = `/uploads/${filename}`;
+
+    // Insert attestation record with file URL
+    await pool.query(
+      `INSERT INTO attestations_stage (atsid, stagesid, url, dategeneration, cdtid) 
+       VALUES ($1, $2, $3, NOW(), $4)`,
+      [attestationid, candidate.stagesid, fileUrl, candidate.cdtid]
+    );
+
     res.status(200).json({ 
       success: true, 
       message: "Attestation générée avec succès.",
-      attestation: attestationData
+      attestation: {
+        ...attestationData,
+        downloadUrl: fileUrl
+      }
     });
 
   } catch (error) {

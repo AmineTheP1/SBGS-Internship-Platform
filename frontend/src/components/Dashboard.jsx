@@ -470,6 +470,12 @@ export default function Dashboard() {
     }
   };
 
+  const handleDownloadAttestation = (downloadUrl) => {
+    if (downloadUrl) {
+      window.open(`${API_BASE_URL}${downloadUrl}`, '_blank');
+    }
+  };
+
   if (loading) {
     console.log("Dashboard is loading...");
     return <div className="text-center py-20 text-xl">Chargement des candidatures...</div>;
@@ -637,17 +643,27 @@ export default function Dashboard() {
                    </table>
                  )}
                 
-                {attestationStatus && (
-                  <div className={`mt-4 p-4 rounded-lg ${
-                    attestationStatus.includes('succès') 
-                      ? 'bg-green-100 text-green-700' 
-                      : attestationStatus.includes('Erreur') 
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {attestationStatus}
-                  </div>
-                )}
+                                 {attestationStatus && (
+                   <div className={`mt-4 p-4 rounded-lg ${
+                     attestationStatus.includes('succès') 
+                       ? 'bg-green-100 text-green-700' 
+                       : attestationStatus.includes('Erreur') 
+                       ? 'bg-red-100 text-red-700'
+                       : 'bg-blue-100 text-blue-700'
+                   }`}>
+                     <div className="flex items-center justify-between">
+                       <span>{attestationStatus}</span>
+                       {attestationStatus.includes('succès') && selectedAttestation?.downloadUrl && (
+                         <button
+                           onClick={() => handleDownloadAttestation(selectedAttestation.downloadUrl)}
+                           className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                         >
+                           Télécharger l'attestation
+                         </button>
+                       )}
+                     </div>
+                   </div>
+                 )}
               </div>
             </div>
           </div>
