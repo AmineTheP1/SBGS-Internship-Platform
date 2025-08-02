@@ -70,7 +70,8 @@ const generateAttestationPDF = (attestationData: any) => {
          }
         
                  .attestation-container {
-           max-width: 800px;
+           max-width: 95%;
+           width: 100%;
            margin: 0 auto;
            background: white;
            border-radius: 15px;
@@ -167,7 +168,7 @@ const generateAttestationPDF = (attestationData: any) => {
         }
         
                  .content {
-           padding: 25px 20px;
+           padding: 25px 30px;
            position: relative;
            flex: 1;
            display: flex;
@@ -210,14 +211,14 @@ const generateAttestationPDF = (attestationData: any) => {
           margin-bottom: 0;
         }
         
-        .info-label {
-          font-weight: 600;
-          color: #374151;
-          min-width: 120px;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
+                 .info-label {
+           font-weight: 600;
+           color: #374151;
+           min-width: 140px;
+           font-size: 12px;
+           text-transform: uppercase;
+           letter-spacing: 0.5px;
+         }
         
         .info-value {
           font-weight: 500;
@@ -262,13 +263,13 @@ const generateAttestationPDF = (attestationData: any) => {
           flex: 1;
         }
         
-        .signature-line {
-          width: 200px;
-          height: 2px;
-          background: #374151;
-          margin: 20px auto 10px;
-          border-radius: 1px;
-        }
+                 .signature-line {
+           width: 250px;
+           height: 2px;
+           background: #374151;
+           margin: 20px auto 10px;
+           border-radius: 1px;
+         }
         
         .signature-text {
           font-size: 14px;
@@ -391,7 +392,7 @@ const generateAttestationPDF = (attestationData: any) => {
                  @media print {
            @page {
              size: A4;
-             margin: 15mm;
+             margin: 10mm;
            }
            
            /* Hide browser-generated headers and footers */
@@ -419,6 +420,7 @@ const generateAttestationPDF = (attestationData: any) => {
              box-shadow: none;
              border-radius: 0;
              max-width: 100%;
+             width: 100%;
              margin: 0;
              border: 2px solid #333;
              min-height: auto;
@@ -432,7 +434,7 @@ const generateAttestationPDF = (attestationData: any) => {
              print-color-adjust: exact;
            }
            .content {
-             padding: 15px;
+             padding: 20px 25px;
            }
            .logo {
              width: 50px;
@@ -512,6 +514,7 @@ const generateAttestationPDF = (attestationData: any) => {
              background: #333 !important;
              -webkit-print-color-adjust: exact;
              print-color-adjust: exact;
+             width: 200px !important;
            }
            .signature-text {
              color: #333 !important;
@@ -578,7 +581,7 @@ const generateAttestationPDF = (attestationData: any) => {
            
            .info-label {
              font-size: 10px;
-             min-width: 80px;
+             min-width: 100px;
            }
            
            .info-value {
