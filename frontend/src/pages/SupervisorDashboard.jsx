@@ -216,9 +216,6 @@ export default function SupervisorDashboard() {
       if (data.success) {
         setConfirmationStatus(data.message);
         
-        // Refresh intern details
-        handleViewInternDetails(cdtid);
-        
         // Refresh the assigned interns data to update counters
         const internsRes = await fetch(API_ENDPOINTS.SUPERVISOR_ASSIGNED_INTERNS, {
           credentials: "include"
