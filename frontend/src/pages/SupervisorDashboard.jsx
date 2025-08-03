@@ -1063,7 +1063,7 @@ export default function SupervisorDashboard() {
                           {report.prenom} {report.nom}
                         </h3>
                         <p 
-                          className="text-sm text-gray-600 truncate cursor-pointer hover:text-blue-600 hover:underline" 
+                          className="text-sm text-red-600 truncate cursor-pointer hover:text-red-600 hover:underline" 
                           title={report.titre}
                           onClick={() => {
                             if (report.url) {
