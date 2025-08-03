@@ -71,7 +71,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
          AND DATE(date) = $2
          GROUP BY cdtid
        ) pending_counts ON c.cdtid = pending_counts.cdtid
-       WHERE a.resid = $1 AND a.statut = 'Actif'
+       WHERE a.resid = $1 
+       AND a.statut = 'Actif'
+       AND NOT EXISTS (
+         SELECT 1 FROM rapports_stage rs 
+         WHERE rs.cdtid = c.cdtid 
+         AND rs.statut = 'Approuvé'
+       )
        ORDER BY a.date_assignation DESC`,
       [supervisor.resid, today]
     );
