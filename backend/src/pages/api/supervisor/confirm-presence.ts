@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import jwt from "jsonwebtoken";
 import { handleCors } from "../../../utilities/cors";
+import sendEmail from "../../../utilities/sendEmail";
 
 // Confirm presence endpoint for supervisors - Updated
 
@@ -130,6 +131,54 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             [cdtid, normalizedDate, 'Absence confirmée par le superviseur', false, supervisor.resid]
           );
           console.log("Absence record created:", absenceResult.rows);
+
+          // Send email to candidate about the absence
+          try {
+            // Get candidate information
+            const candidateResult = await pool.query(
+              `SELECT c.email, c.prenom, c.nom FROM candidat c WHERE c.cdtid = $1`,
+              [cdtid]
+            );
+
+            if (candidateResult.rows.length > 0) {
+              const candidate = candidateResult.rows[0];
+              const fullName = `${candidate.prenom} ${candidate.nom}`.trim();
+              
+              // Format the date for display
+              const dateObj = new Date(normalizedDate);
+              const formattedDate = dateObj.toLocaleDateString('fr-FR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              });
+
+              await sendEmail({
+                to: candidate.email,
+                subject: "AVERTISSEMENT - Absence non justifiée",
+                text: `Bonjour ${fullName},
+
+AVERTISSEMENT: Votre absence du ${formattedDate} a été notée comme NON JUSTIFIÉE par votre responsable de stage.
+
+Motif: Absence confirmée par le superviseur
+Statut: NON JUSTIFIÉE
+
+⚠️ ATTENTION: Cette absence non justifiée peut avoir des conséquences sur votre évaluation de stage.
+
+Veuillez contacter votre responsable de stage pour justifier cette absence.
+
+Cordialement,
+SBGS Plateforme`,
+                html: undefined
+              });
+              
+              console.log("Absence notification email sent to:", candidate.email);
+            }
+          } catch (emailError) {
+            console.error('Error sending absence notification email:', emailError);
+            // Continue processing even if email fails
+            // We don't want to fail the whole request if just the email fails
+          }
         }
       } catch (error) {
         console.error('Error creating absence record:', error);

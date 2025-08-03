@@ -86,7 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await sendEmail({
         to: candidate.email,
         subject: "Absence justifiée - Notification",
-        text: `Bonjour ${fullName},\n\nVotre absence du ${new Date(date_absence).toLocaleDateString('fr-FR')} a été notée par votre responsable de stage.\n\nMotif: ${motif || 'Non spécifié'}\nStatut: Justifiée\n\nCordialement,\nSBGS Plateforme`
+        text: `Bonjour ${fullName},\n\nVotre absence du ${new Date(date_absence).toLocaleDateString('fr-FR')} a été notée par votre responsable de stage.\n\nMotif: ${motif || 'Non spécifié'}\nStatut: Justifiée\n\nCordialement,\nSBGS Plateforme`,
+        html: undefined
       });
     }
 

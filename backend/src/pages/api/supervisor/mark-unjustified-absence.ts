@@ -86,7 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await sendEmail({
         to: candidate.email,
         subject: "AVERTISSEMENT - Absence non justifiée",
-        text: `Bonjour ${fullName},\n\nAVERTISSEMENT: Votre absence du ${new Date(date_absence).toLocaleDateString('fr-FR')} a été notée comme NON JUSTIFIÉE par votre responsable de stage.\n\nMotif: ${motif || 'Non spécifié'}\nStatut: NON JUSTIFIÉE\n\n⚠️ ATTENTION: Cette absence non justifiée peut avoir des conséquences sur votre évaluation de stage.\n\nVeuillez contacter votre responsable de stage pour justifier cette absence.\n\nCordialement,\nSBGS Plateforme`
+        text: `Bonjour ${fullName},\n\nAVERTISSEMENT: Votre absence du ${new Date(date_absence).toLocaleDateString('fr-FR')} a été notée comme NON JUSTIFIÉE par votre responsable de stage.\n\nMotif: ${motif || 'Non spécifié'}\nStatut: NON JUSTIFIÉE\n\n⚠️ ATTENTION: Cette absence non justifiée peut avoir des conséquences sur votre évaluation de stage.\n\nVeuillez contacter votre responsable de stage pour justifier cette absence.\n\nCordialement,\nSBGS Plateforme`,
+        html: undefined
       });
     }
 
