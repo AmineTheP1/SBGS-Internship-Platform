@@ -56,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         a.date_assignation,
         a.statut as statut_assignation,
         a.theme_stage,
-        CASE WHEN p.cdtid IS NOT NULL THEN true ELSE false END as today_attendance,
+        CASE WHEN p.cdtid IS NOT NULL AND p.confirme_par_superviseur = true THEN true ELSE false END as today_attendance,
         COALESCE(pending_counts.pending_count, 0)::integer as pending_confirmations
        FROM assignations_stage a
        JOIN candidat c ON a.cdtid = c.cdtid
@@ -68,6 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
            COUNT(*) as pending_count 
          FROM presence 
          WHERE confirme_par_superviseur IS NULL 
+         AND DATE(date) = $2
          GROUP BY cdtid
        ) pending_counts ON c.cdtid = pending_counts.cdtid
        WHERE a.resid = $1 AND a.statut = 'Actif'

@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
   SUPERVISOR_GET_INTERN_REPORTS: `${API_BASE_URL}/api/supervisor/get-intern-reports`,
   SUPERVISOR_APPROVE_REPORT: `${API_BASE_URL}/api/supervisor/approve-report`,
 
+
   // Candidate endpoints
   CANDIDATE_LOGIN: `${API_BASE_URL}/api/candidate/login`,
   CANDIDATE_SESSION: `${API_BASE_URL}/api/candidate/session`,

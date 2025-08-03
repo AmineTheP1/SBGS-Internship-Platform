@@ -188,8 +188,14 @@ export default function SupervisorDashboard() {
     }
   };
 
+              
+
   const handleConfirmPresence = async (cdtid, date, confirmed) => {
     try {
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('Making request to:', API_ENDPOINTS.SUPERVISOR_CONFIRM_PRESENCE);
+      console.log('Request data:', { cdtid, date, confirmed });
+      
       const response = await fetch(API_ENDPOINTS.SUPERVISOR_CONFIRM_PRESENCE, {
         method: "POST",
         headers: {
@@ -202,6 +208,9 @@ export default function SupervisorDashboard() {
           confirmed: confirmed
         }),
       });
+      
+      console.log('Response status:', response.status);
+      console.log('Response URL:', response.url);
 
       const data = await response.json();
       if (data.success) {
@@ -217,6 +226,26 @@ export default function SupervisorDashboard() {
         if (internsRes.ok) {
           const internsData = await internsRes.json();
           setInterns(internsData.interns || []);
+        }
+        
+        // Refresh confirmations data to remove the confirmed item
+        const confirmationsRes = await fetch(API_ENDPOINTS.SUPERVISOR_PENDING_CONFIRMATIONS, {
+          credentials: "include"
+        });
+        if (confirmationsRes.ok) {
+          const confirmationsData = await confirmationsRes.json();
+          setConfirmationsData(confirmationsData.confirmations || []);
+          setPendingConfirmations(confirmationsData.count || 0);
+        }
+        
+        // Refresh absences data in case an absence was created
+        const absencesRes = await fetch(API_ENDPOINTS.SUPERVISOR_MONTHLY_ABSENCES, {
+          credentials: "include"
+        });
+        if (absencesRes.ok) {
+          const absencesData = await absencesRes.json();
+          setAbsencesData(absencesData.absences || []);
+          setMonthlyAbsences(absencesData.count || 0);
         }
         
         setTimeout(() => setConfirmationStatus(""), 3000);
@@ -383,7 +412,6 @@ export default function SupervisorDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      
         
         {/* Stats Cards */}
         <div className="grid md:grid-cols-5 gap-6 mb-8">
