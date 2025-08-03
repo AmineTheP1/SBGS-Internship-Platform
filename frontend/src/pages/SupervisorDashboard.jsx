@@ -780,6 +780,9 @@ export default function SupervisorDashboard() {
                             {absence.prenom} {absence.nom}
                           </h3>
                           <p className="text-sm text-gray-600">ID: {absence.cdtid}</p>
+                          <p className="text-xs text-red-600 font-medium">
+                            {absence.absence_count} absence{absence.absence_count > 1 ? 's' : ''} ce mois
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">

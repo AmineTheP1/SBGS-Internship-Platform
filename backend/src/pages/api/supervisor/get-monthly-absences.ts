@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
-    // Get detailed absences data
+    // Get detailed absences data with count per candidate
     const absencesResult = await pool.query(
       `SELECT 
         a.id as absenceid,
@@ -40,7 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         a.date_absence,
         a.date_creation as date_declaration,
         a.motif as raison,
-        a.justifiee as type
+        a.justifiee as type,
+        COUNT(*) OVER (PARTITION BY a.cdtid) as absence_count
        FROM absences a
        JOIN candidat c ON a.cdtid = c.cdtid
        JOIN assignations_stage ast ON a.cdtid = ast.cdtid
