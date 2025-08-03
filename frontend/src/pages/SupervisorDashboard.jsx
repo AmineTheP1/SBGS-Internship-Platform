@@ -37,6 +37,24 @@ export default function SupervisorDashboard() {
   const navigate = useNavigate();
   const reportsSectionRef = useRef(null);
 
+  // Function to handle view changes and reset pagination
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    // Reset pagination for all views
+    setCurrentCandidatePage(1);
+    setCurrentReportPage(1);
+    setCurrentPresentPage(1);
+    setCurrentAbsencePage(1);
+    setCurrentConfirmationPage(1);
+  };
+
+  // Pagination state for new cards
+  const [currentPresentPage, setCurrentPresentPage] = useState(1);
+  const [currentAbsencePage, setCurrentAbsencePage] = useState(1);
+  const [currentConfirmationPage, setCurrentConfirmationPage] = useState(1);
+  const [presentPerPage] = useState(6);
+  const [absencePerPage] = useState(6);
+  const [confirmationPerPage] = useState(6);
 
 
   useEffect(() => {
@@ -384,6 +402,23 @@ export default function SupervisorDashboard() {
   const currentReports = reports.slice(indexOfFirstReport, indexOfLastReport);
   const totalReportPages = Math.ceil(reports.length / reportsPerPage);
 
+  // Pagination logic for new cards
+  const presentInterns = interns.filter(intern => intern.today_attendance === true);
+  const indexOfLastPresent = currentPresentPage * presentPerPage;
+  const indexOfFirstPresent = indexOfLastPresent - presentPerPage;
+  const currentPresentInterns = presentInterns.slice(indexOfFirstPresent, indexOfLastPresent);
+  const totalPresentPages = Math.ceil(presentInterns.length / presentPerPage);
+
+  const indexOfLastAbsence = currentAbsencePage * absencePerPage;
+  const indexOfFirstAbsence = indexOfLastAbsence - absencePerPage;
+  const currentAbsences = absencesData.slice(indexOfFirstAbsence, indexOfLastAbsence);
+  const totalAbsencePages = Math.ceil(absencesData.length / absencePerPage);
+
+  const indexOfLastConfirmation = currentConfirmationPage * confirmationPerPage;
+  const indexOfFirstConfirmation = indexOfLastConfirmation - confirmationPerPage;
+  const currentConfirmations = confirmationsData.slice(indexOfFirstConfirmation, indexOfLastConfirmation);
+  const totalConfirmationPages = Math.ceil(confirmationsData.length / confirmationPerPage);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -414,7 +449,7 @@ export default function SupervisorDashboard() {
         <div className="grid md:grid-cols-5 gap-6 mb-8">
           <div 
             className={`bg-white border ${currentView === 'interns' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-            onClick={() => setCurrentView('interns')}
+            onClick={() => handleViewChange('interns')}
           >
             <div className="flex items-center">
               <div className="bg-blue-100 p-3 rounded-lg">
@@ -429,7 +464,7 @@ export default function SupervisorDashboard() {
 
                      <div 
                        className={`bg-white border ${currentView === 'present' ? 'border-green-500 ring-2 ring-green-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-                       onClick={() => setCurrentView('present')}>
+                       onClick={() => handleViewChange('present')}>
              <div className="flex items-center">
                <div className="bg-green-100 p-3 rounded-lg">
                  <FaClock className="text-2xl text-green-600" />
@@ -445,7 +480,7 @@ export default function SupervisorDashboard() {
           
           <div 
             className={`bg-white border ${currentView === 'absences' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-            onClick={() => setCurrentView('absences')}>
+            onClick={() => handleViewChange('absences')}>
             <div className="flex items-center">
               <div className="bg-purple-100 p-3 rounded-lg">
                 <FaCalendar className="text-2xl text-purple-600" />
@@ -459,7 +494,7 @@ export default function SupervisorDashboard() {
 
                      <div 
                        className={`bg-white border ${currentView === 'confirmations' ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-                       onClick={() => setCurrentView('confirmations')}
+                       onClick={() => handleViewChange('confirmations')}
                      >
              <div className="flex items-center">
                <div className="bg-orange-100 p-3 rounded-lg">
@@ -476,7 +511,7 @@ export default function SupervisorDashboard() {
 
            <div 
             className={`bg-white border ${currentView === 'reports' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200'} rounded-xl p-6 cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-            onClick={() => setCurrentView('reports')}
+            onClick={() => handleViewChange('reports')}
           >
             <div className="flex items-center">
               <div className="bg-yellow-100 p-3 rounded-lg">
@@ -675,14 +710,14 @@ export default function SupervisorDashboard() {
               </div>
             </div>
 
-            {interns.filter(intern => intern.today_attendance === true).length === 0 ? (
+            {currentPresentInterns.length === 0 ? (
               <div className="text-center py-12">
                 <FaClock className="text-4xl text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-500">Aucun stagiaire présent aujourd'hui</p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {interns.filter(intern => intern.today_attendance === true).map((intern) => (
+                {currentPresentInterns.map((intern) => (
                   <div key={intern.cdtid} className="bg-green-50 rounded-lg p-6 border border-green-200">
                     <div className="flex items-center mb-4">
                       <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center mr-4 overflow-hidden">
@@ -733,6 +768,29 @@ export default function SupervisorDashboard() {
                 ))}
               </div>
             )}
+            
+            {/* Present Interns Pagination */}
+            {totalPresentPages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentPresentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPresentPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentPresentPage} sur {totalPresentPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPresentPage(prev => Math.min(prev + 1, totalPresentPages))}
+                  disabled={currentPresentPage === totalPresentPages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -746,14 +804,14 @@ export default function SupervisorDashboard() {
               </div>
             </div>
 
-            {absencesData.length === 0 ? (
+            {currentAbsences.length === 0 ? (
               <div className="text-center py-12">
                 <FaCalendar className="text-4xl text-purple-300 mx-auto mb-4" />
                 <p className="text-gray-500">Aucune absence enregistrée ce mois</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {absencesData.map((absence) => (
+                {currentAbsences.map((absence) => (
                   <div key={absence.absenceid} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">
@@ -817,6 +875,29 @@ export default function SupervisorDashboard() {
                 ))}
               </div>
             )}
+            
+            {/* Absences Pagination */}
+            {totalAbsencePages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentAbsencePage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentAbsencePage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentAbsencePage} sur {totalAbsencePages}
+                </span>
+                <button
+                  onClick={() => setCurrentAbsencePage(prev => Math.min(prev + 1, totalAbsencePages))}
+                  disabled={currentAbsencePage === totalAbsencePages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -830,14 +911,14 @@ export default function SupervisorDashboard() {
               </div>
             </div>
 
-            {confirmationsData.length === 0 ? (
+            {currentConfirmations.length === 0 ? (
               <div className="text-center py-12">
                 <FaClock className="text-4xl text-orange-300 mx-auto mb-4" />
                 <p className="text-gray-500">Aucune confirmation en attente</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {confirmationsData.map((confirmation) => (
+                {currentConfirmations.map((confirmation) => (
                   <div key={confirmation.confirmationid} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                                          <div className="flex items-center justify-between mb-4">
                        <div className="flex items-center">
@@ -905,6 +986,29 @@ export default function SupervisorDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+            
+            {/* Confirmations Pagination */}
+            {totalConfirmationPages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentConfirmationPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentConfirmationPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentConfirmationPage} sur {totalConfirmationPages}
+                </span>
+                <button
+                  onClick={() => setCurrentConfirmationPage(prev => Math.min(prev + 1, totalConfirmationPages))}
+                  disabled={currentConfirmationPage === totalConfirmationPages}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
               </div>
             )}
           </div>
