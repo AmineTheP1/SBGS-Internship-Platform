@@ -53,7 +53,7 @@ export default function SupervisorDashboard() {
   const [currentAbsencePage, setCurrentAbsencePage] = useState(1);
   const [currentConfirmationPage, setCurrentConfirmationPage] = useState(1);
   const [presentPerPage] = useState(6);
-  const [absencePerPage] = useState(6);
+  const [absencePerPage] = useState(4);
   const [confirmationPerPage] = useState(6);
 
 
