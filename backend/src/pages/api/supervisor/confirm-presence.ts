@@ -21,15 +21,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("Confirm presence endpoint called");
     console.log("Request body:", req.body);
     
-    // Temporarily bypass authentication for testing
-    // const token = req.cookies?.supervisor_token;
-    // if (!token) {
-    //   return res.status(401).json({ success: false, error: "Not authenticated" });
-    // }
-    // const supervisor = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    
-    // Use a default supervisor ID for testing
-    const supervisor = { resid: 'res001' };
+    // Get supervisor info from token
+    const token = req.cookies?.supervisor_token;
+
+    if (!token) {
+      return res.status(401).json({ success: false, error: "Not authenticated" });
+    }
+
+    const supervisor = jwt.verify(token, process.env.JWT_SECRET!) as any;
     
     const { cdtid, date, confirmed } = req.body;
 
@@ -62,14 +61,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("Normalized date:", normalizedDate);
     console.log("Today's date:", new Date().toISOString().split('T')[0]);
 
-    // Skip assignment check for testing
-    // const assignmentCheck = await pool.query(
-    //   `SELECT * FROM assignations_stage WHERE resid = $1 AND cdtid = $2 AND statut = 'Actif'`,
-    //   [supervisor.resid, cdtid]
-    // );
-    // if (assignmentCheck.rows.length === 0) {
-    //   return res.status(403).json({ success: false, error: "Not authorized to manage this intern" });
-    // }
+    // Verify supervisor is assigned to this intern
+    const assignmentCheck = await pool.query(
+      `SELECT * FROM assignations_stage WHERE resid = $1 AND cdtid = $2 AND statut = 'Actif'`,
+      [supervisor.resid, cdtid]
+    );
+
+    if (assignmentCheck.rows.length === 0) {
+      return res.status(403).json({ success: false, error: "Not authorized to manage this intern" });
+    }
 
     // Check if attendance record exists for this date
     const attendanceCheck = await pool.query(
