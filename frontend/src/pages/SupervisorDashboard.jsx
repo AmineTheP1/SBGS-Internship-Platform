@@ -1062,7 +1062,15 @@ export default function SupervisorDashboard() {
                         <h3 className="font-semibold text-gray-800 truncate">
                           {report.prenom} {report.nom}
                         </h3>
-                        <p className="text-sm text-gray-600 truncate" title={report.titre}>
+                        <p 
+                          className="text-sm text-gray-600 truncate cursor-pointer hover:text-blue-600 hover:underline" 
+                          title={report.titre}
+                          onClick={() => {
+                            if (report.url) {
+                              window.open(`${API_BASE_URL}${report.url}`, '_blank');
+                            }
+                          }}
+                        >
                           {report.titre}
                         </p>
                       </div>
