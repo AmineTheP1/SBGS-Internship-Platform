@@ -1,8 +1,9 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
+import EnhancedChatbot from "./components/EnhancedChatbot";
 import Home from "./pages/Home";
 import Apply from "./pages/Apply";
 import HRPortal from "./pages/HRPortal";
@@ -16,6 +17,9 @@ import SupervisorLogin from './pages/SupervisorLogin';
 import SupervisorDashboard from './pages/SupervisorDashboard';
 
 function App() {
+  const location = useLocation();
+  const isHRDashboard = location.pathname === '/admin';
+
   return (
     <div className="bg-gray-50 min-h-screen font-poppins">
       <Navbar />
@@ -33,7 +37,7 @@ function App() {
         <Route path="/candidature/:id" element={<CandidateDetails />} />
       </Routes>
       <Footer />
-      <Chatbot />
+      {isHRDashboard ? <EnhancedChatbot /> : <Chatbot />}
     </div>
   );
 }
