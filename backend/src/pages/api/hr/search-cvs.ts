@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const keywords = extractKeywords(query);
     console.log("Extracted keywords:", keywords);
 
-    // Get all CV files from the database
+    // Get all CV files from the database - only candidates with pending status
     const result = await pool.query(`
       SELECT 
         c.cdtid, c.nom, c.prenom, c.email, c.telephone,
@@ -45,7 +45,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       FROM candidat c
       JOIN demandes_stage d ON c.cdtid = d.cdtid
       LEFT JOIN pieces_jointes p ON p.dsgid = d.dsgid AND p.typepiece = 'CV'
-      WHERE p.url IS NOT NULL
+      WHERE p.url IS NOT NULL 
+        AND d.statut = 'En attente'
     `);
 
     const candidates = [];

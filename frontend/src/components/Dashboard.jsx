@@ -45,8 +45,6 @@ export default function Dashboard() {
   const approved = applications.filter(app => app.status === "Accepté").length;
   const rejected = applications.filter(app => app.status === "Rejeté").length;
 
-  // Debug: Log statistics
-  console.log("Statistics:", { totalSubmissions, pendingReview, approved, rejected });
 
   // Helper function to safely parse JSON strings
   const parseJsonString = (value) => {
