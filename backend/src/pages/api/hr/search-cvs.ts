@@ -95,7 +95,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         // Only include candidates with meaningful matches (not just common words)
         const meaningfulKeywords = keywords.filter(keyword => 
-          !['cherche', 'trouve', 'candidats', 'candidat', 'avec', 'qui', 'ont', 'experience', 'expérience'].includes(keyword.toLowerCase())
+          !['cherche', 'trouve', 'candidats', 'candidat', 'avec', 'qui', 'ont', 'experience', 'expérience', 'des', 'les', 'qui', 'ont', 'avec'].includes(keyword.toLowerCase())
         );
 
         if (matches.length > 0 && meaningfulKeywords.some(keyword => matches.includes(keyword))) {
@@ -167,30 +167,69 @@ function extractKeywords(query: string): string[] {
     'veloppeurs', 'veloppeur' // Handle partial matches
   ];
 
-  // Extract words and filter out common words
+  // Extract words and filter out common words - more inclusive approach
   const words = query.toLowerCase()
     .replace(/[^\w\s]/g, ' ') // Remove punctuation
     .split(/\s+/)
     .filter(word => word.length > 2 && !commonWords.includes(word))
     .filter(word => {
-      // Only keep words that are likely to be skills/technologies
-      const techKeywords = [
+      // Keep any word that could be a skill, experience, or qualification
+      // This includes languages, software, tools, methodologies, etc.
+      const skillKeywords = [
+        // Programming & Development
         'angular', 'react', 'vue', 'node', 'python', 'java', 'javascript', 'typescript',
         'php', 'sql', 'mongodb', 'docker', 'kubernetes', 'aws', 'azure', 'git',
         'html', 'css', 'bootstrap', 'tailwind', 'jquery', 'express', 'django',
         'flask', 'spring', 'laravel', 'symfony', 'csharp', 'dotnet', 'ruby',
         'go', 'rust', 'swift', 'kotlin', 'scala', 'r', 'matlab', 'c', 'cpp',
         'mysql', 'postgresql', 'sqlite', 'redis', 'elasticsearch', 'kafka',
-        'jenkins', 'travis', 'circleci', 'github', 'gitlab', 'bitbucket'
+        'jenkins', 'travis', 'circleci', 'github', 'gitlab', 'bitbucket',
+        
+        // Languages
+        'français', 'francais', 'anglais', 'arabe', 'espagnol', 'allemand', 'italien',
+        'french', 'english', 'arabic', 'spanish', 'german', 'italian', 'portuguese',
+        
+        // Business & Management
+        'marketing', 'vente', 'sales', 'finance', 'comptabilité', 'comptabilite', 'accounting',
+        'rh', 'hr', 'ressources humaines', 'management', 'gestion', 'leadership',
+        'projet', 'project', 'agile', 'scrum', 'kanban', 'lean', 'six sigma',
+        
+        // Design & Creative
+        'design', 'photoshop', 'illustrator', 'figma', 'sketch', 'invision',
+        'ui', 'ux', 'user interface', 'user experience', 'graphic', 'graphique',
+        'web design', 'print design', 'branding', 'logo', 'typography',
+        
+        // Office & Tools
+        'excel', 'word', 'powerpoint', 'outlook', 'office', 'google', 'suite',
+        'adobe', 'autocad', 'solidworks', 'sketchup', 'blender', 'maya',
+        
+        // Industry Specific
+        'mécanique', 'mecanique', 'electrique', 'électrique', 'electronique', 'électronique',
+        'chimie', 'chemistry', 'biologie', 'biology', 'medecine', 'médecine',
+        'architecture', 'construction', 'civil', 'genie', 'génie', 'engineering',
+        
+        // Soft Skills
+        'communication', 'teamwork', 'collaboration', 'problem solving', 'résolution',
+        'creativity', 'créativité', 'innovation', 'adaptability', 'adaptabilité',
+        'organization', 'organisation', 'planning', 'planification',
+        
+        // Education & Certifications
+        'bac', 'licence', 'master', 'doctorat', 'phd', 'diplome', 'diplôme',
+        'certification', 'formation', 'training', 'workshop', 'seminar',
+        
+        // Experience Levels
+        'junior', 'senior', 'expert', 'specialist', 'spécialiste', 'consultant',
+        'debutant', 'débutant', 'beginner', 'intermediate', 'avance', 'avancé'
       ];
       
-      return techKeywords.some(tech => 
-        word.includes(tech) || tech.includes(word)
-      ) || word.length > 4; // Keep longer words that might be skills
+      return skillKeywords.some(skill => 
+        word.includes(skill) || skill.includes(word)
+      ) || word.length > 3; // Keep longer words that might be skills
     });
 
-  // Add common technology variations
-  const techVariations: { [key: string]: string[] } = {
+  // Add common skill variations
+  const skillVariations: { [key: string]: string[] } = {
+    // Programming & Development
     'angular': ['angular', 'angularjs', 'angular.js'],
     'react': ['react', 'reactjs', 'react.js', 'reactjs'],
     'vue': ['vue', 'vuejs', 'vue.js'],
@@ -217,15 +256,74 @@ function extractKeywords(query: string): string[] {
     'flask': ['flask', 'flask-restful'],
     'spring': ['spring', 'springboot', 'spring boot'],
     'laravel': ['laravel', 'laravel8', 'laravel9'],
-    'symfony': ['symfony', 'symfony4', 'symfony5']
+    'symfony': ['symfony', 'symfony4', 'symfony5'],
+    
+    // Languages
+    'français': ['français', 'francais', 'french'],
+    'anglais': ['anglais', 'english'],
+    'arabe': ['arabe', 'arabic'],
+    'espagnol': ['espagnol', 'spanish'],
+    'allemand': ['allemand', 'german'],
+    
+    // Business & Management
+    'marketing': ['marketing', 'digital marketing', 'social media'],
+    'vente': ['vente', 'sales', 'commercial'],
+    'finance': ['finance', 'financial', 'financier'],
+    'comptabilité': ['comptabilité', 'comptabilite', 'accounting'],
+    'rh': ['rh', 'hr', 'ressources humaines', 'human resources'],
+    'management': ['management', 'gestion', 'leadership'],
+    'projet': ['projet', 'project', 'project management'],
+    'agile': ['agile', 'scrum', 'kanban'],
+    
+    // Design & Creative
+    'design': ['design', 'graphic design', 'web design'],
+    'photoshop': ['photoshop', 'adobe photoshop', 'ps'],
+    'illustrator': ['illustrator', 'adobe illustrator', 'ai'],
+    'figma': ['figma', 'ui design', 'ux design'],
+    'ui': ['ui', 'user interface', 'interface'],
+    'ux': ['ux', 'user experience', 'experience'],
+    
+    // Office & Tools
+    'excel': ['excel', 'microsoft excel', 'spreadsheet'],
+    'word': ['word', 'microsoft word', 'document'],
+    'powerpoint': ['powerpoint', 'microsoft powerpoint', 'presentation'],
+    'office': ['office', 'microsoft office', 'ms office'],
+    
+    // Industry Specific
+    'mécanique': ['mécanique', 'mecanique', 'mechanical'],
+    'électrique': ['électrique', 'electrique', 'electrical'],
+    'électronique': ['électronique', 'electronique', 'electronics'],
+    'chimie': ['chimie', 'chemistry', 'chemical'],
+    'biologie': ['biologie', 'biology', 'biological'],
+    'architecture': ['architecture', 'architectural'],
+    'construction': ['construction', 'building'],
+    'génie': ['génie', 'genie', 'engineering'],
+    
+    // Soft Skills
+    'communication': ['communication', 'communicative'],
+    'teamwork': ['teamwork', 'team work', 'collaboration'],
+    'problem solving': ['problem solving', 'résolution', 'resolution'],
+    'creativity': ['creativity', 'créativité', 'creative'],
+    'organization': ['organization', 'organisation', 'organizational'],
+    
+    // Education & Certifications
+    'licence': ['licence', 'bachelor', 'bac+3'],
+    'master': ['master', 'masters', 'bac+5'],
+    'doctorat': ['doctorat', 'phd', 'doctorate'],
+    'certification': ['certification', 'certified', 'cert'],
+    
+    // Experience Levels
+    'junior': ['junior', 'débutant', 'debutant', 'beginner'],
+    'senior': ['senior', 'avancé', 'avance', 'expert'],
+    'specialist': ['specialist', 'spécialiste', 'specialist']
   };
 
-  // Find technology matches and add variations
+  // Find skill matches and add variations
   const enhancedWords = [...words];
   for (const word of words) {
-    for (const [tech, variations] of Object.entries(techVariations)) {
+    for (const [skill, variations] of Object.entries(skillVariations)) {
       if (variations.some(v => word.includes(v) || v.includes(word))) {
-        enhancedWords.push(tech);
+        enhancedWords.push(skill);
         // Add other variations for better matching
         variations.forEach(v => {
           if (!enhancedWords.includes(v)) {

@@ -5,7 +5,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre Assistant RH SBGS. Comment puis-je vous aider avec les candidatures de stage ou les questions RH ?",
+      text: "Bonjour ! Je suis votre Assistant SBGS. Comment puis-je vous aider ?",
       isBot: true,
       timestamp: new Date()
     }
@@ -66,7 +66,7 @@ export default function Chatbot() {
             <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
               <i className="fas fa-robot text-coke-red"></i>
             </div>
-            <span className="ml-2 text-white font-medium">Assistant RH SBGS</span>
+            <span className="ml-2 text-white font-medium">Assistant SBGS</span>
           </div>
           <button 
             onClick={() => setIsOpen(false)}
