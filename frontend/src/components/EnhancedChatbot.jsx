@@ -13,6 +13,7 @@ export default function EnhancedChatbot() {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState(new Set());
 
   const botResponses = [
     "Merci pour votre message. Pour le statut de votre candidature de stage, veuillez permettre 2-3 semaines à notre équipe RH pour examiner les candidatures.",
@@ -53,21 +54,13 @@ export default function EnhancedChatbot() {
           return `Je n'ai trouvé aucun candidat avec les compétences "${data.keywords.join(', ')}" dans votre recherche "${query}".\n\n💡 Suggestions:\n• Essayez d'autres compétences (ex: Excel, Photoshop, anglais)\n• Utilisez des termes plus génériques (ex: "marketing" au lieu de "digital marketing")\n• Vérifiez l'orthographe des compétences recherchées\n• Essayez des synonymes (ex: "vente" au lieu de "sales")`;
         }
 
-        let responseText = `J'ai trouvé ${data.candidates.length} candidat(s) correspondant à votre recherche "${query}":\n\n`;
-        
-        data.candidates.slice(0, 5).forEach((candidate, index) => {
-          responseText += `${index + 1}. **${candidate.fullName}**\n`;
-          responseText += `   📧 ${candidate.email}\n`;
-          responseText += `   📱 ${candidate.telephone || 'Non disponible'}\n`;
-          responseText += `   🎯 Compétences trouvées: ${candidate.matchingKeywords.join(', ')}\n`;
-          responseText += `   📄 CV: [Télécharger](${API_ENDPOINTS.HR_GET_CV}?filename=${encodeURIComponent(candidate.cvfilename)})\n\n`;
-        });
+        let responseText = `J'ai trouvé ${data.candidates.length} candidat(s) correspondant à votre recherche "${query}":`;
 
-        if (data.candidates.length > 5) {
-          responseText += `... et ${data.candidates.length - 5} autre(s) candidat(s).`;
-        }
-
-        return responseText;
+        return {
+          text: responseText,
+          candidates: data.candidates,
+          query: query
+        };
       } else {
         return "Désolé, j'ai rencontré une erreur lors de la recherche. Veuillez réessayer.";
       }
@@ -111,7 +104,12 @@ export default function EnhancedChatbot() {
       // Replace searching message with results
       setMessages(prev => prev.map(msg => 
         msg.id === searchingMessage.id 
-          ? { ...msg, text: searchResult }
+          ? { 
+              ...msg, 
+              text: typeof searchResult === 'string' ? searchResult : searchResult.text,
+              candidates: typeof searchResult === 'object' ? searchResult.candidates : null,
+              query: typeof searchResult === 'object' ? searchResult.query : null
+            }
           : msg
       ));
     } else {
@@ -141,7 +139,7 @@ export default function EnhancedChatbot() {
   };
 
   // Function to render message text with markdown-like formatting
-  const renderMessageText = (text) => {
+  const renderMessageText = (text, message) => {
     // Convert **text** to bold
     const boldText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
@@ -152,6 +150,58 @@ export default function EnhancedChatbot() {
     const finalText = linkText.replace(/\n/g, '<br>');
     
     return <span dangerouslySetInnerHTML={{ __html: finalText }} />;
+  };
+
+  // Function to toggle expanded view for a message
+  const toggleExpanded = (messageId) => {
+    setExpandedMessages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
+      return newSet;
+    });
+  };
+
+  // Function to render candidate list
+  const renderCandidateList = (message) => {
+    if (!message.candidates) return null;
+    
+    const isExpanded = expandedMessages.has(message.id);
+    const candidatesToShow = isExpanded ? message.candidates : message.candidates.slice(0, 5);
+    
+    return (
+      <div className="mt-2">
+        {candidatesToShow.map((candidate, index) => (
+          <div key={index} className="mb-3 p-2 bg-gray-50 rounded border-l-4 border-coke-red">
+            <div className="font-semibold text-sm">{candidate.fullName}</div>
+            <div className="text-xs text-gray-600">📧 {candidate.email}</div>
+            <div className="text-xs text-gray-600">📱 {candidate.telephone || 'Non disponible'}</div>
+            <div className="text-xs text-gray-600">🎯 Compétences: {candidate.matchingKeywords.join(', ')}</div>
+            <div className="text-xs">
+              📄 <a 
+                href={`${API_ENDPOINTS.HR_GET_CV}?filename=${encodeURIComponent(candidate.cvfilename)}`}
+                target="_blank"
+                className="text-blue-600 hover:text-blue-800 underline"
+              >
+                Télécharger CV
+              </a>
+            </div>
+          </div>
+        ))}
+        
+        {message.candidates.length > 5 && (
+          <button
+            onClick={() => toggleExpanded(message.id)}
+            className="text-blue-600 hover:text-blue-800 underline text-sm mt-2"
+          >
+            {isExpanded ? 'Voir moins' : `Voir tous les candidats (${message.candidates.length - 5} de plus)`}
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -176,15 +226,16 @@ export default function EnhancedChatbot() {
         <div className="p-4 h-80 overflow-y-auto">
           {messages.map((message) => (
             <div key={message.id} className={`mb-3 ${message.isBot ? '' : 'text-right'}`}>
-              <div className={`rounded-lg p-3 ${
-                message.isBot 
-                  ? 'bg-gray-200' 
-                  : 'bg-coke-light bg-opacity-20 inline-block'
-              }`}>
-                <div className="text-sm leading-relaxed">
-                  {renderMessageText(message.text)}
-                </div>
-              </div>
+                             <div className={`rounded-lg p-3 ${
+                 message.isBot 
+                   ? 'bg-gray-200' 
+                   : 'bg-coke-light bg-opacity-20 inline-block'
+               }`}>
+                 <div className="text-sm leading-relaxed">
+                   {renderMessageText(message.text, message)}
+                 </div>
+                 {message.candidates && renderCandidateList(message)}
+               </div>
               <p className="text-xs text-gray-500 mt-1">
                 {message.isBot ? 'Aujourd\'hui à' : 'À l\'instant'} {formatTime(message.timestamp)}
               </p>
