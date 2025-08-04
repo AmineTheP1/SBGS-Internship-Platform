@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { Pool } from "pg";
 import fs from "fs";
 import path from "path";
+// @ts-ignore
 import pdf from "pdf-parse";
 
 const pool = new Pool({
@@ -79,17 +80,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           continue; // Skip this candidate if PDF parsing fails
         }
 
-        // Check if any keywords match - improved logic
-        const matches = [];
-        const cvWords = cvText.split(/\s+/);
+        // Check if any keywords match - whole word matching only
+        const matches: string[] = [];
+        // Split CV text into words, handling punctuation and special characters
+        const cvWords = cvText
+          .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
+          .split(/\s+/)
+          .filter(word => word.length > 0); // Remove empty strings
         
         for (const keyword of keywords) {
-          // Check for exact word matches (case insensitive)
+          // Check for exact whole word matches (case insensitive)
           if (cvWords.some(word => word.toLowerCase() === keyword.toLowerCase())) {
-            matches.push(keyword);
-          }
-          // Also check for partial matches in longer words (e.g., "react" in "reactjs")
-          else if (cvWords.some(word => word.toLowerCase().includes(keyword.toLowerCase()))) {
             matches.push(keyword);
           }
         }
