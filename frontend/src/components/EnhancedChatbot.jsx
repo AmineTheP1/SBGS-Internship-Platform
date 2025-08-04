@@ -6,7 +6,7 @@ export default function EnhancedChatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences. Essayez de me demander : 'Trouve-moi des candidats qui ont de l'expérience avec Angular' ou 'Cherche des candidats avec des compétences en React'",
+      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui connaissent Python'\n• 'Find candidates with Java experience'\n\n🔍 Je recherche uniquement dans les CVs pour des compétences spécifiques.",
       isBot: true,
       timestamp: new Date()
     }
@@ -50,7 +50,7 @@ export default function EnhancedChatbot() {
       
       if (data.success) {
         if (data.candidates.length === 0) {
-          return `Je n'ai trouvé aucun candidat correspondant à votre recherche "${query}". Essayez avec d'autres mots-clés ou compétences.`;
+          return `Je n'ai trouvé aucun candidat avec les compétences "${data.keywords.join(', ')}" dans votre recherche "${query}".\n\n💡 Suggestions:\n• Essayez d'autres technologies (ex: JavaScript, Python, Java)\n• Utilisez des termes plus génériques (ex: "développement web" au lieu de "React")\n• Vérifiez l'orthographe des technologies recherchées`;
         }
 
         let responseText = `J'ai trouvé ${data.candidates.length} candidat(s) correspondant à votre recherche "${query}":\n\n`;

@@ -78,12 +78,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           continue; // Skip this candidate if PDF parsing fails
         }
 
-        // Check if any keywords match
-        const matches = keywords.filter(keyword => 
-          cvText.includes(keyword.toLowerCase())
+        // Check if any keywords match - improved logic
+        const matches = [];
+        const cvWords = cvText.split(/\s+/);
+        
+        for (const keyword of keywords) {
+          // Check for exact word matches (case insensitive)
+          if (cvWords.some(word => word.toLowerCase() === keyword.toLowerCase())) {
+            matches.push(keyword);
+          }
+          // Also check for partial matches in longer words (e.g., "react" in "reactjs")
+          else if (cvWords.some(word => word.toLowerCase().includes(keyword.toLowerCase()))) {
+            matches.push(keyword);
+          }
+        }
+
+        // Only include candidates with meaningful matches (not just common words)
+        const meaningfulKeywords = keywords.filter(keyword => 
+          !['cherche', 'trouve', 'candidats', 'candidat', 'avec', 'qui', 'ont', 'experience', 'expérience'].includes(keyword.toLowerCase())
         );
 
-        if (matches.length > 0) {
+        if (matches.length > 0 && meaningfulKeywords.some(keyword => matches.includes(keyword))) {
           candidates.push({
             cdtid: row.cdtid,
             nom: row.nom,
@@ -96,8 +111,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             typestage: row.typestage,
             domaine: row.domaine,
             status: row.status,
-            matchingKeywords: matches,
-            matchScore: matches.length / keywords.length // Simple scoring
+            matchingKeywords: matches.filter(keyword => 
+              meaningfulKeywords.includes(keyword)
+            ),
+            matchScore: matches.filter(keyword => 
+              meaningfulKeywords.includes(keyword)
+            ).length / meaningfulKeywords.length // Score based on meaningful matches only
           });
         }
       } catch (error) {
@@ -152,7 +171,23 @@ function extractKeywords(query: string): string[] {
   const words = query.toLowerCase()
     .replace(/[^\w\s]/g, ' ') // Remove punctuation
     .split(/\s+/)
-    .filter(word => word.length > 2 && !commonWords.includes(word));
+    .filter(word => word.length > 2 && !commonWords.includes(word))
+    .filter(word => {
+      // Only keep words that are likely to be skills/technologies
+      const techKeywords = [
+        'angular', 'react', 'vue', 'node', 'python', 'java', 'javascript', 'typescript',
+        'php', 'sql', 'mongodb', 'docker', 'kubernetes', 'aws', 'azure', 'git',
+        'html', 'css', 'bootstrap', 'tailwind', 'jquery', 'express', 'django',
+        'flask', 'spring', 'laravel', 'symfony', 'csharp', 'dotnet', 'ruby',
+        'go', 'rust', 'swift', 'kotlin', 'scala', 'r', 'matlab', 'c', 'cpp',
+        'mysql', 'postgresql', 'sqlite', 'redis', 'elasticsearch', 'kafka',
+        'jenkins', 'travis', 'circleci', 'github', 'gitlab', 'bitbucket'
+      ];
+      
+      return techKeywords.some(tech => 
+        word.includes(tech) || tech.includes(word)
+      ) || word.length > 4; // Keep longer words that might be skills
+    });
 
   // Add common technology variations
   const techVariations: { [key: string]: string[] } = {
