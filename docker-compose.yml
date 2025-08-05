@@ -1,4 +1,26 @@
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sbgs-postgres
+    environment:
+      POSTGRES_DB: sbgs_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Africa/Casablanca
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sbgs_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
   # Nginx reverse proxy
   nginx:
     image: nginx:alpine
@@ -59,6 +81,9 @@ services:
       - TZ=Africa/Casablanca
     env_file:
       - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
     expose:
       - "3001"
     healthcheck:
@@ -67,4 +92,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    restart: unless-stopped 
+    restart: unless-stopped
+
+# Volumes
+volumes:
+  postgres_data:
+    driver: local 
