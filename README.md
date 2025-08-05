@@ -17,9 +17,91 @@ Plateforme SBGS/
 │       ├── pages/          # Route-level pages (Home, Apply, HRPortal, Contact)
 │       ├── assets/         # Images, logo, etc.
 │       └── App.jsx         # Main app with routing
-├── README.md
-└── ...
+├── database/               # Database configuration and scripts
+│   ├── init/               # Database initialization scripts
+│   ├── backups/            # Database backup files
+│   ├── backup.bat          # Windows backup script
+│   ├── backup.sh           # Linux/Mac backup script
+│   └── restore.sh          # Database restore script
+├── docker-compose.yml      # Docker services configuration
+├── Dockerfile.backend      # Backend container configuration
+├── Dockerfile.frontend     # Frontend container configuration
+├── nginx.conf              # Nginx reverse proxy configuration
+├── .env                    # Environment variables (create this)
+└── README.md
 ```
+
+---
+
+## 🐳 Docker Setup
+
+This project is fully containerized using Docker Compose with the following services:
+
+### Services
+- **PostgreSQL Database**: `postgres:15-alpine` on port `5433` (external)
+- **Backend**: Next.js API server on port `3001`
+- **Frontend**: React + Vite development server on port `3000`
+- **Nginx**: Reverse proxy on port `80`
+
+### Quick Start with Docker
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd "Plateforme SBGS"
+   ```
+
+2. **Create environment file:**
+   ```bash
+   # Create .env file with your configuration
+   DATABASE_URL=postgresql://postgres:postgres@postgres:5432/sbgs_db
+   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+   SUPER_ADMIN_SECRET=your-super-admin-secret-change-this-in-production
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-app-password
+   ```
+
+3. **Start all services:**
+   ```bash
+   docker-compose up -d
+   ```
+
+4. **Access the application:**
+   - **Frontend**: http://localhost
+   - **Database**: Connect via pgAdmin to `localhost:5433`
+
+### Database Management
+
+#### Backup Database
+```bash
+# Windows
+database\backup.bat
+
+# Linux/Mac
+./database/backup.sh
+```
+
+#### Restore Database
+```bash
+# Linux/Mac
+./database/restore.sh backup_file.sql
+```
+
+#### Access Database Directly
+```bash
+# Connect to database container
+docker exec -it sbgs-postgres psql -U postgres -d sbgs_db
+
+# Or connect from host (pgAdmin)
+# Host: localhost, Port: 5433, User: postgres, Password: postgres
+```
+
+### Data Persistence
+- Database data is stored in Docker volume `postgres_data`
+- Data persists across container restarts and system reboots
+- Only gets deleted if you run `docker-compose down -v`
 
 ---
 
@@ -69,6 +151,9 @@ Plateforme SBGS/
 
 - **Frontend:** React 18, Vite, Tailwind CSS, React Router v6, react-icons
 - **Backend:** Next.js API routes, PostgreSQL
+- **Database:** PostgreSQL 15 (containerized)
+- **Reverse Proxy:** Nginx
+- **Containerization:** Docker & Docker Compose
 - **Styling:** Tailwind CSS, Poppins font
 - **File Uploads:** Formidable, file previews
 - **Authentication:** HR portal login
@@ -99,8 +184,21 @@ Plateforme SBGS/
 
 ---
 
-## 🔧 Getting Started
+## 🔧 Development Setup
 
+### Option 1: Docker (Recommended)
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Option 2: Local Development
 1. **Install dependencies:**
    ```bash
    npm install
@@ -149,6 +247,24 @@ Plateforme SBGS/
 - Secure file upload handling
 - HR authentication
 - Input sanitization
+- Database connection security
 
 ---
+
+## 🚨 Troubleshooting
+
+### Database Issues
+- **Port conflicts**: If port 5433 is in use, change it in `docker-compose.yml`
+- **Connection errors**: Ensure the database container is healthy
+- **Data loss**: Always backup before major changes
+
+### Container Issues
+- **Build failures**: Check Docker logs with `docker-compose logs`
+- **Service dependencies**: Ensure database starts before backend
+- **Volume issues**: Use `docker-compose down -v` to reset volumes
+
+### Performance
+- **Slow queries**: Check database indexes
+- **Memory issues**: Adjust Docker resource limits
+- **File uploads**: Check nginx client_max_body_size setting
 
