@@ -127,6 +127,16 @@ export default function CandidateDashboard() {
   };
 
   const handleClockOut = async () => {
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      "Êtes-vous sûr de vouloir pointer votre sortie ?\n\n" +
+      "Cette action ne peut pas être annulée et marquera la fin de votre journée de travail."
+    );
+    
+    if (!confirmed) {
+      return; // User cancelled
+    }
+    
     try {
       const res = await fetch(API_ENDPOINTS.CANDIDATE_CLOCK_OUT, {
         method: "POST",
