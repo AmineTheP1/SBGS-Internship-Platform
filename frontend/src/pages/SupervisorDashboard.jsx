@@ -167,102 +167,212 @@ export default function SupervisorDashboard() {
       creator: 'SBGS Platform'
     });
     
-    // Add title
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Rapports Journaliers - ${fullName}`, 105, 20, { align: 'center' });
-    
-    // Add intern info
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Email: ${internData.intern.email}`, 20, 35);
-    doc.text(`Type de stage: ${internData.intern.typestage || 'Non spécifié'}`, 20, 42);
-    doc.text(`Durée: ${internData.intern.periode || 'Non spécifiée'}`, 20, 49);
-    doc.text(`Statut: ${internData.intern.statut_candidature}`, 20, 56);
-    
     // Filter and sort daily reports
     const dailyReports = [...internData.dailyReports].sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    if (dailyReports.length === 0) {
-      doc.setFontSize(14);
-      doc.text('Aucun rapport journalier disponible', 105, 70, { align: 'center' });
-    } else {
-      // Add reports
-      let yPosition = 70;
-      
-      dailyReports.forEach((report, index) => {
-        // Add page if needed
-        if (yPosition > 250) {
-          doc.addPage();
-          yPosition = 20;
-        }
-        
-        // Format date
-        const reportDate = new Date(report.date).toLocaleDateString('fr-FR', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        });
-        
-        // Add report header
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Rapport du ${reportDate}`, 20, yPosition);
-        yPosition += 10;
-        
-        // Add report details
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        
-        // Tasks
-        doc.setFont('helvetica', 'bold');
-        doc.text('Tâches effectuées:', 20, yPosition);
-        doc.setFont('helvetica', 'normal');
-        yPosition += 7;
-        
-        if (report.taches && report.taches.trim() !== '') {
-          const tasksLines = doc.splitTextToSize(report.taches, 170);
-          doc.text(tasksLines, 20, yPosition);
-          yPosition += tasksLines.length * 7;
-        } else {
-          doc.text('Aucune tâche spécifiée', 20, yPosition);
-          yPosition += 7;
-        }
-        
-        // Documents
-        doc.setFont('helvetica', 'bold');
-        doc.text('Documents utilisés:', 20, yPosition);
-        doc.setFont('helvetica', 'normal');
-        yPosition += 7;
-        
-        if (report.documents && report.documents.trim() !== '') {
-          const docsLines = doc.splitTextToSize(report.documents, 170);
-          doc.text(docsLines, 20, yPosition);
-          yPosition += docsLines.length * 7;
-        } else {
-          doc.text('Aucun document spécifié', 20, yPosition);
-          yPosition += 7;
-        }
-        
-        // Status
-        doc.setFont('helvetica', 'bold');
-        doc.text('Statut:', 20, yPosition);
-        doc.setFont('helvetica', 'normal');
-        yPosition += 7;
-        doc.text(report.statut || 'Non spécifié', 20, yPosition);
-        
-        // Add separator
-        yPosition += 15;
-        if (index < dailyReports.length - 1) {
-          doc.setDrawColor(200, 200, 200);
-          doc.line(20, yPosition - 5, 190, yPosition - 5);
-        }
-      });
-    }
+    // Load the SBGS logo
+    const logoImg = new Image();
+    logoImg.src = '/src/assets/sbgs-logo.jpeg';
     
-    // Save the PDF
-    doc.save(fileName);
+    // Create a canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // When the image is loaded, draw it on the canvas and continue with PDF generation
+    logoImg.onload = function() {
+      // Set canvas dimensions to match the image
+      canvas.width = logoImg.width;
+      canvas.height = logoImg.height;
+      
+      // Draw the image on the canvas
+      ctx.drawImage(logoImg, 0, 0);
+      
+      // Get the image data URL
+      const imgData = canvas.toDataURL('image/jpeg');
+      
+      // Add the logo to the PDF
+      doc.addImage(imgData, 'JPEG', 10, 10, 30, 15);
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Rapports Journaliers - ${fullName}`, 105, 20, { align: 'center' });
+      
+      // Add intern info
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Email: ${internData.intern.email}`, 20, 35);
+      doc.text(`Type de stage: ${internData.intern.typestage || 'Non spécifié'}`, 20, 42);
+      doc.text(`Durée: ${internData.intern.periode || 'Non spécifiée'}`, 20, 49);
+      
+      if (dailyReports.length === 0) {
+        doc.setFontSize(14);
+        doc.text('Aucun rapport journalier disponible', 105, 70, { align: 'center' });
+      } else {
+        // Add reports
+        let yPosition = 70;
+        
+        dailyReports.forEach((report, index) => {
+          // Add page if needed
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          
+          // Format date
+          const reportDate = new Date(report.date).toLocaleDateString('fr-FR', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          // Add report header
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Rapport du ${reportDate}`, 20, yPosition);
+          yPosition += 10;
+          
+          // Add report details
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'normal');
+          
+          // Tasks
+          doc.setFont('helvetica', 'bold');
+          doc.text('Tâches effectuées:', 20, yPosition);
+          doc.setFont('helvetica', 'normal');
+          yPosition += 7;
+          
+          if (report.taches && report.taches.trim() !== '') {
+            const tasksLines = doc.splitTextToSize(report.taches, 170);
+            doc.text(tasksLines, 20, yPosition);
+            yPosition += tasksLines.length * 7;
+          } else {
+            doc.text('Aucune tâche spécifiée', 20, yPosition);
+            yPosition += 7;
+          }
+          
+          // Documents
+          doc.setFont('helvetica', 'bold');
+          doc.text('Documents utilisés:', 20, yPosition);
+          doc.setFont('helvetica', 'normal');
+          yPosition += 7;
+          
+          if (report.documents && report.documents.trim() !== '') {
+            const docsLines = doc.splitTextToSize(report.documents, 170);
+            doc.text(docsLines, 20, yPosition);
+            yPosition += docsLines.length * 7;
+          } else {
+            doc.text('Aucun document spécifié', 20, yPosition);
+            yPosition += 7;
+          }
+          
+          // Add separator
+          yPosition += 15;
+          if (index < dailyReports.length - 1) {
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, yPosition - 5, 190, yPosition - 5);
+          }
+        });
+      }
+      
+      // Save the PDF
+      doc.save(fileName);
+    };
+    
+    // Handle image loading error
+    logoImg.onerror = function() {
+      console.error('Erreur lors du chargement du logo SBGS');
+      
+      // Continue with PDF generation without the logo
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Rapports Journaliers - ${fullName}`, 105, 20, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Email: ${internData.intern.email}`, 20, 35);
+      doc.text(`Type de stage: ${internData.intern.typestage || 'Non spécifié'}`, 20, 42);
+      doc.text(`Durée: ${internData.intern.periode || 'Non spécifiée'}`, 20, 49);
+      
+      // Continue with the rest of the PDF generation
+      if (dailyReports.length === 0) {
+        doc.setFontSize(14);
+        doc.text('Aucun rapport journalier disponible', 105, 70, { align: 'center' });
+      } else {
+        // Add reports (same code as above)
+        let yPosition = 70;
+        
+        dailyReports.forEach((report, index) => {
+          // Add page if needed
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          
+          // Format date
+          const reportDate = new Date(report.date).toLocaleDateString('fr-FR', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          });
+          
+          // Add report header
+          doc.setFontSize(14);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`Rapport du ${reportDate}`, 20, yPosition);
+          yPosition += 10;
+          
+          // Add report details
+          doc.setFontSize(12);
+          doc.setFont('helvetica', 'normal');
+          
+          // Tasks
+          doc.setFont('helvetica', 'bold');
+          doc.text('Tâches effectuées:', 20, yPosition);
+          doc.setFont('helvetica', 'normal');
+          yPosition += 7;
+          
+          if (report.taches && report.taches.trim() !== '') {
+            const tasksLines = doc.splitTextToSize(report.taches, 170);
+            doc.text(tasksLines, 20, yPosition);
+            yPosition += tasksLines.length * 7;
+          } else {
+            doc.text('Aucune tâche spécifiée', 20, yPosition);
+            yPosition += 7;
+          }
+          
+          // Documents
+          doc.setFont('helvetica', 'bold');
+          doc.text('Documents utilisés:', 20, yPosition);
+          doc.setFont('helvetica', 'normal');
+          yPosition += 7;
+          
+          if (report.documents && report.documents.trim() !== '') {
+            const docsLines = doc.splitTextToSize(report.documents, 170);
+            doc.text(docsLines, 20, yPosition);
+            yPosition += docsLines.length * 7;
+          } else {
+            doc.text('Aucun document spécifié', 20, yPosition);
+            yPosition += 7;
+          }
+          
+          // Add separator
+          yPosition += 15;
+          if (index < dailyReports.length - 1) {
+            doc.setDrawColor(200, 200, 200);
+            doc.line(20, yPosition - 5, 190, yPosition - 5);
+          }
+        });
+      }
+      
+      // Save the PDF
+      doc.save(fileName);
+    };
+    
+    // Set the correct path for the logo
+    logoImg.src = '/src/assets/sbgs-logo.jpeg';
   };
 
   const handleSubmitAbsence = async () => {
