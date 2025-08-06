@@ -90,7 +90,7 @@ export default function Navbar() {
               </Link>
               <div className="ml-4">
                 <span className="font-bold text-2xl text-coke-red tracking-wide">SBGS</span>
-                <span className="text-xs text-gray-600 block mt-1">Embouteillage Coca-Cola</span>
+                <span className="text-xs text-gray-600 block mt-1">Société des Boissons Gazeuse du Souss</span>
               </div>
             </div>
           </div>
