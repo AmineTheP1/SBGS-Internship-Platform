@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DocumentTextIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
+import AnnouncementForm from "./AnnouncementForm";
+
 
 export default function Dashboard() {
   const [applications, setApplications] = useState([]);
@@ -650,6 +652,25 @@ export default function Dashboard() {
              <div className="text-xl font-bold">{approvedCandidates.length}</div>
            </div>
          </div>
+         
+         {/* Send Announcement */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "announcement" ? "border-indigo-500 ring-2 ring-indigo-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setCurrentView("announcement");
+             setShowApprovedCandidates(false);
+           }}
+         >
+           <div className="bg-indigo-100 p-3 rounded-full flex items-center justify-center">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+             </svg>
+           </div>
+           <div>
+             <div className="text-gray-500 text-xs font-medium">Envoyer annonce</div>
+             <div className="text-xl font-bold">{approved}</div>
+           </div>
+         </div>
        </div>
        
                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -657,6 +678,20 @@ export default function Dashboard() {
             <div className="text-center py-20">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Tableau de bord RH</h2>
               <p className="text-lg text-gray-600 mb-8">Cliquez sur une carte ci-dessus pour afficher les données correspondantes</p>
+            </div>
+          ) : currentView === "announcement" ? (
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="coke-gradient px-6 py-4">
+                  <h2 className="text-2xl font-bold text-white">Envoyer une annonce</h2>
+                  <p className="text-coke-light">Envoyer un e-mail à tous les stagiaires acceptés</p>
+                </div>
+                
+                <div className="p-6">
+                  {/* Announcement Form */}
+                  <AnnouncementForm />
+                </div>
+              </div>
             </div>
           ) : currentView === "reports" ? (
           <div className="space-y-6">
