@@ -172,7 +172,8 @@ export default function SupervisorDashboard() {
     
     // Load the SBGS logo
     const logoImg = new Image();
-    logoImg.src = '/src/assets/sbgs-logo.jpeg';
+    // Utiliser un chemin relatif qui fonctionne dans l'environnement Docker
+    logoImg.src = './src/assets/sbgs-logo.jpeg';
     
     // Create a canvas element
     const canvas = document.createElement('canvas');
@@ -193,6 +194,19 @@ export default function SupervisorDashboard() {
       // Add the logo to the PDF
       doc.addImage(imgData, 'JPEG', 10, 10, 30, 15);
       
+      // Continue with PDF generation
+      continuePdfGeneration();
+    };
+    
+    // Handle image loading error
+    logoImg.onerror = function() {
+      console.error('Erreur de chargement du logo SBGS');
+      // Continue with PDF generation without the logo
+      continuePdfGeneration();
+    };
+    
+    // Function to continue PDF generation after logo handling
+    function continuePdfGeneration() {
       // Add title
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
@@ -243,8 +257,8 @@ export default function SupervisorDashboard() {
           doc.setFont('helvetica', 'normal');
           yPosition += 7;
           
-          if (report.taches && report.taches.trim() !== '') {
-            const tasksLines = doc.splitTextToSize(report.taches, 170);
+          if (report.taches_effectuees && report.taches_effectuees.trim() !== '') {
+            const tasksLines = doc.splitTextToSize(report.taches_effectuees, 170);
             doc.text(tasksLines, 20, yPosition);
             yPosition += tasksLines.length * 7;
           } else {
@@ -258,8 +272,8 @@ export default function SupervisorDashboard() {
           doc.setFont('helvetica', 'normal');
           yPosition += 7;
           
-          if (report.documents && report.documents.trim() !== '') {
-            const docsLines = doc.splitTextToSize(report.documents, 170);
+          if (report.documents_utilises && report.documents_utilises.trim() !== '') {
+            const docsLines = doc.splitTextToSize(report.documents_utilises, 170);
             doc.text(docsLines, 20, yPosition);
             yPosition += docsLines.length * 7;
           } else {
@@ -280,27 +294,28 @@ export default function SupervisorDashboard() {
       doc.save(fileName);
     };
     
-    // Handle image loading error
-    logoImg.onerror = function() {
-      console.error('Erreur lors du chargement du logo SBGS');
-      
-      // Continue with PDF generation without the logo
+    // Set the correct path for the logo
+    logoImg.src = './src/assets/sbgs-logo.jpeg';
+    
+    // Function to continue PDF generation after logo handling
+    function continuePdfGeneration() {
+      // Add title
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
       doc.text(`Rapports Journaliers - ${fullName}`, 105, 20, { align: 'center' });
       
+      // Add intern info
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
       doc.text(`Email: ${internData.intern.email}`, 20, 35);
       doc.text(`Type de stage: ${internData.intern.typestage || 'Non spécifié'}`, 20, 42);
       doc.text(`Durée: ${internData.intern.periode || 'Non spécifiée'}`, 20, 49);
       
-      // Continue with the rest of the PDF generation
       if (dailyReports.length === 0) {
         doc.setFontSize(14);
         doc.text('Aucun rapport journalier disponible', 105, 70, { align: 'center' });
       } else {
-        // Add reports (same code as above)
+        // Add reports
         let yPosition = 70;
         
         dailyReports.forEach((report, index) => {
@@ -334,8 +349,8 @@ export default function SupervisorDashboard() {
           doc.setFont('helvetica', 'normal');
           yPosition += 7;
           
-          if (report.taches && report.taches.trim() !== '') {
-            const tasksLines = doc.splitTextToSize(report.taches, 170);
+          if (report.taches_effectuees && report.taches_effectuees.trim() !== '') {
+            const tasksLines = doc.splitTextToSize(report.taches_effectuees, 170);
             doc.text(tasksLines, 20, yPosition);
             yPosition += tasksLines.length * 7;
           } else {
@@ -349,8 +364,8 @@ export default function SupervisorDashboard() {
           doc.setFont('helvetica', 'normal');
           yPosition += 7;
           
-          if (report.documents && report.documents.trim() !== '') {
-            const docsLines = doc.splitTextToSize(report.documents, 170);
+          if (report.documents_utilises && report.documents_utilises.trim() !== '') {
+            const docsLines = doc.splitTextToSize(report.documents_utilises, 170);
             doc.text(docsLines, 20, yPosition);
             yPosition += docsLines.length * 7;
           } else {
@@ -369,10 +384,7 @@ export default function SupervisorDashboard() {
       
       // Save the PDF
       doc.save(fileName);
-    };
-    
-    // Set the correct path for the logo
-    logoImg.src = '/src/assets/sbgs-logo.jpeg';
+    }
   };
 
   const handleSubmitAbsence = async () => {
