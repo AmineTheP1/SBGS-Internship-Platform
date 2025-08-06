@@ -34,6 +34,15 @@ export default function Dashboard() {
   // New state variable for tracking the current view
   const [currentView, setCurrentView] = useState("initial");
   
+  // Function to safely set the current view
+  const setViewSafely = (view) => {
+    // If trying to view reports but there are none, stay on current view
+    if (view === "reports" && approvedCandidates.length === 0) {
+      return;
+    }
+    setCurrentView(view);
+  };
+  
   const navigate = useNavigate();
 
   // Scroll to top on mount and when filters/search/page change
@@ -574,7 +583,7 @@ export default function Dashboard() {
          <div 
            className={`min-w-[200px] bg-white border ${currentView === "main" ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
            onClick={() => {
-             setCurrentView("main");
+             setViewSafely("main");
              setShowApprovedCandidates(false);
            }}
          >
@@ -590,7 +599,7 @@ export default function Dashboard() {
          <div 
            className={`min-w-[200px] bg-white border ${currentView === "pending" ? "border-yellow-500 ring-2 ring-yellow-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
            onClick={() => {
-             setCurrentView("pending");
+             setViewSafely("pending");
              setShowApprovedCandidates(false);
            }}
          >
@@ -606,7 +615,7 @@ export default function Dashboard() {
          <div 
            className={`min-w-[200px] bg-white border ${currentView === "approved" ? "border-green-500 ring-2 ring-green-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
            onClick={() => {
-             setCurrentView("approved");
+             setViewSafely("approved");
              setShowApprovedCandidates(false);
            }}
          >
@@ -622,7 +631,7 @@ export default function Dashboard() {
          <div 
            className={`min-w-[200px] bg-white border ${currentView === "rejected" ? "border-red-500 ring-2 ring-red-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
            onClick={() => {
-             setCurrentView("rejected");
+             setViewSafely("rejected");
              setShowApprovedCandidates(false);
            }}
          >
@@ -636,28 +645,30 @@ export default function Dashboard() {
              <div className="text-xl font-bold">{rejected}</div>
            </div>
          </div>
-         {/* Approved Reports */}
-         <div 
-           className={`min-w-[200px] bg-white border ${currentView === "reports" ? "border-purple-500 ring-2 ring-purple-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
-           onClick={() => {
-             setCurrentView("reports");
-             setShowApprovedCandidates(true);
-           }}
-         >
-           <div className="bg-purple-100 p-3 rounded-full flex items-center justify-center">
-             <DocumentTextIcon className="h-7 w-7 text-purple-500" />
+         {/* Approved Reports - Only shown when there are approved reports */}
+         {approvedCandidates.length > 0 && (
+           <div 
+             className={`min-w-[200px] bg-white border ${currentView === "reports" ? "border-purple-500 ring-2 ring-purple-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+             onClick={() => {
+               setViewSafely("reports");
+               setShowApprovedCandidates(true);
+             }}
+           >
+             <div className="bg-purple-100 p-3 rounded-full flex items-center justify-center">
+               <DocumentTextIcon className="h-7 w-7 text-purple-500" />
+             </div>
+             <div>
+               <div className="text-gray-500 text-xs font-medium">Rapports approuvés</div>
+               <div className="text-xl font-bold">{approvedCandidates.length}</div>
+             </div>
            </div>
-           <div>
-             <div className="text-gray-500 text-xs font-medium">Rapports approuvés</div>
-             <div className="text-xl font-bold">{approvedCandidates.length}</div>
-           </div>
-         </div>
+         )}
          
          {/* Send Announcement */}
          <div 
            className={`min-w-[200px] bg-white border ${currentView === "announcement" ? "border-indigo-500 ring-2 ring-indigo-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
            onClick={() => {
-             setCurrentView("announcement");
+             setViewSafely("announcement");
              setShowApprovedCandidates(false);
            }}
          >
