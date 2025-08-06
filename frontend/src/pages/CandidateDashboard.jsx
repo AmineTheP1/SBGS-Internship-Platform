@@ -23,6 +23,7 @@ export default function CandidateDashboard() {
   const [uploadStatus, setUploadStatus] = useState('');
   const [hasAttestation, setHasAttestation] = useState(false);
   const [attestationData, setAttestationData] = useState(null);
+  const [showClockOutConfirm, setShowClockOutConfirm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -127,16 +128,11 @@ export default function CandidateDashboard() {
   };
 
   const handleClockOut = async () => {
-    // Show confirmation dialog
-    const confirmed = window.confirm(
-      "Êtes-vous sûr de vouloir pointer votre sortie ?\n\n" +
-      "Cette action ne peut pas être annulée et marquera la fin de votre journée de travail."
-    );
-    
-    if (!confirmed) {
-      return; // User cancelled
-    }
-    
+    setShowClockOutConfirm(true);
+  };
+
+  const confirmClockOut = async () => {
+    setShowClockOutConfirm(false);
     try {
       const res = await fetch(API_ENDPOINTS.CANDIDATE_CLOCK_OUT, {
         method: "POST",
@@ -772,8 +768,49 @@ export default function CandidateDashboard() {
               </div>
             </form>
           </div>
-        </div>
-      )}
-    </div>
-  );
-} 
+                 </div>
+       )}
+
+       {/* Clock Out Confirmation Modal */}
+       {showClockOutConfirm && (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
+             <div className="text-center">
+               <div className="flex justify-center mb-6">
+                 <div className="bg-red-100 p-4 rounded-full">
+                   <FaSignOut className="text-4xl text-red-600" />
+                 </div>
+               </div>
+               
+               <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                 Confirmer le pointage de sortie
+               </h3>
+               
+               <p className="text-gray-600 mb-6 leading-relaxed">
+                 Êtes-vous sûr de vouloir pointer votre sortie ?<br />
+                 <span className="font-semibold text-red-600">
+                   Cette action ne peut pas être annulée et marquera la fin de votre journée de travail.
+                 </span>
+               </p>
+               
+               <div className="flex justify-center space-x-4">
+                 <button
+                   onClick={() => setShowClockOutConfirm(false)}
+                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+                 >
+                   Annuler
+                 </button>
+                 <button
+                   onClick={confirmClockOut}
+                   className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+                 >
+                   Confirmer la sortie
+                 </button>
+               </div>
+             </div>
+           </div>
+         </div>
+       )}
+     </div>
+   );
+ }  
