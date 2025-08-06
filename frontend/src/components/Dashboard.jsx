@@ -678,8 +678,8 @@ export default function Dashboard() {
              </svg>
            </div>
            <div>
-             <div className="text-gray-500 text-xs font-medium">Envoyer annonce</div>
-             <div className="text-xl font-bold">{approved}</div>
+             <div className="text-black-500 text-s font-medium">Envoyer annonce</div>
+             
            </div>
          </div>
        </div>
