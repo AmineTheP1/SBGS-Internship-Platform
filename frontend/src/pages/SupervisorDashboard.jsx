@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes, FaDownload } from "react-icons/fa";
+import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye, FaPlus, FaTimes, FaDownload, FaFilePdf } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api.js";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function SupervisorDashboard() {
   const [supervisor, setSupervisor] = useState(null);
@@ -149,6 +151,118 @@ export default function SupervisorDashboard() {
     setAbsenceReason("");
     setAbsenceStatus("");
     setAbsenceType("justified"); // Default to justified
+  };
+
+  const generateDailyReportsPDF = (internData) => {
+    // Create a new PDF document
+    const doc = new jsPDF();
+    const fullName = `${internData.intern.prenom} ${internData.intern.nom}`;
+    const fileName = `${fullName} - Rapport Journalier.pdf`;
+    
+    // Set document properties
+    doc.setProperties({
+      title: `Rapports Journaliers - ${fullName}`,
+      subject: 'Rapports Journaliers',
+      author: 'SBGS Platform',
+      creator: 'SBGS Platform'
+    });
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Rapports Journaliers - ${fullName}`, 105, 20, { align: 'center' });
+    
+    // Add intern info
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Email: ${internData.intern.email}`, 20, 35);
+    doc.text(`Type de stage: ${internData.intern.typestage || 'Non spécifié'}`, 20, 42);
+    doc.text(`Durée: ${internData.intern.periode || 'Non spécifiée'}`, 20, 49);
+    doc.text(`Statut: ${internData.intern.statut_candidature}`, 20, 56);
+    
+    // Filter and sort daily reports
+    const dailyReports = [...internData.dailyReports].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    if (dailyReports.length === 0) {
+      doc.setFontSize(14);
+      doc.text('Aucun rapport journalier disponible', 105, 70, { align: 'center' });
+    } else {
+      // Add reports
+      let yPosition = 70;
+      
+      dailyReports.forEach((report, index) => {
+        // Add page if needed
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        // Format date
+        const reportDate = new Date(report.date).toLocaleDateString('fr-FR', { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        });
+        
+        // Add report header
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Rapport du ${reportDate}`, 20, yPosition);
+        yPosition += 10;
+        
+        // Add report details
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        
+        // Tasks
+        doc.setFont('helvetica', 'bold');
+        doc.text('Tâches effectuées:', 20, yPosition);
+        doc.setFont('helvetica', 'normal');
+        yPosition += 7;
+        
+        if (report.taches && report.taches.trim() !== '') {
+          const tasksLines = doc.splitTextToSize(report.taches, 170);
+          doc.text(tasksLines, 20, yPosition);
+          yPosition += tasksLines.length * 7;
+        } else {
+          doc.text('Aucune tâche spécifiée', 20, yPosition);
+          yPosition += 7;
+        }
+        
+        // Documents
+        doc.setFont('helvetica', 'bold');
+        doc.text('Documents utilisés:', 20, yPosition);
+        doc.setFont('helvetica', 'normal');
+        yPosition += 7;
+        
+        if (report.documents && report.documents.trim() !== '') {
+          const docsLines = doc.splitTextToSize(report.documents, 170);
+          doc.text(docsLines, 20, yPosition);
+          yPosition += docsLines.length * 7;
+        } else {
+          doc.text('Aucun document spécifié', 20, yPosition);
+          yPosition += 7;
+        }
+        
+        // Status
+        doc.setFont('helvetica', 'bold');
+        doc.text('Statut:', 20, yPosition);
+        doc.setFont('helvetica', 'normal');
+        yPosition += 7;
+        doc.text(report.statut || 'Non spécifié', 20, yPosition);
+        
+        // Add separator
+        yPosition += 15;
+        if (index < dailyReports.length - 1) {
+          doc.setDrawColor(200, 200, 200);
+          doc.line(20, yPosition - 5, 190, yPosition - 5);
+        }
+      });
+    }
+    
+    // Save the PDF
+    doc.save(fileName);
   };
 
   const handleSubmitAbsence = async () => {
@@ -1189,6 +1303,13 @@ export default function SupervisorDashboard() {
               >
                 <FaCalendar className="text-sm" />
                 Marquer une absence
+              </button>
+              <button
+                onClick={() => generateDailyReportsPDF(selectedIntern)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <FaFilePdf className="text-sm" />
+                Générer PDF des rapports journaliers
               </button>
             </div>
 
