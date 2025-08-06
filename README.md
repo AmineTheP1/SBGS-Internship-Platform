@@ -54,12 +54,12 @@ This project is fully containerized using Docker Compose with the following serv
 2. **Create environment file:**
    ```bash
    # Create .env file with your configuration
-   DATABASE_URL=postgresql://postgres:postgres@postgres:5432/sbgs_db
-   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-   SUPER_ADMIN_SECRET=your-super-admin-secret-change-this-in-production
+   DATABASE_URL=postgresql://<username>:<password>@<host>:<port>/<database>
+   JWT_SECRET=your-jwt-secret-key
+   SUPER_ADMIN_SECRET=your-super-admin-secret-key
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=587
-   SMTP_USER=your-email@gmail.com
+   SMTP_USER=example@example.com
    SMTP_PASS=your-app-password
    ```
 
