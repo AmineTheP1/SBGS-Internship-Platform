@@ -20,7 +20,10 @@ export const config = {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS
-  await handleCors(req, res);
+  if (handleCors(req, res)) return;
+  
+  // Set proper content type for JSON responses
+  res.setHeader('Content-Type', 'application/json');
   
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -35,8 +38,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     let hrId: string;
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-      hrId = decoded.id;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { rhId: string };
+      hrId = decoded.rhId;
     } catch (error) {
       return res.status(401).json({ success: false, error: "Invalid token" });
     }
@@ -58,7 +61,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       form.parse(req, async (err, fields, files) => {
         if (err) {
           console.error("Error parsing form:", err);
-          res.status(500).json({ success: false, error: "Error uploading file" });
+          res.setHeader('Content-Type', 'application/json');
+          res.status(500).json({ success: false, error: `Error uploading file: ${err.message}` });
           return resolve(undefined);
         }
 
@@ -68,6 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const description = Array.isArray(fields.description) ? fields.description[0] : fields.description;
           
           if (!title) {
+            res.setHeader('Content-Type', 'application/json');
             res.status(400).json({ success: false, error: "Title is required" });
             return resolve(undefined);
           }
@@ -75,6 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // Get file information
           const file = Array.isArray(files.file) ? files.file[0] : files.file;
           if (!file) {
+            res.setHeader('Content-Type', 'application/json');
             res.status(400).json({ success: false, error: "File is required" });
             return resolve(undefined);
           }
@@ -90,7 +96,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           fs.renameSync(file.filepath, newFilePath);
 
           // Save file information to database
-          const relativePath = `/uploads/fichiers_utiles/${newFilename}`;
+          const relativePath = `/public/uploads/fichiers_utiles/${newFilename}`;
           const result = await pool.query(`
             INSERT INTO fichiers_utiles (
               title, 
@@ -110,21 +116,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             hrId
           ]);
 
-          res.status(200).json({
-            success: true,
-            fileId: result.rows[0].id,
-            message: "File uploaded successfully"
-          });
+          // Ensure proper content type and response format
+            res.setHeader('Content-Type', 'application/json');
+            res.status(200).json({
+              success: true,
+              fileId: result.rows[0].id,
+              message: "File uploaded successfully"
+            });
           return resolve(undefined);
         } catch (error) {
           console.error("Error processing file:", error);
-          res.status(500).json({ success: false, error: "Server error" });
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          res.setHeader('Content-Type', 'application/json');
+          res.status(500).json({ success: false, error: `Server error: ${errorMessage}` });
           return resolve(undefined);
         }
       });
     });
   } catch (error) {
     console.error("Error uploading file:", error);
-    return res.status(500).json({ success: false, error: "Server error" });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(500).json({ success: false, error: `Server error: ${errorMessage}` });
   }
 }

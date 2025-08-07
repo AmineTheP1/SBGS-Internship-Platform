@@ -75,10 +75,32 @@ const UsefulFilesManager = () => {
       const response = await fetch(API_ENDPOINTS.HR_UPLOAD_USEFUL_FILE, {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'Accept': 'application/json'
+        },
         body: formData
       });
-
-      const data = await response.json();
+      
+      let data;
+      try {
+        // Check if response is ok before trying to parse JSON
+        if (!response.ok) {
+          // Try to get error message from response if possible
+          try {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server error: ${response.status}`);
+          } catch (jsonError) {
+            // If we can't parse the error response, use status text
+            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+          }
+        }
+        
+        // Parse successful response
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+        throw new Error(parseError.message || 'Failed to parse server response. Please try again.');
+      }
       if (data.success) {
         setShowUploadModal(false);
         setUploadForm({
@@ -91,7 +113,7 @@ const UsefulFilesManager = () => {
         throw new Error(data.error || 'Failed to upload file');
       }
     } catch (err) {
-      setUploadError(err.message);
+      setUploadError(err.message || 'Une erreur est survenue lors du téléchargement du fichier');
       console.error('Error uploading file:', err);
     } finally {
       setIsUploading(false);
@@ -233,8 +255,11 @@ const UsefulFilesManager = () => {
             <h3 className="text-lg font-semibold mb-4">Ajouter un nouveau fichier</h3>
             
             {uploadError && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                {uploadError}
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md flex items-start">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{uploadError}</span>
               </div>
             )}
             

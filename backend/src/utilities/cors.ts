@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-export function setCorsHeaders(res: NextApiResponse) {
+export function setCorsHeaders(req: NextApiRequest, res: NextApiResponse) {
   // Allow requests from localhost (development) and any origin (production)
   const allowedOrigins = [
     'http://localhost:5173',  // Vite dev server
@@ -9,7 +9,10 @@ export function setCorsHeaders(res: NextApiResponse) {
     'http://localhost:80',    // Nginx proxy
   ];
   
-  const origin = allowedOrigins.includes('*') ? '*' : allowedOrigins.join(', ');
+  // Get the origin from the request header
+  const requestOrigin = req?.headers?.origin || '';
+  // Set the origin to the requesting origin if it's in the allowed list, otherwise use the first allowed origin
+  const origin = allowedOrigins.includes(requestOrigin) ? requestOrigin : allowedOrigins[0];
   
   res.setHeader("Access-Control-Allow-Origin", origin);
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -18,7 +21,7 @@ export function setCorsHeaders(res: NextApiResponse) {
 }
 
 export function handleCors(req: NextApiRequest, res: NextApiResponse) {
-  setCorsHeaders(res);
+  setCorsHeaders(req, res);
   
   // Handle preflight requests
   if (req.method === "OPTIONS") {
@@ -27,4 +30,4 @@ export function handleCors(req: NextApiRequest, res: NextApiResponse) {
   }
   
   return false;
-} 
+}

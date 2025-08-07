@@ -9,7 +9,7 @@ const pool = new Pool({
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS
-  await handleCors(req, res);
+  if (handleCors(req, res)) return;
   
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
