@@ -583,66 +583,8 @@ export default function CandidateDashboard() {
             </div>
           </div>
         </div>
-
-
-        {/* Reports Section */}
-        {candidate.statut === "Accepté" && (
-          <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                <FaFileAlt className="mr-2 text-coke-red" />
-                Rapports de stage
-              </h3>
-              <button
-                onClick={() => setShowReportUpload(true)}
-                className="bg-coke-red text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Soumettre un rapport
-              </button>
-            </div>
-
-            {reports.length > 0 ? (
-              <div className="space-y-4">
-                {reports.map((report) => (
-                  <div key={report.rapportid} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                                             <div className="flex-1">
-                         <h4 className="font-semibold text-gray-800">{report.titre}</h4>
-                         {report.description && (
-                          <p className="text-sm text-gray-700 mb-2">{report.description}</p>
-                        )}
-                        <p className="text-xs text-gray-500">
-                          Soumis le {new Date(report.date_soumission).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReportStatusColor(report.statut)}`}>
-                          {report.statut}
-                        </span>
-                        {report.commentaires_superviseur && report.commentaires_superviseur.trim() && (
-                          <div className="text-xs text-gray-600 max-w-xs">
-                            <strong>Commentaire :</strong> {report.commentaires_superviseur}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-600 text-center py-8">
-                Aucun rapport soumis pour le moment.
-              </p>
-            )}
-          </div>
-        )}
-
-
-          </>
-        )}
-
-        {/* Fichiers Utiles Section - Always show */}
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
+{/* Fichiers Utiles Section - Always show */}
+<div className="mt-8 bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
             <FaFileAlt className="mr-2 text-coke-red" />
             Fichiers Utiles
@@ -714,6 +656,64 @@ export default function CandidateDashboard() {
             </div>
           )}
         </div>
+
+        {/* Reports Section */}
+        {candidate.statut === "Accepté" && (
+          <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                <FaFileAlt className="mr-2 text-coke-red" />
+                Rapports de stage
+              </h3>
+              <button
+                onClick={() => setShowReportUpload(true)}
+                className="bg-coke-red text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Soumettre un rapport
+              </button>
+            </div>
+
+            {reports.length > 0 ? (
+              <div className="space-y-4">
+                {reports.map((report) => (
+                  <div key={report.rapportid} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start">
+                                             <div className="flex-1">
+                         <h4 className="font-semibold text-gray-800">{report.titre}</h4>
+                         {report.description && (
+                          <p className="text-sm text-gray-700 mb-2">{report.description}</p>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          Soumis le {new Date(report.date_soumission).toLocaleDateString('fr-FR')}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getReportStatusColor(report.statut)}`}>
+                          {report.statut}
+                        </span>
+                        {report.commentaires_superviseur && report.commentaires_superviseur.trim() && (
+                          <div className="text-xs text-gray-600 max-w-xs">
+                            <strong>Commentaire :</strong> {report.commentaires_superviseur}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-600 text-center py-8">
+                Aucun rapport soumis pour le moment.
+              </p>
+            )}
+          </div>
+        )}
+
+
+          </>
+        )}
+
+        
 
         {/* Contact Information - Always show */}
         <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
