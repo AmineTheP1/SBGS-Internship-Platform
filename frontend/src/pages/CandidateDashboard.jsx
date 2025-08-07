@@ -25,6 +25,8 @@ export default function CandidateDashboard() {
   const [attestationData, setAttestationData] = useState(null);
   const [showClockOutConfirm, setShowClockOutConfirm] = useState(false);
   const [usefulFiles, setUsefulFiles] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filesPerPage] = useState(4);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -594,23 +596,60 @@ export default function CandidateDashboard() {
           </p>
           
           {usefulFiles.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {usefulFiles.map((file) => (
-                <div key={file.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
-                    <FaFileAlt className="text-coke-red mr-2" />
-                    {file.title}
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-2">{file.description}</p>
-                  <button 
-                    onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
-                    className="text-sm text-coke-red hover:underline"
-                  >
-                    Télécharger
-                  </button>
+            <>
+              <div className="grid md:grid-cols-2 gap-4">
+                {usefulFiles
+                  .slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage)
+                  .map((file) => (
+                    <div key={file.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                      <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                        <FaFileAlt className="text-coke-red mr-2" />
+                        {file.title}
+                      </h4>
+                      <p className="text-sm text-gray-600 mb-2">{file.description}</p>
+                      <button 
+                        onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
+                        className="text-sm text-coke-red hover:underline"
+                      >
+                        Télécharger
+                      </button>
+                    </div>
+                  ))}
+              </div>
+              
+              {/* Pagination Controls */}
+              {usefulFiles.length > filesPerPage && (
+                <div className="flex justify-center mt-6">
+                  <nav className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                      Précédent
+                    </button>
+                    
+                    {Array.from({ length: Math.ceil(usefulFiles.length / filesPerPage) }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-coke-red text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(usefulFiles.length / filesPerPage)))}
+                      disabled={currentPage === Math.ceil(usefulFiles.length / filesPerPage)}
+                      className={`px-3 py-1 rounded-md ${currentPage === Math.ceil(usefulFiles.length / filesPerPage) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    >
+                      Suivant
+                    </button>
+                  </nav>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-8 border border-gray-200 rounded-lg">
               <p className="text-gray-500">Aucun fichier disponible pour le moment.</p>
