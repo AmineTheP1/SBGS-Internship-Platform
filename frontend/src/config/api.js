@@ -25,6 +25,9 @@ export const API_ENDPOINTS = {
   HR_MARK_ATTESTATION_DOWNLOADED: `${API_BASE_URL}/api/hr/mark-attestation-downloaded`,
   HR_SEARCH_CVS: `${API_BASE_URL}/api/hr/search-cvs`,
   HR_SEND_ANNOUNCEMENT: `${API_BASE_URL}/api/hr/send-announcement-email`,
+  HR_UPLOAD_USEFUL_FILE: `${API_BASE_URL}/api/hr/upload-useful-file`,
+  HR_GET_USEFUL_FILES: `${API_BASE_URL}/api/hr/get-useful-files`,
+  HR_DELETE_USEFUL_FILE: `${API_BASE_URL}/api/hr/delete-useful-file`,
 
   // Supervisor endpoints
   SUPERVISOR_LOGIN: `${API_BASE_URL}/api/supervisor/login`,
@@ -56,6 +59,8 @@ export const API_ENDPOINTS = {
   CANDIDATE_UPLOAD_REPORT: `${API_BASE_URL}/api/candidate/upload-report`,
   CANDIDATE_GET_REPORTS: `${API_BASE_URL}/api/candidate/get-reports`,
   CANDIDATE_CHECK_ATTESTATION: `${API_BASE_URL}/api/candidate/check-attestation`,
+  CANDIDATE_GET_USEFUL_FILES: `${API_BASE_URL}/api/candidate/get-useful-files`,
+  CANDIDATE_DOWNLOAD_USEFUL_FILE: `${API_BASE_URL}/api/candidate/download-useful-file`,
 
   // Application endpoints
   APPLY: `${API_BASE_URL}/api/hr/apply`,

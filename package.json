@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "bcrypt": "^6.0.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.1"
+    "jspdf": "^3.0.1",
+    "uuid": "^11.1.0"
   }
 }

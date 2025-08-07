@@ -24,6 +24,7 @@ export default function CandidateDashboard() {
   const [hasAttestation, setHasAttestation] = useState(false);
   const [attestationData, setAttestationData] = useState(null);
   const [showClockOutConfirm, setShowClockOutConfirm] = useState(false);
+  const [usefulFiles, setUsefulFiles] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,6 +83,19 @@ export default function CandidateDashboard() {
           if (attestationData.hasAttestation) {
             setAttestationData(attestationData.attestation);
           }
+        }
+
+        // Fetch useful files
+        try {
+          const usefulFilesRes = await fetch(API_ENDPOINTS.CANDIDATE_GET_USEFUL_FILES, {
+            credentials: "include"
+          });
+          if (usefulFilesRes.ok) {
+            const usefulFilesData = await usefulFilesRes.json();
+            setUsefulFiles(usefulFilesData.files || []);
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération des fichiers utiles:", error);
         }
       } catch {
         navigate('/candidate-login', { replace: true });
@@ -249,6 +263,33 @@ export default function CandidateDashboard() {
       case "Approuvé": return "bg-green-100 text-green-800";
       case "Rejeté": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleDownloadUsefulFile = async (fileId, fileName) => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.CANDIDATE_DOWNLOAD_USEFUL_FILE}?fileId=${fileId}`, {
+        credentials: "include"
+      });
+      
+      if (response.ok) {
+        // Créer un lien temporaire pour télécharger le fichier
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        alert("Erreur lors du téléchargement du fichier");
+      }
+    } catch (error) {
+      console.error("Erreur lors du téléchargement du fichier:", error);
+      alert("Erreur lors du téléchargement du fichier");
     }
   };
 
@@ -600,6 +641,80 @@ export default function CandidateDashboard() {
           </>
         )}
 
+        {/* Fichiers Utiles Section - Always show */}
+        <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
+          <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
+            <FaFileAlt className="mr-2 text-coke-red" />
+            Fichiers Utiles
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Documents importants mis à votre disposition par le service RH :
+          </p>
+          
+          {usefulFiles.length > 0 ? (
+            <div className="grid md:grid-cols-2 gap-4">
+              {usefulFiles.map((file) => (
+                <div key={file.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                    <FaFileAlt className="text-coke-red mr-2" />
+                    {file.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-2">{file.description}</p>
+                  <button 
+                    onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
+                    className="text-sm text-coke-red hover:underline"
+                  >
+                    Télécharger
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 border border-gray-200 rounded-lg">
+              <p className="text-gray-500">Aucun fichier disponible pour le moment.</p>
+              <p className="text-sm text-gray-400 mt-2">Les fichiers utiles seront ajoutés par le service RH.</p>
+            </div>
+          )}
+
+          {/* Exemples de fichiers statiques en attendant l'implémentation backend */}
+          {usefulFiles.length === 0 && (
+            <div className="mt-6 grid md:grid-cols-2 gap-4">
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                  <FaFileAlt className="text-coke-red mr-2" />
+                  Modèles de rapport
+                </h4>
+                <p className="text-sm text-gray-600 mb-2">Modèles pour vos rapports de stage.</p>
+                <span className="text-sm text-gray-400">Bientôt disponible</span>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                  <FaFileAlt className="text-coke-red mr-2" />
+                  Charte du stagiaire
+                </h4>
+                <p className="text-sm text-gray-600 mb-2">Droits et devoirs du stagiaire chez SBGS.</p>
+                <span className="text-sm text-gray-400">Bientôt disponible</span>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                  <FaFileAlt className="text-coke-red mr-2" />
+                  Règlement intérieur
+                </h4>
+                <p className="text-sm text-gray-600 mb-2">Extrait du règlement intérieur pour les stagiaires.</p>
+                <span className="text-sm text-gray-400">Bientôt disponible</span>
+              </div>
+              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                  <FaFileAlt className="text-coke-red mr-2" />
+                  Procédure d'attestation
+                </h4>
+                <p className="text-sm text-gray-600 mb-2">Procédure de signature de l'attestation de stage.</p>
+                <span className="text-sm text-gray-400">Bientôt disponible</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Contact Information - Always show */}
         <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Besoin d'aide ?</h3>
@@ -813,4 +928,4 @@ export default function CandidateDashboard() {
        )}
      </div>
    );
- }  
+ }

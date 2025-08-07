@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { DocumentTextIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 import AnnouncementForm from "./AnnouncementForm";
+import UsefulFilesManager from "./UsefulFilesManager";
 
 
 export default function Dashboard() {
@@ -682,6 +683,24 @@ export default function Dashboard() {
              
            </div>
          </div>
+
+         {/* Useful Files */}
+         <div 
+           className={`min-w-[200px] bg-white border ${currentView === "usefulFiles" ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"} rounded-xl p-5 flex items-center gap-4 shadow-sm cursor-pointer hover:shadow-md transition-all duration-200 transform hover:scale-105`}
+           onClick={() => {
+             setViewSafely("usefulFiles");
+             setShowApprovedCandidates(false);
+           }}
+         >
+           <div className="bg-blue-100 p-3 rounded-full flex items-center justify-center">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+             </svg>
+           </div>
+           <div>
+             <div className="text-black-500 text-s font-medium">Fichiers Utiles</div>
+           </div>
+         </div>
        </div>
        
                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -701,6 +720,18 @@ export default function Dashboard() {
                 <div className="p-6">
                   {/* Announcement Form */}
                   <AnnouncementForm />
+                </div>
+              </div>
+            </div>
+          ) : currentView === "usefulFiles" ? (
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="coke-gradient px-6 py-4">
+                  <h2 className="text-2xl font-bold text-white">Fichiers Utiles</h2>
+                  <p className="text-coke-light">Gérer les fichiers disponibles pour les stagiaires</p>
+                </div>
+                <div className="p-6">
+                  <UsefulFilesManager />
                 </div>
               </div>
             </div>
