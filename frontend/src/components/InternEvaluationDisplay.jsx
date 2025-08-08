@@ -59,7 +59,8 @@ const InternEvaluationDisplay = ({ evaluation }) => {
           </div>
           <div>
             <p className="text-sm text-gray-600">Département / Service</p>
-            <p className="font-medium">{departement && departement !== 'À définir' ? departement : 'Non spécifié'}</p>
+            {/*<p className="font-medium">{departement && departement !== 'À définir' ? departement : 'Non spécifié'}</p>*/}
+            <p className="font-medium">Informatique</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Superviseur</p>

@@ -675,11 +675,11 @@ const generateAttestationPDF = (attestationData: any) => {
              <div class="additional-title">Informations Complémentaires</div>
              <div class="info-row">
                <div class="info-label">Service d'affectation</div>
-               <div class="info-value">Service des Ressources Humaines</div>
+               <div class="info-value">Service Informatique</div>
              </div>
              <div class="info-row">
                <div class="info-label">Superviseur</div>
-               <div class="info-value">Responsable RH - SBGS</div>
+               <div class="info-value">Adil El Farissi</div>
              </div>
              <div class="info-row">
                <div class="info-label">Statut du stage</div>
