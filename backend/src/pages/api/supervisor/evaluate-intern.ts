@@ -147,7 +147,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             
             Cordialement,
             Système de gestion des stages
-          `
+          `,
+          html: undefined
         });
       } catch (emailError) {
         console.error('Error sending email:', emailError);

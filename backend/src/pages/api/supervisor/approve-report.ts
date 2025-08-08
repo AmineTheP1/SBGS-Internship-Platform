@@ -90,7 +90,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           await sendEmail({
             to: hrEmail,
             subject: emailSubject,
-            text: emailBody
+            text: emailBody,
+            html: emailBody
           });
           console.log('Email sent successfully');
         } catch (emailError) {
