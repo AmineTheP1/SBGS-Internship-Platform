@@ -59,7 +59,7 @@ const InternEvaluationDisplay = ({ evaluation }) => {
           </div>
           <div>
             <p className="text-sm text-gray-600">Département / Service</p>
-            <p className="font-medium">{departement || 'Non spécifié'}</p>
+            <p className="font-medium">{departement && departement !== 'À définir' ? departement : 'Non spécifié'}</p>
           </div>
           <div>
             <p className="text-sm text-gray-600">Superviseur</p>
@@ -76,43 +76,43 @@ const InternEvaluationDisplay = ({ evaluation }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Critère</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score (0-10)</th>
+                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Score (0-10)</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Compétences techniques</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-gray-900">Compétences techniques</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span className={`font-bold ${getScoreColor(competences_techniques)}`}>{competences_techniques}/10</span>
                 </td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Qualité du travail rendu</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-gray-900">Qualité du travail rendu</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span className={`font-bold ${getScoreColor(qualite_travail)}`}>{qualite_travail}/10</span>
                 </td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Respect des délais</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-gray-900">Respect des délais</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span className={`font-bold ${getScoreColor(respect_delais)}`}>{respect_delais}/10</span>
                 </td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capacité à travailler en équipe</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-gray-900">Capacité à travailler en équipe</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span className={`font-bold ${getScoreColor(travail_equipe)}`}>{travail_equipe}/10</span>
                 </td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Autonomie et initiative</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-gray-900">Autonomie et initiative</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span className={`font-bold ${getScoreColor(autonomie_initiative)}`}>{autonomie_initiative}/10</span>
                 </td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Communication professionnelle</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium text-gray-900">Communication professionnelle</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <span className={`font-bold ${getScoreColor(communication)}`}>{communication}/10</span>
                 </td>
               </tr>
