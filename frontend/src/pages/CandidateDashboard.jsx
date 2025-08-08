@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes, FaCertificate, FaHeart, FaCheckCircle } from "react-icons/fa";
+import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes, FaCertificate, FaHeart, FaCheckCircle, FaStar } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
+import InternEvaluationDisplay from "../components/InternEvaluationDisplay";
+
 
 export default function CandidateDashboard() {
   const [candidate, setCandidate] = useState(null);
@@ -27,6 +29,8 @@ export default function CandidateDashboard() {
   const [usefulFiles, setUsefulFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filesPerPage] = useState(4);
+  const [evaluation, setEvaluation] = useState(null);
+  const [loadingEvaluation, setLoadingEvaluation] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -98,6 +102,24 @@ export default function CandidateDashboard() {
           }
         } catch (error) {
           console.error("Erreur lors de la récupération des fichiers utiles:", error);
+        }
+        
+        // Fetch evaluation if available
+        try {
+          setLoadingEvaluation(true);
+          const evaluationRes = await fetch(API_ENDPOINTS.CANDIDATE_GET_EVALUATION, {
+            credentials: "include"
+          });
+          if (evaluationRes.ok) {
+            const evaluationData = await evaluationRes.json();
+            if (evaluationData.success) {
+              setEvaluation(evaluationData.evaluation);
+            }
+          }
+        } catch (error) {
+          console.error("Erreur lors de la récupération de l'évaluation:", error);
+        } finally {
+          setLoadingEvaluation(false);
         }
       } catch {
         navigate('/candidate-login', { replace: true });
@@ -745,6 +767,23 @@ export default function CandidateDashboard() {
                 Aucun rapport soumis pour le moment.
               </p>
             )}
+          </div>
+        )}
+        
+        {/* Evaluation Section */}
+        {evaluation && (
+          <div className="mt-8">
+            <div className="flex items-center mb-4">
+              <FaStar className="text-coke-red mr-2" />
+              <h3 className="text-xl font-bold text-gray-800">Évaluation de stage</h3>
+            </div>
+            <InternEvaluationDisplay evaluation={evaluation} />
+          </div>
+        )}
+        {loadingEvaluation && (
+          <div className="mt-8 bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-coke-red mx-auto"></div>
+            <p className="mt-2 text-gray-600">Chargement de l'évaluation...</p>
           </div>
         )}
 
