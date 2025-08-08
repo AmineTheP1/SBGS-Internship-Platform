@@ -464,6 +464,23 @@ export default function CandidateDashboard() {
                   Votre attestation peut être récupérée auprès du service RH.
                 </p>
               </div>
+              
+              {/* Display evaluation if available */}
+              {evaluation && (
+                <div className="mt-8">
+                  <div className="flex items-center mb-4">
+                    <FaStar className="text-coke-red mr-2" />
+                    <h3 className="text-xl font-bold text-gray-800">Évaluation de stage</h3>
+                  </div>
+                  <InternEvaluationDisplay evaluation={evaluation} />
+                </div>
+              )}
+              {loadingEvaluation && (
+                <div className="mt-8 bg-white rounded-xl shadow-lg p-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-coke-red mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Chargement de l'évaluation...</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -770,8 +787,8 @@ export default function CandidateDashboard() {
           </div>
         )}
         
-        {/* Evaluation Section */}
-        {evaluation && (
+        {/* Evaluation Section - Now displayed inside attestation section when available */}
+        {!hasAttestation && evaluation && (
           <div className="mt-8">
             <div className="flex items-center mb-4">
               <FaStar className="text-coke-red mr-2" />
@@ -780,7 +797,7 @@ export default function CandidateDashboard() {
             <InternEvaluationDisplay evaluation={evaluation} />
           </div>
         )}
-        {loadingEvaluation && (
+        {!hasAttestation && loadingEvaluation && (
           <div className="mt-8 bg-white rounded-xl shadow-lg p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-coke-red mx-auto"></div>
             <p className="mt-2 text-gray-600">Chargement de l'évaluation...</p>
