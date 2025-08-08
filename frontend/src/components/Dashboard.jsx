@@ -698,7 +698,7 @@ export default function Dashboard() {
              </svg>
            </div>
            <div>
-             <div className="text-black-500 text-s font-medium">Fichiers Utiles</div>
+             <div className="text-black-500 text-s font-medium">Documents Utiles</div>
            </div>
          </div>
        </div>
@@ -727,8 +727,8 @@ export default function Dashboard() {
             <div className="space-y-6">
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="coke-gradient px-6 py-4">
-                  <h2 className="text-2xl font-bold text-white">Fichiers Utiles</h2>
-                  <p className="text-coke-light">Gérer les fichiers disponibles pour les stagiaires</p>
+                  <h2 className="text-2xl font-bold text-white">Documents Utiles</h2>
+                  <p className="text-coke-light">Gérer les documents disponibles pour les stagiaires</p>
                 </div>
                 <div className="p-6">
                   <UsefulFilesManager />

@@ -28,6 +28,9 @@ export const API_ENDPOINTS = {
   HR_UPLOAD_USEFUL_FILE: `${API_BASE_URL}/api/hr/upload-useful-file`,
   HR_GET_USEFUL_FILES: `${API_BASE_URL}/api/hr/get-useful-files`,
   HR_DELETE_USEFUL_FILE: `${API_BASE_URL}/api/hr/delete-useful-file`,
+  HR_GET_FOLDERS: `${API_BASE_URL}/api/hr/get-folders`,
+  HR_CREATE_FOLDER: `${API_BASE_URL}/api/hr/create-folder`,
+  HR_DELETE_FOLDER: `${API_BASE_URL}/api/hr/delete-folder`,
 
   // Supervisor endpoints
   SUPERVISOR_LOGIN: `${API_BASE_URL}/api/supervisor/login`,

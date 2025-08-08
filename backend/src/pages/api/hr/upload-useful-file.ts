@@ -70,6 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // Extract form fields
           const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
           const description = Array.isArray(fields.description) ? fields.description[0] : fields.description;
+          const folderId = Array.isArray(fields.folderId) ? fields.folderId[0] : fields.folderId;
           
           if (!title) {
             res.setHeader('Content-Type', 'application/json');
@@ -104,8 +105,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               filename, 
               file_path, 
               file_type, 
-              uploaded_by
-            ) VALUES ($1, $2, $3, $4, $5, $6) 
+              uploaded_by,
+              folder_id
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
             RETURNING id
           `, [
             title,
@@ -113,7 +115,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             originalFilename,
             relativePath,
             file.mimetype || null,
-            hrId
+            hrId,
+            folderId || null
           ]);
 
           // Ensure proper content type and response format

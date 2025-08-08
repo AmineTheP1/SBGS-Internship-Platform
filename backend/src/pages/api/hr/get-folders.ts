@@ -9,7 +9,7 @@ const pool = new Pool({
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Handle CORS
-  if (handleCors(req, res)) return;
+  await handleCors(req, res);
   
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -28,32 +28,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ success: false, error: "Invalid token" });
     }
 
-    // Get all useful files with folder information
+    // Get all folders
     const result = await pool.query(`
       SELECT 
-        uf.id, 
-        uf.title, 
-        uf.description, 
-        uf.filename, 
-        uf.file_path, 
-        uf.file_type, 
-        uf.uploaded_at, 
-        uf.uploaded_by,
-        rh.nom as uploaded_by_name,
-        uf.folder_id,
-        du.name as folder_name
-      FROM fichiers_utiles uf
-      LEFT JOIN rh ON uf.uploaded_by = rh.rhid
-      LEFT JOIN dossiers_utiles du ON uf.folder_id = du.id
-      ORDER BY uf.uploaded_at DESC
+        id, 
+        name, 
+        description, 
+        created_at, 
+        created_by
+      FROM dossiers_utiles
+      ORDER BY name ASC
     `);
 
     return res.status(200).json({
       success: true,
-      files: result.rows
+      folders: result.rows
     });
   } catch (error) {
-    console.error("Error fetching useful files:", error);
+    console.error("Error fetching folders:", error);
     return res.status(500).json({ success: false, error: "Server error" });
   }
 }

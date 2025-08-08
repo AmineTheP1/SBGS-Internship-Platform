@@ -101,7 +101,7 @@ export default function CandidateDashboard() {
             setUsefulFiles(usefulFilesData.files || []);
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des fichiers utiles:", error);
+          console.error("Erreur lors de la récupération des documents utiles:", error);
         }
         
         // Fetch evaluation if available
@@ -628,7 +628,7 @@ export default function CandidateDashboard() {
 <div className="mt-8 bg-white rounded-xl shadow-lg p-8">
           <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center">
             <FaFileAlt className="mr-2 text-coke-red" />
-            Fichiers Utiles
+            Documents Utiles
           </h3>
           <p className="text-gray-600 mb-4">
             Documents importants mis à votre disposition par le service RH :
@@ -692,7 +692,7 @@ export default function CandidateDashboard() {
           ) : (
             <div className="text-center py-8 border border-gray-200 rounded-lg">
               <p className="text-gray-500">Aucun fichier disponible pour le moment.</p>
-              <p className="text-sm text-gray-400 mt-2">Les fichiers utiles seront ajoutés par le service RH.</p>
+              <p className="text-sm text-gray-400 mt-2">Les documents utiles seront ajoutés par le service RH.</p>
             </div>
           )}
 
