@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes, FaCertificate, FaHeart, FaCheckCircle, FaStar } from "react-icons/fa";
+import { FaUser, FaGraduationCap, FaCalendar, FaFileAlt, FaSignOutAlt, FaClock, FaSignInAlt, FaSignOutAlt as FaSignOut, FaEdit, FaTimes, FaCertificate, FaHeart, FaCheckCircle, FaStar, FaFolder, FaFile } from "react-icons/fa";
 import API_ENDPOINTS, { API_BASE_URL } from "../config/api.js";
 import InternEvaluationDisplay from "../components/InternEvaluationDisplay";
 
@@ -29,6 +29,7 @@ export default function CandidateDashboard() {
   const [usefulFiles, setUsefulFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filesPerPage] = useState(4);
+  const [currentView, setCurrentView] = useState('folders'); // 'folders' ou 'files'
   const [evaluation, setEvaluation] = useState(null);
   const [loadingEvaluation, setLoadingEvaluation] = useState(false);
   const navigate = useNavigate();
@@ -99,6 +100,7 @@ export default function CandidateDashboard() {
           if (usefulFilesRes.ok) {
             const usefulFilesData = await usefulFilesRes.json();
             setUsefulFiles(usefulFilesData.files || []);
+            console.log("Documents utiles récupérés:", usefulFilesData.files);
           }
         } catch (error) {
           console.error("Erreur lors de la récupération des documents utiles:", error);
@@ -634,61 +636,187 @@ export default function CandidateDashboard() {
             Documents importants mis à votre disposition par le service RH :
           </p>
           
+          {/* View Tabs */}
+          <div className="flex border-b mb-6">
+            <button
+              onClick={() => setCurrentView('folders')}
+              className={`px-4 py-2 font-medium text-sm flex items-center ${currentView === 'folders' 
+                ? 'border-b-2 border-coke-red text-coke-red' 
+                : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <FaFolder className="mr-2" /> Par dossiers
+            </button>
+            <button
+              onClick={() => setCurrentView('files')}
+              className={`px-4 py-2 font-medium text-sm flex items-center ${currentView === 'files' 
+                ? 'border-b-2 border-coke-red text-coke-red' 
+                : 'text-gray-500 hover:text-gray-700'}`}
+            >
+              <FaFile className="mr-2" /> Tous les fichiers
+            </button>
+          </div>
+          
           {usefulFiles.length > 0 ? (
-            <>
-              <div className="grid md:grid-cols-2 gap-4">
-                {usefulFiles
-                  .slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage)
-                  .map((file) => (
-                    <div key={file.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
-                        <FaFileAlt className="text-coke-red mr-2" />
-                        {file.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-2">{file.description}</p>
-                      <button 
-                        onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
-                        className="text-sm text-coke-red hover:underline"
-                      >
-                        Télécharger
-                      </button>
+            currentView === 'folders' ? (
+              // Vue par dossiers
+              <div>
+                {/* Grouper les fichiers par dossier */}
+                {(() => {
+                  // Récupérer tous les dossiers uniques
+                  const folders = usefulFiles
+                    .filter(file => file.folder_id)
+                    .map(file => ({
+                      id: file.folder_id,
+                      name: file.folder_name,
+                      description: file.folder_description
+                    }))
+                    .filter((folder, index, self) => 
+                      index === self.findIndex(f => f.id === folder.id)
+                    );
+                  
+                  if (folders.length === 0) {
+                    return (
+                      <div className="text-center py-4 text-gray-500">
+                        <p>Aucun dossier disponible.</p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="space-y-6">
+                      {folders.map(folder => (
+                        <div key={folder.id} className="border rounded-lg p-4">
+                          <div className="flex items-center mb-3">
+                            <FaFolder className="text-yellow-500 text-xl mr-2" />
+                            <div>
+                              <h4 className="font-semibold text-gray-800">{folder.name}</h4>
+                              {folder.description && (
+                                <p className="text-sm text-gray-600">{folder.description}</p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="pl-6 mt-3 space-y-3">
+                            {usefulFiles
+                              .filter(file => file.folder_id === folder.id)
+                              .map(file => (
+                                <div key={file.id} className="border-t pt-3">
+                                  <h5 className="font-medium text-gray-800 flex items-center">
+                                    <FaFileAlt className="text-coke-red mr-2" />
+                                    {file.title}
+                                  </h5>
+                                  {file.description && (
+                                    <p className="text-sm text-gray-600 mt-1 mb-2">{file.description}</p>
+                                  )}
+                                  <button 
+                                    onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
+                                    className="text-sm text-coke-red hover:underline"
+                                  >
+                                    Télécharger
+                                  </button>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Fichiers sans dossier */}
+                      {usefulFiles.filter(file => !file.folder_id).length > 0 && (
+                        <div className="border rounded-lg p-4">
+                          <div className="flex items-center mb-3">
+                            <FaFolder className="text-gray-400 text-xl mr-2" />
+                            <h4 className="font-semibold text-gray-800">Fichiers sans dossier</h4>
+                          </div>
+                          
+                          <div className="pl-6 mt-3 space-y-3">
+                            {usefulFiles
+                              .filter(file => !file.folder_id)
+                              .map(file => (
+                                <div key={file.id} className="border-t pt-3">
+                                  <h5 className="font-medium text-gray-800 flex items-center">
+                                    <FaFileAlt className="text-coke-red mr-2" />
+                                    {file.title}
+                                  </h5>
+                                  {file.description && (
+                                    <p className="text-sm text-gray-600 mt-1 mb-2">{file.description}</p>
+                                  )}
+                                  <button 
+                                    onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
+                                    className="text-sm text-coke-red hover:underline"
+                                  >
+                                    Télécharger
+                                  </button>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  );
+                })()}
               </div>
-              
-              {/* Pagination Controls */}
-              {usefulFiles.length > filesPerPage && (
-                <div className="flex justify-center mt-6">
-                  <nav className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
-                      Précédent
-                    </button>
-                    
-                    {Array.from({ length: Math.ceil(usefulFiles.length / filesPerPage) }, (_, i) => i + 1).map(page => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-coke-red text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                      >
-                        {page}
-                      </button>
+            ) : (
+              // Vue par fichiers (vue originale)
+              <>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {usefulFiles
+                    .slice((currentPage - 1) * filesPerPage, currentPage * filesPerPage)
+                    .map((file) => (
+                      <div key={file.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                        <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
+                          <FaFileAlt className="text-coke-red mr-2" />
+                          {file.title}
+                        </h4>
+                        {file.folder_name && (
+                          <div className="text-xs text-gray-500 mb-1 flex items-center">
+                            <FaFolder className="text-yellow-500 mr-1" /> {file.folder_name}
+                          </div>
+                        )}
+                        <p className="text-sm text-gray-600 mb-2">{file.description}</p>
+                        <button 
+                          onClick={() => handleDownloadUsefulFile(file.id, file.filename)}
+                          className="text-sm text-coke-red hover:underline"
+                        >
+                          Télécharger
+                        </button>
+                      </div>
                     ))}
-                    
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(usefulFiles.length / filesPerPage)))}
-                      disabled={currentPage === Math.ceil(usefulFiles.length / filesPerPage)}
-                      className={`px-3 py-1 rounded-md ${currentPage === Math.ceil(usefulFiles.length / filesPerPage) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                    >
-                      Suivant
-                    </button>
-                  </nav>
                 </div>
-              )}
-            </>
+                
+                {/* Pagination Controls */}
+                {usefulFiles.length > filesPerPage && (
+                  <div className="flex justify-center mt-6">
+                    <nav className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-1 rounded-md ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                      >
+                        Précédent
+                      </button>
+                      
+                      {Array.from({ length: Math.ceil(usefulFiles.length / filesPerPage) }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-coke-red text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                      
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(usefulFiles.length / filesPerPage)))}
+                        disabled={currentPage === Math.ceil(usefulFiles.length / filesPerPage)}
+                        className={`px-3 py-1 rounded-md ${currentPage === Math.ceil(usefulFiles.length / filesPerPage) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                      >
+                        Suivant
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </>
+            )
           ) : (
             <div className="text-center py-8 border border-gray-200 rounded-lg">
               <p className="text-gray-500">Aucun fichier disponible pour le moment.</p>
