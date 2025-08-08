@@ -179,7 +179,7 @@ const UsefulFilesManager = () => {
           description: '',
           file: null
         });
-        fetchFiles(); // Refresh the file list
+        fetchData(); // Refresh the file list
       } else {
         throw new Error(data.error || 'Failed to upload file');
       }
