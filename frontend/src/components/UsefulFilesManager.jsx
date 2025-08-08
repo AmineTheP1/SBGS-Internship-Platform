@@ -28,6 +28,8 @@ const UsefulFilesManager = () => {
   const [uploadError, setUploadError] = useState(null);
   const [folderError, setFolderError] = useState(null);
   const [currentView, setCurrentView] = useState('folders'); // 'folders' or 'files'
+  const [currentFolderPage, setCurrentFolderPage] = useState(1);
+  const [foldersPerPage] = useState(6); // Nombre de dossiers par page
 
   // Fetch files and folders on component mount
   useEffect(() => {
@@ -270,7 +272,7 @@ const UsefulFilesManager = () => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Fichiers Utiles</h2>
+        <h2 className="text-2xl font-semibold text-gray-800"></h2>
         <div className="flex space-x-3">
           <button
             onClick={() => {
@@ -337,8 +339,14 @@ const UsefulFilesManager = () => {
               <p>Aucun dossier disponible. Créez des dossiers pour organiser vos fichiers.</p>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {folders.map((folder) => (
+              {folders
+                .slice(
+                  (currentFolderPage - 1) * foldersPerPage,
+                  currentFolderPage * foldersPerPage
+                )
+                .map((folder) => (
                 <div key={folder.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center">
@@ -383,14 +391,36 @@ const UsefulFilesManager = () => {
                 </div>
               ))}
             </div>
+            
+            {/* Folders Pagination */}
+            {Math.ceil(folders.length / foldersPerPage) > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-6">
+                <button
+                  onClick={() => setCurrentFolderPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentFolderPage === 1}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                <span className="text-sm text-gray-600">
+                  Page {currentFolderPage} sur {Math.ceil(folders.length / foldersPerPage)}
+                </span>
+                <button
+                  onClick={() => setCurrentFolderPage(prev => Math.min(prev + 1, Math.ceil(folders.length / foldersPerPage)))}
+                  disabled={currentFolderPage === Math.ceil(folders.length / foldersPerPage)}
+                  className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
+            </>
           )}
           
-          {/* Files without folder */}
-          <div className="mt-8 border-t pt-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4">Fichiers sans dossier</h3>
-            {files.filter(file => !file.folder_id).length === 0 ? (
-              <p className="text-gray-500">Aucun fichier sans dossier</p>
-            ) : (
+          {/* Files without folder - only shown if there are files without folder */}
+          {files.filter(file => !file.folder_id).length > 0 ? (
+            <div className="mt-8 border-t pt-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Fichiers sans dossier</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -434,8 +464,8 @@ const UsefulFilesManager = () => {
                   </tbody>
                 </table>
               </div>
-            )}
-          </div>
+            </div>
+          ) : null}
         </div>
       ) : (
         // All Files View
