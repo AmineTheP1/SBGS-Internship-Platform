@@ -29,6 +29,8 @@ export default function CandidateDashboard() {
   const [usefulFiles, setUsefulFiles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filesPerPage] = useState(4);
+  const [currentFolderPage, setCurrentFolderPage] = useState(1);
+  const [foldersPerPage] = useState(2);
   const [currentView, setCurrentView] = useState('folders'); // 'folders' ou 'files'
   const [evaluation, setEvaluation] = useState(null);
   const [loadingEvaluation, setLoadingEvaluation] = useState(false);
@@ -130,6 +132,12 @@ export default function CandidateDashboard() {
     };
     checkSession();
   }, [navigate]);
+  
+  // Réinitialiser les pages lorsque la vue change
+  useEffect(() => {
+    setCurrentPage(1);
+    setCurrentFolderPage(1);
+  }, [currentView]);
 
   const handleLogout = async () => {
     try {
@@ -682,9 +690,14 @@ export default function CandidateDashboard() {
                     );
                   }
                   
+                  // Calculer les indices pour la pagination des dossiers
+                  const indexOfLastFolder = currentFolderPage * foldersPerPage;
+                  const indexOfFirstFolder = indexOfLastFolder - foldersPerPage;
+                  const currentFolders = folders.slice(indexOfFirstFolder, indexOfLastFolder);
+                  
                   return (
                     <div className="space-y-6">
-                      {folders.map(folder => (
+                      {currentFolders.map(folder => (
                         <div key={folder.id} className="border rounded-lg p-4">
                           <div className="flex items-center mb-3">
                             <FaFolder className="text-yellow-500 text-xl mr-2" />
@@ -719,6 +732,39 @@ export default function CandidateDashboard() {
                           </div>
                         </div>
                       ))}
+                      
+                      {/* Pagination Controls pour les dossiers */}
+                      {folders.length > foldersPerPage && (
+                        <div className="flex justify-center mt-6">
+                          <nav className="flex items-center space-x-2">
+                            <button
+                              onClick={() => setCurrentFolderPage(prev => Math.max(prev - 1, 1))}
+                              disabled={currentFolderPage === 1}
+                              className={`px-3 py-1 rounded-md ${currentFolderPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                            >
+                              Précédent
+                            </button>
+                            
+                            {Array.from({ length: Math.ceil(folders.length / foldersPerPage) }, (_, i) => i + 1).map(page => (
+                              <button
+                                key={page}
+                                onClick={() => setCurrentFolderPage(page)}
+                                className={`px-3 py-1 rounded-md ${currentFolderPage === page ? 'bg-coke-red text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                              >
+                                {page}
+                              </button>
+                            ))}
+                            
+                            <button
+                              onClick={() => setCurrentFolderPage(prev => Math.min(prev + 1, Math.ceil(folders.length / foldersPerPage)))}
+                              disabled={currentFolderPage === Math.ceil(folders.length / foldersPerPage)}
+                              className={`px-3 py-1 rounded-md ${currentFolderPage === Math.ceil(folders.length / foldersPerPage) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                            >
+                              Suivant
+                            </button>
+                          </nav>
+                        </div>
+                      )}
                       
                       {/* Fichiers sans dossier */}
                       {usefulFiles.filter(file => !file.folder_id).length > 0 && (
