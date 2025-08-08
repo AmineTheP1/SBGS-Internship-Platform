@@ -4,6 +4,7 @@ import { FaUserTie, FaUsers, FaClock, FaFileAlt, FaCalendar, FaSignOutAlt, FaEye
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api.js";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import InternEvaluationForm from "../components/InternEvaluationForm";
 
 export default function SupervisorDashboard() {
   const [supervisor, setSupervisor] = useState(null);
@@ -36,6 +37,9 @@ export default function SupervisorDashboard() {
   const [candidatesPerPage] = useState(6);
   const [reportsPerPage] = useState(6);
   const [currentView, setCurrentView] = useState('main'); // 'main', 'interns', 'reports', 'absences', 'confirmations'
+  const [showEvaluationForm, setShowEvaluationForm] = useState(false);
+  const [evaluationCandidate, setEvaluationCandidate] = useState(null);
+  const [evaluationRapportId, setEvaluationRapportId] = useState(null);
   const navigate = useNavigate();
   const reportsSectionRef = useRef(null);
 
@@ -596,11 +600,21 @@ export default function SupervisorDashboard() {
       const data = await response.json();
       if (data.success) {
         setReportStatus("Rapport traité avec succès !");
-        setSelectedReport(null);
-        setReportAction("");
-        setReportComment("");
-        setRequestCertificate(false);
-        setShowReportModal(false);
+        
+        // Si c'est un rapport final approuvé, afficher le formulaire d'évaluation
+        if (reportAction === "Approuvé" && data.isFinalReport) {
+          setShowReportModal(false);
+          setEvaluationCandidate(data.candidateInfo);
+          setEvaluationRapportId(data.rapportid);
+          setShowEvaluationForm(true);
+        } else {
+          setSelectedReport(null);
+          setReportAction("");
+          setReportComment("");
+          setRequestCertificate(false);
+          setShowReportModal(false);
+        }
+        
         // Refresh reports
         const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?resid=${supervisor.resid}`, {
           credentials: "include"
@@ -616,6 +630,17 @@ export default function SupervisorDashboard() {
       console.error("Error approving report:", error);
       setReportStatus("Erreur lors du traitement du rapport");
     }
+  };
+  
+  const handleEvaluationSuccess = () => {
+    // Réinitialiser les états après une évaluation réussie
+    setSelectedReport(null);
+    setReportAction("");
+    setReportComment("");
+    setRequestCertificate(false);
+    setShowEvaluationForm(false);
+    setEvaluationCandidate(null);
+    setEvaluationRapportId(null);
   };
 
   const getReportStatusColor = (status) => {
@@ -1982,6 +2007,19 @@ export default function SupervisorDashboard() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Evaluation Form Modal */}
+      {showEvaluationForm && evaluationCandidate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <InternEvaluationForm 
+            candidateInfo={evaluationCandidate}
+            rapportid={evaluationRapportId}
+            resid={supervisor?.resid}
+            onClose={() => setShowEvaluationForm(false)}
+            onSuccess={handleEvaluationSuccess}
+          />
         </div>
       )}
     </div>

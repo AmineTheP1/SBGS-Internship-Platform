@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
   SUPERVISOR_ADMIN_CREATE_SUPERVISOR: `${API_BASE_URL}/api/supervisor-admin/create-supervisor`,
   SUPERVISOR_GET_INTERN_REPORTS: `${API_BASE_URL}/api/supervisor/get-intern-reports`,
   SUPERVISOR_APPROVE_REPORT: `${API_BASE_URL}/api/supervisor/approve-report`,
+  SUPERVISOR_EVALUATE_INTERN: `${API_BASE_URL}/api/supervisor/evaluate-intern`,
 
 
   // Candidate endpoints
@@ -61,6 +62,7 @@ export const API_ENDPOINTS = {
   CANDIDATE_CHECK_ATTESTATION: `${API_BASE_URL}/api/candidate/check-attestation`,
   CANDIDATE_GET_USEFUL_FILES: `${API_BASE_URL}/api/candidate/get-useful-files`,
   CANDIDATE_DOWNLOAD_USEFUL_FILE: `${API_BASE_URL}/api/candidate/download-useful-file`,
+  CANDIDATE_GET_EVALUATION: `${API_BASE_URL}/api/candidate/get-evaluation`,
 
   // Application endpoints
   APPLY: `${API_BASE_URL}/api/hr/apply`,

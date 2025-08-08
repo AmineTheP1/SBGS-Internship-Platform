@@ -2,20 +2,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Pool } from 'pg';
 import sendEmail from '../../../utilities/sendEmail';
 import crypto from 'crypto';
+import { handleCors } from '../../../utilities/cors';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
+  // Handle CORS
+  if (handleCors(req, res)) return;
 
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
@@ -104,15 +99,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
+    // Check if this is a final report
+    const reportTypeResult = await pool.query(
+      `SELECT r.titre, c.cdtid, c.nom, c.prenom
+       FROM rapports_stage r
+       JOIN candidat c ON r.cdtid = c.cdtid
+       WHERE r.rstid = $1`,
+      [rapportid]
+    );
+    
+    const isFinalReport = reportTypeResult.rows.length > 0 && 
+                         reportTypeResult.rows[0].titre.toLowerCase().includes('final');
+    
     res.status(200).json({ 
       success: true, 
       message: action === 'Approuvé' 
         ? "Rapport approuvé avec succès." + (requestCertificate ? " Demande d'attestation envoyée à HR." : "")
-        : "Rapport rejeté."
+        : "Rapport rejeté.",
+      isFinalReport: isFinalReport,
+      candidateInfo: isFinalReport ? {
+        cdtid: reportTypeResult.rows[0].cdtid,
+        nom: reportTypeResult.rows[0].nom,
+        prenom: reportTypeResult.rows[0].prenom
+      } : null,
+      rapportid: rapportid
     });
 
   } catch (error) {
     console.error('Error approving report:', error);
     res.status(500).json({ success: false, error: "Erreur lors de l'approbation du rapport." });
   }
-} 
+}
