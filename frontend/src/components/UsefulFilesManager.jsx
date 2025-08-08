@@ -30,11 +30,19 @@ const UsefulFilesManager = () => {
   const [currentView, setCurrentView] = useState('folders'); // 'folders' or 'files'
   const [currentFolderPage, setCurrentFolderPage] = useState(1);
   const [foldersPerPage] = useState(6); // Nombre de dossiers par page
+  const [currentFilePage, setCurrentFilePage] = useState(1);
+  const [filesPerPage] = useState(4); // Nombre de fichiers par page
 
   // Fetch files and folders on component mount
   useEffect(() => {
     fetchData();
   }, []);
+  
+  // Réinitialiser les pages lorsque la vue change
+  useEffect(() => {
+    setCurrentFolderPage(1);
+    setCurrentFilePage(1);
+  }, [currentView]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -432,7 +440,10 @@ const UsefulFilesManager = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {files.filter(file => !file.folder_id).map((file) => (
+                    {files
+                      .filter(file => !file.folder_id)
+                      .slice((currentFilePage - 1) * filesPerPage, currentFilePage * filesPerPage)
+                      .map((file) => (
                       <tr key={file.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -464,6 +475,29 @@ const UsefulFilesManager = () => {
                   </tbody>
                 </table>
               </div>
+              
+              {/* Pagination for files without folder */}
+              {files.filter(file => !file.folder_id).length > filesPerPage && (
+                <div className="flex justify-center items-center space-x-2 mt-6">
+                  <button
+                    onClick={() => setCurrentFilePage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentFilePage === 1}
+                    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Précédent
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentFilePage} sur {Math.ceil(files.filter(file => !file.folder_id).length / filesPerPage)}
+                  </span>
+                  <button
+                    onClick={() => setCurrentFilePage(prev => Math.min(prev + 1, Math.ceil(files.filter(file => !file.folder_id).length / filesPerPage)))}
+                    disabled={currentFilePage === Math.ceil(files.filter(file => !file.folder_id).length / filesPerPage)}
+                    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Suivant
+                  </button>
+                </div>
+              )}
             </div>
           ) : null}
         </div>
@@ -486,7 +520,9 @@ const UsefulFilesManager = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {files.map((file) => (
+                {files
+                  .slice((currentFilePage - 1) * filesPerPage, currentFilePage * filesPerPage)
+                  .map((file) => (
                   <tr key={file.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -527,6 +563,29 @@ const UsefulFilesManager = () => {
                 ))}
               </tbody>
             </table>
+          )}
+          
+          {/* Files Pagination */}
+          {files.length > filesPerPage && (
+            <div className="flex justify-center items-center space-x-2 mt-6">
+              <button
+                onClick={() => setCurrentFilePage(prev => Math.max(prev - 1, 1))}
+                disabled={currentFilePage === 1}
+                className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Précédent
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {currentFilePage} sur {Math.ceil(files.length / filesPerPage)}
+              </span>
+              <button
+                onClick={() => setCurrentFilePage(prev => Math.min(prev + 1, Math.ceil(files.length / filesPerPage)))}
+                disabled={currentFilePage === Math.ceil(files.length / filesPerPage)}
+                className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Suivant
+              </button>
+            </div>
           )}
         </div>
       )}
