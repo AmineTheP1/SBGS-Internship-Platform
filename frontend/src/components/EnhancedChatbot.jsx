@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { API_ENDPOINTS } from "../config/api.js";
 import BestCandidatesList from "./BestCandidatesList";
 import axios from "axios";
 
 export default function EnhancedChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [chatSize, setChatSize] = useState({ width: 384, height: 500 }); // Default size (w-96 = 384px)
+  const chatRef = useRef(null);
+  const resizeRef = useRef(null);
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -16,6 +21,52 @@ export default function EnhancedChatbot() {
   const [inputMessage, setInputMessage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [expandedMessages, setExpandedMessages] = useState(new Set());
+
+  // Handle resize functionality
+  useEffect(() => {
+    const handleMouseDown = (e) => {
+      setIsResizing(true);
+      // Prevent text selection during resize
+      document.body.style.userSelect = 'none';
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isResizing) return;
+      
+      // Calculate new width and height based on mouse position
+      const chatRect = chatRef.current.getBoundingClientRect();
+      const newWidth = Math.max(384, e.clientX - chatRect.left); // Minimum width 384px
+      const newHeight = Math.max(500, e.clientY - chatRect.top); // Minimum height 500px
+      
+      setChatSize({ width: newWidth, height: newHeight });
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      // Restore text selection
+      document.body.style.userSelect = '';
+    };
+
+    // Add event listeners
+    const resizeHandle = resizeRef.current;
+    if (resizeHandle) {
+      resizeHandle.addEventListener('mousedown', handleMouseDown);
+    }
+    
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    // Clean up event listeners
+    return () => {
+      if (resizeHandle) {
+        resizeHandle.removeEventListener('mousedown', handleMouseDown);
+      }
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
 
   const botResponses = [
     "Merci pour votre message. Pour le statut de votre candidature de stage, veuillez permettre 2-3 semaines à notre équipe RH pour examiner les candidatures.",
@@ -242,6 +293,11 @@ export default function EnhancedChatbot() {
     
     return <BestCandidatesList candidates={message.bestCandidates} />;
   };
+  
+  // Function to toggle expanded view
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
 
   // Function to toggle expanded view for a message
   const toggleExpanded = (messageId) => {
@@ -298,7 +354,14 @@ export default function EnhancedChatbot() {
   return (
     <div className="fixed bottom-8 right-8 z-50">
       {/* Chat Window */}
-      <div className={`${isOpen ? 'block' : 'hidden'} bg-white rounded-xl shadow-xl w-96 h-[500px] scale-in`}>
+      <div 
+        ref={chatRef}
+        className={`${isOpen ? 'block' : 'hidden'} bg-white rounded-xl shadow-xl transition-all duration-300 scale-in relative ${isResizing ? 'cursor-nwse-resize' : ''}`}
+        style={{ 
+          width: isResizing ? `${chatSize.width}px` : (isExpanded ? '800px' : '384px'),
+          height: isResizing ? `${chatSize.height}px` : (isExpanded ? '700px' : '500px')
+        }}
+      >
         <div className="coke-gradient rounded-t-xl px-4 py-3 flex justify-between items-center">
           <div className="flex items-center">
             <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
@@ -306,15 +369,51 @@ export default function EnhancedChatbot() {
             </div>
             <span className="ml-2 text-white font-medium">Assistant RH SBGS</span>
           </div>
-          <button 
-            onClick={() => setIsOpen(false)}
-            className="text-white focus:outline-none"
-          >
-            <i className="fas fa-minus"></i>
-          </button>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={toggleExpand}
+              className="text-white focus:outline-none mr-2 relative group"
+              title={isExpanded ? "Réduire" : "Agrandir"}
+            >
+              <i className={`fas ${isExpanded ? 'fa-compress-alt' : 'fa-expand-alt'}`}></i>
+              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                {isExpanded ? "Réduire" : "Agrandir"}
+              </span>
+            </button>
+            <button 
+              onClick={() => setIsOpen(false)}
+              className="text-white focus:outline-none relative group"
+              title="Fermer"
+            >
+              <i className="fas fa-times"></i>
+              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                Fermer
+              </span>
+            </button>
+          </div>
         </div>
         
-        <div className="p-4 h-80 overflow-y-auto">
+        {/* Resize handle */}
+        <div 
+          ref={resizeRef}
+          className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-10 group"
+          style={{ 
+            borderRight: '8px solid #ccc',
+            borderBottom: '8px solid #ccc',
+            borderTop: '8px solid transparent',
+            borderLeft: '8px solid transparent',
+          }}
+        >
+          <span className="absolute -top-8 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            Redimensionner
+          </span>
+        </div>
+        
+        <div className="p-4 overflow-y-auto" style={{ 
+          height: isResizing 
+            ? `${chatSize.height - 130}px` 
+            : (isExpanded ? '570px' : '370px')
+        }}>
           {messages.map((message) => (
             <div key={message.id} className={`mb-3 ${message.isBot ? '' : 'text-right'}`}>
                              <div className={`rounded-lg p-3 ${
