@@ -450,21 +450,6 @@ export default function EnhancedChatbot() {
             </div>
           </div>
           
-          {/* Resize handle */}
-          <div 
-            ref={resizeRef}
-            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-10 group"
-            style={{ 
-              borderRight: '8px solid #ccc',
-              borderBottom: '8px solid #ccc',
-              borderTop: '8px solid transparent',
-              borderLeft: '8px solid transparent',
-            }}
-          >
-            <span className="absolute -top-8 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-              Redimensionner
-            </span>
-          </div>
           
           <div className="p-4 overflow-y-auto" style={{ 
             height: isResizing 
