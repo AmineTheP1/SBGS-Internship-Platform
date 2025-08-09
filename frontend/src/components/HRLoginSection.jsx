@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import API_ENDPOINTS from "../config/api.js";
+import { API_ENDPOINTS } from "../config/api.js";
 
 export default function HRLoginSection() {
   const [loginData, setLoginData] = useState({
@@ -178,4 +178,4 @@ export default function HRLoginSection() {
       </div>
     </section>
   );
-} 
+}

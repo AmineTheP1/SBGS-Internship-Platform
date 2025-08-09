@@ -46,7 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Login successful
     // Generate JWT token
     const token = jwt.sign(
-      { rhId: user.rhid || user.rhId, nom: user.nom, prenom: user.prenom, email: user.email },
+      { 
+        rhId: user.rhid || user.rhId, 
+        nom: user.nom, 
+        prenom: user.prenom, 
+        email: user.email,
+        role: 'hr' // Add the role to the token
+      },
       process.env.JWT_SECRET!,
       { expiresIn: rememberMe ? "30d" : "1h" }
     );

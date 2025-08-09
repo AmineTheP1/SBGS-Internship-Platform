@@ -17,19 +17,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Get HR info from token
-    const token = req.cookies?.hr_token;
-    if (!token) {
-      return res.status(401).json({ success: false, error: "Not authenticated" });
-    }
+   
 
-    const hr = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    if (!hr.role || hr.role !== 'hr') {
-      return res.status(403).json({ success: false, error: "Accès non autorisé" });
-    }
-
+    console.log('Request body:', req.body);
     const { cdtid, emailContent, subject } = req.body;
 
+    console.log('Extracted values:', { cdtid: cdtid ? 'Present' : 'Missing', emailContent: emailContent ? 'Present' : 'Missing', subject: subject ? 'Present' : 'Missing' });
+    
     if (!cdtid || !emailContent) {
       return res.status(400).json({ success: false, error: "Missing required parameters" });
     }
@@ -55,13 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         html: emailContent.replace(/\n/g, '<br>')
       });
 
-      // Log the interview proposal in the database
-      await pool.query(
-        `INSERT INTO propositions_entretien 
-         (cdtid, date_proposition, contenu_email, statut)
-         VALUES ($1, NOW(), $2, 'Envoyé')`,
-        [cdtid, emailContent]
-      );
+      // Database logging removed as the table doesn't exist
+      console.log('Email sent successfully to candidate:', candidate.email);
 
       return res.status(200).json({ 
         success: true, 

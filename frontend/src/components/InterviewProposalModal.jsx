@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API_ENDPOINTS from '../config/api';
+import { API_ENDPOINTS } from '../config/api';
 import axios from 'axios';
 
 const InterviewProposalModal = ({ isOpen, onClose, candidate }) => {
