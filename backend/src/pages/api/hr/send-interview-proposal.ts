@@ -4,6 +4,24 @@ import jwt from "jsonwebtoken";
 import { handleCors } from "../../../utilities/cors";
 import sendEmail from "../../../utilities/sendEmail";
 
+// Create propositions_entretien table if it doesn't exist
+async function ensurePropositionsEntretienTable(pool: Pool) {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS propositions_entretien (
+        id SERIAL PRIMARY KEY,
+        cdtid VARCHAR(255) NOT NULL,
+        date_proposition TIMESTAMP DEFAULT NOW(),
+        email_content TEXT,
+        subject VARCHAR(255),
+        FOREIGN KEY (cdtid) REFERENCES candidat(cdtid)
+      )
+    `);
+  } catch (error) {
+    console.error("Error creating propositions_entretien table:", error);
+  }
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
@@ -17,6 +35,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    // Ensure the propositions_entretien table exists
+    await ensurePropositionsEntretienTable(pool);
    
 
     console.log('Request body:', req.body);
@@ -49,7 +69,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         html: emailContent.replace(/\n/g, '<br>')
       });
 
-      // Database logging removed as the table doesn't exist
+      // Log the interview proposal in the database
+      await pool.query(
+        `INSERT INTO propositions_entretien (cdtid, email_content, subject) VALUES ($1, $2, $3)`,
+        [cdtid, emailContent, subject || "Proposition d'entretien - SBGS"]
+      );
+      
       console.log('Email sent successfully to candidate:', candidate.email);
 
       return res.status(200).json({ 
