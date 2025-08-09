@@ -13,7 +13,9 @@ export default defineConfig({
       interval: 1000
     },
     hmr: {
-      clientPort: 80
+      clientPort: 80,
+      host: 'localhost',
+      protocol: 'ws'
     }
   },
   define: {
