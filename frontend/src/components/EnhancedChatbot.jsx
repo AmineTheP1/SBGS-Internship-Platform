@@ -21,6 +21,7 @@ export default function EnhancedChatbot() {
   const [inputMessage, setInputMessage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [expandedMessages, setExpandedMessages] = useState(new Set());
+  const [paginationState, setPaginationState] = useState({});
 
   // Handle resize functionality
   useEffect(() => {
@@ -300,7 +301,7 @@ export default function EnhancedChatbot() {
   };
 
   // Function to toggle expanded view for a message
-  const toggleExpanded = (messageId) => {
+  const toggleMessageExpanded = (messageId) => {
     setExpandedMessages(prev => {
       const newSet = new Set(prev);
       if (newSet.has(messageId)) {
@@ -312,12 +313,34 @@ export default function EnhancedChatbot() {
     });
   };
 
-  // Function to render candidate list
+  // Function to handle pagination for a message
+  const handlePagination = (messageId, direction) => {
+    setPaginationState(prev => {
+      const currentPage = prev[messageId] || 0;
+      const newPage = direction === 'next' ? currentPage + 1 : currentPage - 1;
+      return { ...prev, [messageId]: Math.max(0, newPage) };
+    });
+  };
+
+  // Function to render candidate list with pagination
   const renderCandidateList = (message) => {
     if (!message.candidates) return null;
     
     const isExpanded = expandedMessages.has(message.id);
-    const candidatesToShow = isExpanded ? message.candidates : message.candidates.slice(0, 5);
+    const currentPage = paginationState[message.id] || 0;
+    const candidatesPerPage = 3; // Show 3 candidates per page
+    
+    let candidatesToShow;
+    if (isExpanded) {
+      // When expanded, show all with pagination
+      const startIndex = currentPage * candidatesPerPage;
+      candidatesToShow = message.candidates.slice(startIndex, startIndex + candidatesPerPage);
+    } else {
+      // When not expanded, just show first 3
+      candidatesToShow = message.candidates.slice(0, candidatesPerPage);
+    }
+    
+    const totalPages = Math.ceil(message.candidates.length / candidatesPerPage);
     
     return (
       <div className="mt-2">
@@ -331,6 +354,7 @@ export default function EnhancedChatbot() {
               📄 <a 
                 href={`${API_ENDPOINTS.HR_GET_CV}?filename=${encodeURIComponent(candidate.cvfilename)}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-blue-600 hover:text-blue-800 underline"
               >
                 Télécharger CV
@@ -339,132 +363,167 @@ export default function EnhancedChatbot() {
           </div>
         ))}
         
-        {message.candidates.length > 5 && (
-          <button
-            onClick={() => toggleExpanded(message.id)}
-            className="text-blue-600 hover:text-blue-800 underline text-sm mt-2"
-          >
-            {isExpanded ? 'Voir moins' : `Voir tous les candidats (${message.candidates.length - 5} de plus)`}
-          </button>
-        )}
+        <div className="flex justify-between items-center mt-2">
+          {isExpanded && (
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePagination(message.id, 'prev')}
+                disabled={currentPage === 0}
+                className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50 text-xs"
+              >
+                &lt; Précédent
+              </button>
+              
+              <span className="text-xs">
+                Page {currentPage + 1} / {totalPages}
+              </span>
+              
+              <button
+                onClick={() => handlePagination(message.id, 'next')}
+                disabled={currentPage >= totalPages - 1}
+                className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50 text-xs"
+              >
+                Suivant &gt;
+              </button>
+            </div>
+          )}
+          
+          {message.candidates.length > candidatesPerPage && (
+            <button
+              onClick={() => {
+                toggleMessageExpanded(message.id);
+                // Reset pagination when toggling expanded state
+                if (!expandedMessages.has(message.id)) {
+                  setPaginationState(prev => ({ ...prev, [message.id]: 0 }));
+                }
+              }}
+              className="text-blue-600 hover:text-blue-800 underline text-sm ml-auto"
+            >
+              {isExpanded ? 'Voir moins' : `Voir tous les candidats (${message.candidates.length - candidatesPerPage} de plus)`}
+            </button>
+          )}
+        </div>
       </div>
     );
   };
 
   return (
     <div className="fixed bottom-8 right-8 z-50">
-      {/* Chat Window */}
-      <div 
-        ref={chatRef}
-        className={`${isOpen ? 'block' : 'hidden'} bg-white rounded-xl shadow-xl transition-all duration-300 scale-in relative ${isResizing ? 'cursor-nwse-resize' : ''}`}
-        style={{ 
-          width: isResizing ? `${chatSize.width}px` : (isExpanded ? '800px' : '384px'),
-          height: isResizing ? `${chatSize.height}px` : (isExpanded ? '700px' : '500px')
-        }}
-      >
-        <div className="coke-gradient rounded-t-xl px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
-              <i className="fas fa-robot text-coke-red"></i>
-            </div>
-            <span className="ml-2 text-white font-medium">Assistant RH SBGS</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={toggleExpand}
-              className="text-white focus:outline-none mr-2 relative group"
-              title={isExpanded ? "Réduire" : "Agrandir"}
-            >
-              <i className={`fas ${isExpanded ? 'fa-compress-alt' : 'fa-expand-alt'}`}></i>
-              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                {isExpanded ? "Réduire" : "Agrandir"}
-              </span>
-            </button>
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="text-white focus:outline-none relative group"
-              title="Fermer"
-            >
-              <i className="fas fa-times"></i>
-              <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                Fermer
-              </span>
-            </button>
-          </div>
-        </div>
-        
-        {/* Resize handle */}
+      {/* Chat Window - Only render when open */}
+      {isOpen && (
         <div 
-          ref={resizeRef}
-          className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-10 group"
+          ref={chatRef}
+          className={`bg-white rounded-xl shadow-xl transition-all duration-300 scale-in relative ${isResizing ? 'cursor-nwse-resize' : ''}`}
           style={{ 
-            borderRight: '8px solid #ccc',
-            borderBottom: '8px solid #ccc',
-            borderTop: '8px solid transparent',
-            borderLeft: '8px solid transparent',
+            width: isResizing ? `${chatSize.width}px` : (isExpanded ? '800px' : '384px'),
+            height: isResizing ? `${chatSize.height}px` : (isExpanded ? '700px' : '500px')
           }}
         >
-          <span className="absolute -top-8 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-            Redimensionner
-          </span>
-        </div>
-        
-        <div className="p-4 overflow-y-auto" style={{ 
-          height: isResizing 
-            ? `${chatSize.height - 130}px` 
-            : (isExpanded ? '570px' : '370px')
-        }}>
-          {messages.map((message) => (
-            <div key={message.id} className={`mb-3 ${message.isBot ? '' : 'text-right'}`}>
-                             <div className={`rounded-lg p-3 ${
-                 message.isBot 
-                   ? 'bg-gray-200' 
-                   : 'bg-coke-light bg-opacity-20 inline-block'
-               }`}>
-                 <div className="text-sm leading-relaxed">
-                   {renderMessageText(message.text, message)}
-                 </div>
-                 {message.candidates && renderCandidateList(message)}
-                 {message.bestCandidates && renderBestCandidatesList(message)}
-               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {message.isBot ? 'Aujourd\'hui à' : 'À l\'instant'} {formatTime(message.timestamp)}
-              </p>
+          <div className="coke-gradient rounded-t-xl px-4 py-3 flex justify-between items-center">
+            <div className="flex items-center">
+              <div className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
+                <i className="fas fa-robot text-coke-red"></i>
+              </div>
+              <span className="ml-2 text-white font-medium">Assistant RH SBGS</span>
             </div>
-          ))}
-          {isSearching && (
-            <div className="mb-3">
-              <div className="bg-gray-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-coke-red"></div>
-                  <span className="text-sm">Recherche en cours...</span>
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-white focus:outline-none mr-2 relative group"
+                title={isExpanded ? "Réduire" : "Agrandir"}
+              >
+                <i className={`fas ${isExpanded ? 'fa-compress-alt' : 'fa-expand-alt'}`}></i>
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                  {isExpanded ? "Réduire" : "Agrandir"}
+                </span>
+              </button>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="text-white focus:outline-none relative group"
+                title="Fermer"
+              >
+                <i className="fas fa-times"></i>
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                  Fermer
+                </span>
+              </button>
+            </div>
+          </div>
+          
+          {/* Resize handle */}
+          <div 
+            ref={resizeRef}
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-10 group"
+            style={{ 
+              borderRight: '8px solid #ccc',
+              borderBottom: '8px solid #ccc',
+              borderTop: '8px solid transparent',
+              borderLeft: '8px solid transparent',
+            }}
+          >
+            <span className="absolute -top-8 right-0 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+              Redimensionner
+            </span>
+          </div>
+          
+          <div className="p-4 overflow-y-auto" style={{ 
+            height: isResizing 
+              ? `${chatSize.height - 130}px` 
+              : (isExpanded ? '570px' : '370px')
+          }}>
+            {messages.map((message) => (
+              <div key={message.id} className={`mb-3 ${message.isBot ? '' : 'text-right'}`}>
+                <div className={`rounded-lg p-3 ${
+                   message.isBot 
+                     ? 'bg-gray-200' 
+                     : 'bg-coke-light bg-opacity-20 inline-block'
+                 }`}>
+                   <div className="text-sm leading-relaxed">
+                     {renderMessageText(message.text, message)}
+                   </div>
+                   {message.candidates && renderCandidateList(message)}
+                   {message.bestCandidates && renderBestCandidatesList(message)}
+                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {message.isBot ? 'Aujourd\'hui à' : 'À l\'instant'} {formatTime(message.timestamp)}
+                </p>
+              </div>
+            ))}
+            {isSearching && (
+              <div className="mb-3">
+                <div className="bg-gray-200 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-coke-red"></div>
+                    <span className="text-sm">Recherche en cours...</span>
+                  </div>
                 </div>
               </div>
+            )}
+          </div>
+          
+          <div className="p-4 border-t">
+            <div className="flex items-center">
+              <textarea 
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-coke-red focus:border-coke-red resize-none outline-none"
+                placeholder="Tapez votre message..." 
+                rows="2"
+                disabled={isSearching}
+              />
+              <button 
+                onClick={sendMessage}
+                disabled={isSearching || !inputMessage.trim()}
+                className="coke-gradient text-white px-4 py-2 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed h-full flex items-center justify-center"
+                style={{ height: '56px' }}
+              >
+                <i className="fas fa-paper-plane"></i>
+              </button>
             </div>
-          )}
-        </div>
-        
-        <div className="p-4 border-t">
-          <div className="flex">
-            <textarea 
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-grow border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-coke-red focus:border-coke-red resize-none"
-              placeholder="Tapez votre message..." 
-              rows="2"
-              disabled={isSearching}
-            />
-            <button 
-              onClick={sendMessage}
-              disabled={isSearching || !inputMessage.trim()}
-              className="coke-gradient text-white px-4 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <i className="fas fa-paper-plane"></i>
-            </button>
           </div>
         </div>
-      </div>
+      )}
       
       {/* Chat Button */}
       <button 
