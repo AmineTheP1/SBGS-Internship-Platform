@@ -501,22 +501,22 @@ export default function EnhancedChatbot() {
             )}
           </div>
           
-          <div className="p-4 border-t">
-            <div className="flex items-center">
+          <div className="p-4 border-t bg-white rounded-b-xl">
+            <div className="flex items-end space-x-2">
               <textarea 
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-coke-red focus:border-coke-red resize-none outline-none"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none outline-none min-h-[40px] max-h-[100px]"
                 placeholder="Tapez votre message..." 
-                rows="2"
+                rows="1"
                 disabled={isSearching}
+                style={{ lineHeight: '1.5' }}
               />
               <button 
                 onClick={sendMessage}
                 disabled={isSearching || !inputMessage.trim()}
-                className="coke-gradient text-white px-4 py-2 rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed h-full flex items-center justify-center"
-                style={{ height: '56px' }}
+                className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[48px] h-[40px] hover:from-red-700 hover:to-red-800 transition-colors"
               >
                 <i className="fas fa-paper-plane"></i>
               </button>

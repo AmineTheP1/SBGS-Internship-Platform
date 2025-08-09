@@ -100,12 +100,12 @@ export default function Chatbot() {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="flex-grow border border-gray-300 rounded-l-lg px-4 py-2 focus:ring-coke-red focus:border-coke-red" 
+              className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none outline-none min-h-[40px] max-h-[100px]" 
               placeholder="Tapez votre message..." 
             />
             <button 
               onClick={sendMessage}
-              className="coke-gradient text-white px-4 rounded-r-lg"
+              className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[48px] h-[40px] hover:from-red-700 hover:to-red-800 transition-colors"
             >
               <i className="fas fa-paper-plane"></i>
             </button>
