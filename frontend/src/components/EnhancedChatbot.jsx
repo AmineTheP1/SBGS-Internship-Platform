@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API_ENDPOINTS from "../config/api.js";
+import { API_ENDPOINTS } from "../config/api.js";
 import BestCandidatesList from "./BestCandidatesList";
 import axios from "axios";
 
