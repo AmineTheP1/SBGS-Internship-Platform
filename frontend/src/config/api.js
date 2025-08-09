@@ -31,6 +31,8 @@ export const API_ENDPOINTS = {
   HR_GET_FOLDERS: `${API_BASE_URL}/api/hr/get-folders`,
   HR_CREATE_FOLDER: `${API_BASE_URL}/api/hr/create-folder`,
   HR_DELETE_FOLDER: `${API_BASE_URL}/api/hr/delete-folder`,
+  HR_GET_BEST_CANDIDATES: `${API_BASE_URL}/api/hr/get-best-candidates`,
+  HR_SEND_INTERVIEW_PROPOSAL: `${API_BASE_URL}/api/hr/send-interview-proposal`,
 
   // Supervisor endpoints
   SUPERVISOR_LOGIN: `${API_BASE_URL}/api/supervisor/login`,

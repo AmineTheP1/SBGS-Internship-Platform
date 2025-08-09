@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import API_ENDPOINTS from "../config/api.js";
+import BestCandidatesList from "./BestCandidatesList";
+import axios from "axios";
 
 export default function EnhancedChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences et expériences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui parlent anglais'\n• 'Find candidates with marketing experience'\n• 'Candidats avec Excel'\n• 'Cherche des designers Photoshop'\n• 'Candidats en génie mécanique'\n\n🔍 Je recherche dans les CVs pour toutes sortes de compétences : techniques, langues, logiciels, formations, etc.",
+      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences et expériences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui parlent anglais'\n• 'Find candidates with marketing experience'\n• 'Candidats avec Excel'\n• 'Cherche des designers Photoshop'\n• 'Candidats en génie mécanique'\n\n🔍 Je recherche dans les CVs pour toutes sortes de compétences : techniques, langues, logiciels, formations, etc.\n\n💼 Vous pouvez également me demander de vous montrer les meilleurs anciens stagiaires pour un recrutement potentiel en tapant:\n• 'Montre-moi les meilleurs anciens stagiaires'\n• 'Trouve les stagiaires les mieux évalués'\n• 'Qui sont les meilleurs candidats pour un emploi?'",
       isBot: true,
       timestamp: new Date()
     }
@@ -23,6 +25,20 @@ export default function EnhancedChatbot() {
     "Les étudiants de toutes les universités accréditées au Maroc sont les bienvenus pour postuler à notre programme de stage."
   ];
 
+  // Function to detect if the message is a request for best candidates
+  const isBestCandidatesQuery = (message) => {
+    const bestCandidatesKeywords = [
+      'meilleurs', 'meilleur', 'meilleures', 'meilleure', 'top', 'mieux', 'évalués', 'évalué', 'notés', 'noté', 
+      'anciens stagiaires', 'ancien stagiaire', 'stagiaires', 'stagiaire',
+      'best', 'top-rated', 'highest rated', 'former interns', 'former intern', 'previous interns', 'previous intern',
+      'emploi', 'recrutement', 'embauche', 'employment', 'hire', 'hiring'
+    ];
+    
+    const lowerMessage = message.toLowerCase();
+    const isMatch = bestCandidatesKeywords.some(keyword => lowerMessage.includes(keyword));
+    return isMatch;
+  };
+
   // Function to detect if the message is a CV search query
   const isCVSearchQuery = (message) => {
     const searchKeywords = [
@@ -31,7 +47,48 @@ export default function EnhancedChatbot() {
     ];
     
     const lowerMessage = message.toLowerCase();
+    
+    // If it's already identified as a best candidates query, don't treat it as CV search
+    if (isBestCandidatesQuery(message)) {
+      return false;
+    }
+    
     return searchKeywords.some(keyword => lowerMessage.includes(keyword));
+  };
+
+  // Function to get best candidates
+  const getBestCandidates = async () => {
+    try {
+      const response = await axios.get(API_ENDPOINTS.HR_GET_BEST_CANDIDATES, {
+        withCredentials: true
+      });
+
+      if (response.data.success) {
+        if (response.data.candidates.length === 0) {
+          return response.data.message || "Je n'ai trouvé aucun ancien stagiaire avec des évaluations dans notre base de données. Les évaluations sont créées par les superviseurs après approbation des rapports de stage.";
+        }
+
+        let responseText = `J'ai trouvé ${response.data.candidates.length} ancien(s) stagiaire(s) avec les meilleures évaluations:`;
+
+        return {
+          text: responseText,
+          bestCandidates: response.data.candidates
+        };
+      } else {
+        console.error("API returned success: false", response.data.error);
+        return "Désolé, j'ai rencontré une erreur lors de la recherche. Veuillez réessayer.";
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        return "Vous devez être connecté pour accéder à cette fonctionnalité. Veuillez vous connecter via le portail RH.";
+      }
+      if (error.response?.status === 403) {
+        return "Cette fonctionnalité est réservée au personnel RH. Veuillez vous connecter avec un compte RH pour voir les évaluations des anciens stagiaires.";
+      }
+      // Only log unexpected errors (not auth errors)
+      console.error("Unexpected error getting best candidates:", error);
+      return `Désolé, j'ai rencontré une erreur lors de la recherche (${error.response?.status || 'réseau'}). Veuillez réessayer.`;
+    }
   };
 
   // Function to search CVs
@@ -87,8 +144,33 @@ export default function EnhancedChatbot() {
     const currentQuery = inputMessage;
     setInputMessage("");
 
-    // Check if this is a CV search query
-    if (isCVSearchQuery(currentQuery)) {
+    // Check if this is a best candidates query FIRST (higher priority)
+    if (isBestCandidatesQuery(currentQuery)) {
+      // Show searching message
+      const searchingMessage = {
+        id: Date.now() + 1,
+        text: "🔍 Je recherche les meilleurs anciens stagiaires...",
+        isBot: true,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, searchingMessage]);
+
+      // Get best candidates
+      const bestCandidatesResult = await getBestCandidates();
+      
+      // Replace searching message with results
+      setMessages(prev => prev.map(msg => 
+        msg.id === searchingMessage.id 
+          ? { 
+              ...msg, 
+              text: typeof bestCandidatesResult === 'string' ? bestCandidatesResult : bestCandidatesResult.text,
+              bestCandidates: typeof bestCandidatesResult === 'object' ? bestCandidatesResult.bestCandidates : null
+            }
+          : msg
+      ));
+    }
+    // Check if this is a CV search query (lower priority)
+    else if (isCVSearchQuery(currentQuery)) {
       // Show searching message
       const searchingMessage = {
         id: Date.now() + 1,
@@ -152,6 +234,15 @@ export default function EnhancedChatbot() {
     return <span dangerouslySetInnerHTML={{ __html: finalText }} />;
   };
 
+  // Function to render best candidates list
+  const renderBestCandidatesList = (message) => {
+    if (!message.bestCandidates || !Array.isArray(message.bestCandidates)) {
+      return null;
+    }
+    
+    return <BestCandidatesList candidates={message.bestCandidates} />;
+  };
+
   // Function to toggle expanded view for a message
   const toggleExpanded = (messageId) => {
     setExpandedMessages(prev => {
@@ -174,8 +265,8 @@ export default function EnhancedChatbot() {
     
     return (
       <div className="mt-2">
-        {candidatesToShow.map((candidate, index) => (
-          <div key={index} className="mb-3 p-2 bg-gray-50 rounded border-l-4 border-coke-red">
+        {candidatesToShow.map((candidate) => (
+          <div key={candidate.cdtid} className="mb-3 p-2 bg-gray-50 rounded border-l-4 border-coke-red">
             <div className="font-semibold text-sm">{candidate.fullName}</div>
             <div className="text-xs text-gray-600">📧 {candidate.email}</div>
             <div className="text-xs text-gray-600">📱 {candidate.telephone || 'Non disponible'}</div>
@@ -235,6 +326,7 @@ export default function EnhancedChatbot() {
                    {renderMessageText(message.text, message)}
                  </div>
                  {message.candidates && renderCandidateList(message)}
+                 {message.bestCandidates && renderBestCandidatesList(message)}
                </div>
               <p className="text-xs text-gray-500 mt-1">
                 {message.isBot ? 'Aujourd\'hui à' : 'À l\'instant'} {formatTime(message.timestamp)}
@@ -284,4 +376,4 @@ export default function EnhancedChatbot() {
       </button>
     </div>
   );
-} 
+}
