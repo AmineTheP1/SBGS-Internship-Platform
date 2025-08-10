@@ -156,7 +156,6 @@ docker exec -it sbgs-postgres psql -U postgres -d sbgs_db
 - **Containerization:** Docker & Docker Compose
 - **Styling:** Tailwind CSS, Poppins font
 - **File Uploads:** Formidable, file previews
-- **Authentication:** HR portal login
 
 ---
 
