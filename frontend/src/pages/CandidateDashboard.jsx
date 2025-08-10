@@ -104,7 +104,6 @@ export default function CandidateDashboard() {
             setUsefulFiles(usefulFilesData.files || []);
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des documents utiles:", error);
         }
         
         // Fetch evaluation if available
@@ -120,7 +119,6 @@ export default function CandidateDashboard() {
             }
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération de l'évaluation:", error);
         } finally {
           setLoadingEvaluation(false);
         }
@@ -240,16 +238,12 @@ export default function CandidateDashboard() {
 
   const handleReportUpload = async (e) => {
     e.preventDefault();
-    console.log('Form data:', reportForm);
-    console.log('Title:', reportForm.reportTitle);
-    console.log('File:', reportForm.reportFile);
     if (!reportForm.reportTitle || !reportForm.reportFile) {
       setUploadStatus("Veuillez remplir tous les champs requis.");
       return;
     }
 
     const formData = new FormData();
-    console.log('Sending candidate ID:', candidate.cdtid);
     formData.append('cdtid', candidate.cdtid);
     formData.append('reportTitle', reportForm.reportTitle);
     formData.append('reportDescription', reportForm.reportDescription);
@@ -257,9 +251,6 @@ export default function CandidateDashboard() {
 
     try {
       setUploadStatus("Envoi en cours...");
-      console.log('Environment VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL);
-      console.log('API_BASE_URL:', API_BASE_URL);
-      console.log('API URL being used:', API_ENDPOINTS.CANDIDATE_UPLOAD_REPORT);
       const res = await fetch(API_ENDPOINTS.CANDIDATE_UPLOAD_REPORT, {
         method: "POST",
         credentials: "include",
@@ -321,7 +312,6 @@ export default function CandidateDashboard() {
         alert("Erreur lors du téléchargement du fichier");
       }
     } catch (error) {
-      console.error("Erreur lors du téléchargement du fichier:", error);
       alert("Erreur lors du téléchargement du fichier");
     }
   };
