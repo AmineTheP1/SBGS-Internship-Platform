@@ -25,13 +25,13 @@ export default function EnhancedChatbot() {
 
   // Handle resize functionality
   useEffect(() => {
-    const handleMouseDown = (e) => {
+    const handleMouseDown = () => {
       setIsResizing(true);
       // Prevent text selection during resize
       document.body.style.userSelect = 'none';
     };
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = () => {
       if (!isResizing) return;
       
       // Calculate new width and height based on mouse position
