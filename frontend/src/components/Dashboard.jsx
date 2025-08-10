@@ -79,17 +79,13 @@ export default function Dashboard() {
     // Check if user is logged in via session API
     const checkSession = async () => {
       try {
-        console.log("Checking HR session...");
         const res = await fetch(API_ENDPOINTS.HR_SESSION, { credentials: "include" });
-        console.log("HR session response:", res.status);
         if (!res.ok) {
-          console.log("HR session failed, redirecting to login");
           navigate('/hr-login', { replace: true });
           return;
         }
-        console.log("HR session successful");
       } catch (error) {
-        console.error("HR session error:", error);
+        console.error("Session check failed");
         navigate('/hr-login', { replace: true });
         return;
       }
@@ -105,27 +101,22 @@ export default function Dashboard() {
           setUniversities(data.universities);
         }
       } catch (err) {
-        console.error("Error fetching universities:", err);
+        console.error("Error fetching universities");
       }
     };
 
     // Fetch supervisors for assignment
     const fetchSupervisors = async () => {
       try {
-        console.log("Fetching supervisors...");
         const response = await fetch(API_ENDPOINTS.HR_GET_SUPERVISORS, {
           credentials: "include"
         });
         const data = await response.json();
-        console.log("Supervisors response:", data);
         if (data.success) {
           setSupervisors(data.supervisors);
-          console.log("Supervisors loaded:", data.supervisors.length);
-        } else {
-          console.error("Failed to load supervisors:", data.error);
         }
       } catch (err) {
-        console.error("Error fetching supervisors:", err);
+        console.error("Error fetching supervisors");
       }
     };
     
@@ -135,40 +126,12 @@ export default function Dashboard() {
       try {
         const res = await fetch(API_ENDPOINTS.HR_APPLICATIONS);
         const data = await res.json();
-        console.log("Dashboard received data:", data); // Debug
         if (data.success) {
-          // Debug: Log the raw areas of interest data
-          data.applications.forEach((app, index) => {
-            console.log(`App ${index + 1} areas of interest:`, {
-              raw: app.domaines_interet,
-              type: typeof app.domaines_interet,
-              isArray: Array.isArray(app.domaines_interet),
-              parsed: (() => {
-                try {
-                  if (typeof app.domaines_interet === 'string') {
-                    return JSON.parse(app.domaines_interet);
-                  } else if (Array.isArray(app.domaines_interet)) {
-                    return app.domaines_interet;
-                  }
-                  return null;
-                } catch (error) {
-                  return `Error: ${error.message}`;
-                }
-              })()
-            });
-          });
-          
           const processedApplications = data.applications.map(app => {
             // Parse areas of interest properly
             let areasOfInterest = [];
             if (app.domaines_interet) {
               try {
-                console.log(`Parsing areas for app ${app.dsgid}:`, {
-                  original: app.domaines_interet,
-                  type: typeof app.domaines_interet,
-                  isArray: Array.isArray(app.domaines_interet)
-                });
-                
                 if (typeof app.domaines_interet === 'string') {
                   areasOfInterest = JSON.parse(app.domaines_interet);
                 } else if (Array.isArray(app.domaines_interet)) {
@@ -179,10 +142,7 @@ export default function Dashboard() {
                     areasOfInterest = app.domaines_interet;
                   }
                 }
-                
-                console.log(`Parsed areas for app ${app.dsgid}:`, areasOfInterest);
               } catch (error) {
-                console.error("Error parsing areas of interest:", error);
                 areasOfInterest = [];
               }
             }
@@ -209,11 +169,10 @@ export default function Dashboard() {
               domaine: parseJsonString(app.domaine) || "Non spécifié" // Add domaine
             };
           });
-          console.log("Processed applications:", processedApplications); // Debug
           setApplications(processedApplications);
         }
       } catch (err) {
-        console.error("Error fetching applications:", err); // Debug
+        console.error("Error fetching applications");
       }
       setLoading(false);
     };
@@ -230,7 +189,7 @@ export default function Dashboard() {
           setApprovedCandidates(data.candidates || []);
         }
       } catch (error) {
-        console.error("Error fetching approved candidates:", error);
+        console.error("Error fetching approved candidates");
       }
     };
 
@@ -290,12 +249,6 @@ export default function Dashboard() {
     return matchesSearch && matchesView && matchesDate && matchesUniversity && matchesInternshipType && matchesYear;
   });
 
-  // Debug: Log applications state and filtered results
-  console.log("Applications state:", applications);
-  console.log("Filtered applications:", filteredApplications);
-  console.log("Search term:", search);
-  console.log("Filter status:", filterStatus);
-
   // Pagination logic
   const indexOfLastApplication = currentPage * applicationsPerPage;
   const indexOfFirstApplication = indexOfLastApplication - applicationsPerPage;
@@ -326,7 +279,7 @@ export default function Dashboard() {
           alert("Erreur lors de la suppression: " + (errorData.error || "Erreur inconnue"));
         }
       } catch (error) {
-        console.error("Error deleting application:", error);
+        console.error("Error deleting application");
         alert("Erreur réseau lors de la suppression");
       }
     }
@@ -348,9 +301,6 @@ export default function Dashboard() {
   };
 
   const handleViewDetails = (app) => {
-    console.log("Opening details for application:", app);
-    console.log("Areas of interest in app:", app.areasOfInterest);
-    
     // Parse areas of interest for the modal
     let parsedAreasOfInterest = [];
     if (app.areasOfInterest && app.areasOfInterest.length > 0) {
@@ -361,7 +311,6 @@ export default function Dashboard() {
           parsedAreasOfInterest = app.areasOfInterest;
         }
       } catch (error) {
-        console.error("Error parsing areas for modal:", error);
         parsedAreasOfInterest = [];
       }
     }
@@ -372,7 +321,6 @@ export default function Dashboard() {
       areasOfInterest: parsedAreasOfInterest
     };
     
-    console.log("Modal app with parsed areas:", modalApp);
     setSelectedApplication(modalApp);
   };
 
@@ -390,14 +338,11 @@ export default function Dashboard() {
         setApplications(applications.map(app => 
           app.id === id ? { ...app, status: newStatus } : app
         ));
-        console.log(`Status updated to ${newStatus} for application ${id}`);
       } else {
         const errorData = await response.json();
-        console.error("Error updating status:", errorData.error);
         alert("Erreur lors de la mise à jour du statut: " + (errorData.error || "Erreur inconnue"));
       }
-    } catch (error) {
-      console.error("Error updating status:", error);
+    } catch (error) { 
       alert("Erreur réseau lors de la mise à jour du statut");
     }
   };
@@ -460,12 +405,9 @@ export default function Dashboard() {
       });
 
       const data = await response.json();
-      console.log("Attestation generation response:", data); // Debug
       
       if (data.success) {
         setAttestationStatus("Attestation de stage générée avec succès !");
-        
-                 console.log("Attestation URL from backend:", data.attestation?.downloadUrl); // Debug
          
          // Store the candidate info for later removal when download is clicked
          setSelectedAttestation({
@@ -480,40 +422,31 @@ export default function Dashboard() {
                ? { ...candidate, attestationGenerated: true, downloadUrl: data.attestation.downloadUrl }
                : candidate
            );
-           console.log("Updated candidates with attestation:", updated); // Debug
            return updated;
          });
       } else {
         setAttestationStatus(data.error);
       }
     } catch (error) {
-      console.error("Error generating attestation:", error);
+      console.error("Error generating attestation");
       setAttestationStatus("Erreur lors de la génération de l'attestation de stage");
     }
   };
 
   const handleDownloadAttestation = async (downloadUrl, cdtid, rapportid) => {
-    console.log("handleDownloadAttestation called with:", { downloadUrl, cdtid, rapportid }); // Debug
-    
     if (downloadUrl) {
       const fullUrl = `${API_BASE_URL}${downloadUrl}`;
-      console.log("Opening URL:", fullUrl); // Debug
       
       // Open attestation in a new tab
       window.open(fullUrl, '_blank');
       
-      console.log("Downloading attestation for candidate:", { cdtid, rapportid }); // Debug
-      
       // Safety check: don't proceed if values are empty
       if (!cdtid || !rapportid) {
-        console.log("Empty cdtid or rapportid, skipping removal"); // Debug
         return;
       }
       
       // Remove from local state
       setApprovedCandidates(prevCandidates => {
-        console.log("Previous candidates:", prevCandidates); // Debug
-        
         const filtered = prevCandidates.filter(candidate => {
           // Convert to strings for comparison to handle type mismatches
           const candidateCdtid = String(candidate.cdtid || '');
@@ -522,17 +455,15 @@ export default function Dashboard() {
           const targetRapportid = String(rapportid || '');
           
           const shouldKeep = !(candidateCdtid === targetCdtid && candidateRapportid === targetRapportid);
-          console.log(`Checking ${candidateCdtid} vs ${targetCdtid} and ${candidateRapportid} vs ${targetRapportid}: ${shouldKeep}`); // Debug
           return shouldKeep;
         });
         
-        console.log("Filtered candidates:", filtered); // Debug
         return filtered;
       });
       
       // Mark attestation as downloaded in database
       try {
-        const markResponse = await fetch(API_ENDPOINTS.HR_MARK_ATTESTATION_DOWNLOADED, {
+        await fetch(API_ENDPOINTS.HR_MARK_ATTESTATION_DOWNLOADED, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -543,14 +474,13 @@ export default function Dashboard() {
             rapportid
           }),
         });
-        console.log("Mark downloaded response:", markResponse.status); // Debug
       } catch (error) {
-        console.error("Error marking attestation as downloaded:", error);
+        console.error("Error marking attestation as downloaded");
       }
 
       // Send email notification
       try {
-        const response = await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
+        await fetch(API_ENDPOINTS.HR_NOTIFY_ATTESTATION_DOWNLOAD, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -561,9 +491,8 @@ export default function Dashboard() {
             rapportid
           }),
         });
-        console.log("Email notification response:", response.status); // Debug
       } catch (error) {
-        console.error("Error sending email notification:", error);
+        console.error("Error sending email notification");
         // Don't fail the download if email fails
       }
       
@@ -573,7 +502,6 @@ export default function Dashboard() {
   };
 
   if (loading) {
-    console.log("Dashboard is loading...");
     return <div className="text-center py-20 text-xl">Chargement des candidatures...</div>;
   }
 
@@ -743,95 +671,89 @@ export default function Dashboard() {
                 <p className="text-coke-light">Candidats avec rapports de stage approuvés</p>
               </div>
               
-                                              <div className="p-6">
-                   {attestationStatus && (
-                     <div className={`mb-4 p-4 rounded-lg ${
-                       attestationStatus.includes('succès') 
-                         ? 'bg-green-100 text-green-700' 
-                         : attestationStatus.includes('Erreur') 
-                         ? 'bg-red-100 text-red-700'
-                         : 'bg-blue-100 text-blue-700'
-                     }`}>
-                       <span>{attestationStatus}</span>
-                     </div>
-                   )}
-                   
-                   {approvedCandidates.length === 0 ? (
-                     <div className="text-center py-8 text-gray-500">
-                       Aucun rapport approuvé trouvé.
-                     </div>
-                   ) : (
-                     <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-gray-100 text-gray-700">
-                      <th className="p-3">Candidat</th>
-                      <th className="p-3">CIN</th>
-                      <th className="p-3">Rapport</th>
-                      <th className="p-3">Date d'approbation</th>
-                      <th className="p-3">École</th>
-                      <th className="p-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                                               {approvedCandidates.map((candidate) => (
-                          <tr key={`${candidate.cdtid}-${candidate.rapportid}`} className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="p-3">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10">
-                                  <img
-                                    className="h-10 w-10 rounded-full object-cover"
-                                    src={candidate.imageurl || '/default-avatar.png'}
-                                    alt=""
-                                  />
-                                </div>
-                                <div className="ml-4">
-                                  <div className="font-medium text-gray-900">{candidate.prenom} {candidate.nom}</div>
-                                  <div className="text-gray-500">{candidate.email}</div>
-                                </div>
+              <div className="p-6">
+                {attestationStatus && (
+                  <div className={`mb-4 p-4 rounded-lg ${
+                    attestationStatus.includes('succès') 
+                      ? 'bg-green-100 text-green-700' 
+                      : attestationStatus.includes('Erreur') 
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    <span>{attestationStatus}</span>
+                  </div>
+                )}
+                
+                {approvedCandidates.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    Aucun rapport approuvé trouvé.
+                  </div>
+                ) : (
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-700">
+                        <th className="p-3">Candidat</th>
+                        <th className="p-3">CIN</th>
+                        <th className="p-3">Rapport</th>
+                        <th className="p-3">Date d'approbation</th>
+                        <th className="p-3">École</th>
+                        <th className="p-3">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {approvedCandidates.map((candidate) => (
+                        <tr key={`${candidate.cdtid}-${candidate.rapportid}`} className="border-b border-gray-200 hover:bg-gray-50">
+                          <td className="p-3">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <img
+                                  className="h-10 w-10 rounded-full object-cover"
+                                  src={candidate.imageurl || '/default-avatar.png'}
+                                  alt=""
+                                />
                               </div>
-                            </td>
-                            <td className="p-3 text-gray-900">
-                              {candidate.cin || 'Non spécifié'}
-                            </td>
-                            <td className="p-3 text-gray-900">
-                              {candidate.rapport_titre}
-                            </td>
-                            <td className="p-3 text-gray-500">
-                              {candidate.datevalidation ? new Date(candidate.datevalidation).toLocaleDateString('fr-FR') : 'N/A'}
-                            </td>
-                            <td className="p-3 text-gray-500">
-                              {candidate.ecole_nom || 'Non spécifié'}
-                            </td>
-                                                         <td className="p-3 font-medium">
-                              {candidate.attestationGenerated ? (
-                                <button
-                                  onClick={() => {
-                                    console.log("Download button clicked for candidate:", {
-                                      cdtid: candidate.cdtid,
-                                      rapportid: candidate.rapportid,
-                                      downloadUrl: candidate.downloadUrl,
-                                      attestationGenerated: candidate.attestationGenerated
-                                    });
-                                    handleDownloadAttestation(candidate.downloadUrl, candidate.cdtid, candidate.rapportid);
-                                  }}
-                                  className="px-4 py-2 rounded-lg bg-green-200 text-green-700 hover:bg-green-300 font-semibold text-sm transition-colors"
-                                >
-                                  Télécharger l'attestation
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
-                                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                                >
-                                  Attestation de stage
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                                        </tbody>
-                 </table>
-               )}
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">{candidate.prenom} {candidate.nom}</div>
+                                <div className="text-gray-500">{candidate.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-3 text-gray-900">
+                            {candidate.cin || 'Non spécifié'}
+                          </td>
+                          <td className="p-3 text-gray-900">
+                            {candidate.rapport_titre}
+                          </td>
+                          <td className="p-3 text-gray-500">
+                            {candidate.datevalidation ? new Date(candidate.datevalidation).toLocaleDateString('fr-FR') : 'N/A'}
+                          </td>
+                          <td className="p-3 text-gray-500">
+                            {candidate.ecole_nom || 'Non spécifié'}
+                          </td>
+                          <td className="p-3 font-medium">
+                            {candidate.attestationGenerated ? (
+                              <button
+                                onClick={() => {
+                                  handleDownloadAttestation(candidate.downloadUrl, candidate.cdtid, candidate.rapportid);
+                                }}
+                                className="px-4 py-2 rounded-lg bg-green-200 text-green-700 hover:bg-green-300 font-semibold text-sm transition-colors"
+                              >
+                                Télécharger l'attestation
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleGenerateAttestation(candidate.cdtid, candidate.rapportid)}
+                                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                              >
+                                Attestation de stage
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
@@ -845,26 +767,26 @@ export default function Dashboard() {
             <div className="p-6">
               {/* Search and Filter */}
               <div className="mb-6">
-                                 {/* Basic Search */}
-                 <div className="flex flex-col md:flex-row gap-4 mb-4">
-                   <input
-                     type="text"
-                     placeholder="Rechercher par nom, école ou filière..."
-                     className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red text-lg"
-                     value={search}
-                     onChange={(e) => setSearch(e.target.value)}
-                   />
-                   <button
-                     onClick={() => setShowFilters(!showFilters)}
-                     className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
-                     title={showFilters ? "Masquer les filtres avancés" : "Afficher les filtres avancés"}
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                     </svg>
-                     <span className="text-sm font-medium">{showFilters ? "Masquer" : "Filtres"}</span>
-                   </button>
-                 </div>
+                {/* Basic Search */}
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Rechercher par nom, école ou filière..."
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-coke-red text-lg"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                    title={showFilters ? "Masquer les filtres avancés" : "Afficher les filtres avancés"}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    <span className="text-sm font-medium">{showFilters ? "Masquer" : "Filtres"}</span>
+                  </button>
+                </div>
 
                 {/* Advanced Filters */}
                 {showFilters && (
@@ -972,79 +894,79 @@ export default function Dashboard() {
                 )}
               </div>
 
-                             {/* Applications Table */}
-               {/* Page Info */}
-               <div className="mb-4 text-sm text-gray-600">
-                 Affichage de {indexOfFirstApplication + 1} à {Math.min(indexOfLastApplication, filteredApplications.length)} sur {filteredApplications.length} candidatures
-               </div>
-               
-                               <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-gray-100 text-gray-700">
-                      <th className="p-3">Candidat</th>
-                      <th className="p-3">Institution</th>
-                      <th className="p-3">Type de stage</th>
-                      <th className="p-3">Date de soumission</th>
-                      <th className="p-3">Durée</th>
-                      <th className="p-3">Statut</th>
-                      <th className="p-3">Action</th>
+              {/* Applications Table */}
+              {/* Page Info */}
+              <div className="mb-4 text-sm text-gray-600">
+                Affichage de {indexOfFirstApplication + 1} à {Math.min(indexOfLastApplication, filteredApplications.length)} sur {filteredApplications.length} candidatures
+              </div>
+              
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700">
+                    <th className="p-3">Candidat</th>
+                    <th className="p-3">Institution</th>
+                    <th className="p-3">Type de stage</th>
+                    <th className="p-3">Date de soumission</th>
+                    <th className="p-3">Durée</th>
+                    <th className="p-3">Statut</th>
+                    <th className="p-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentApplications.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8 text-gray-500">
+                        Aucune candidature trouvée.
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                   {currentApplications.length === 0 ? (
-                     <tr>
-                       <td colSpan={7} className="text-center py-8 text-gray-500">
-                         Aucune candidature trouvée.
-                       </td>
-                     </tr>
-                   ) : (
-                                           currentApplications.map((app) => (
-                        <tr key={app.id} className="border-b border-gray-200 hover:bg-gray-50">
-                          <td className="p-3">
-                            <div className="flex items-center">
-                              <div className="flex-shrink-0 h-10 w-10">
-                                {app.imageurl ? (
-                                  <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover" />
-                                ) : (
-                                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?</div>
-                                )}
-                              </div>
-                              <div className="ml-4">
-                                <div className="font-medium text-gray-900">{app.fullName}</div>
-                                <div className="text-gray-500">{app.email}</div>
-                              </div>
+                  ) : (
+                    currentApplications.map((app) => (
+                      <tr key={app.id} className="border-b border-gray-200 hover:bg-gray-50">
+                        <td className="p-3">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              {app.imageurl ? (
+                                <img src={`${API_BASE_URL}${app.imageurl}`} alt="Photo" className="h-10 w-10 rounded-full object-cover" />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">?</div>
+                              )}
                             </div>
-                          </td>
-                          <td className="p-3 text-gray-900">
-                            {app.institution}
-                          </td>
-                          <td className="p-3 text-gray-900">
-                            {app.typestage}
-                          </td>
-                          <td className="p-3 text-gray-500">
-                            {app.date}
-                          </td>
-                          <td className="p-3 text-gray-500">
-                            {app.periode}
-                          </td>
-                                                     <td className="p-3 text-center">
-                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(app.status)}`}>
-                               {app.status}
-                             </span>
-                           </td>
-                                                     <td className="p-3 font-medium">
-                             <button
-                               onClick={() => navigate(`/candidature/${app.id}`)}
-                               className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
-                             >
-                               Voir Détails
-                             </button>
-                           </td>
-                        </tr>
-                      ))
-                   )}
-                 </tbody>
-               </table>
+                            <div className="ml-4">
+                              <div className="font-medium text-gray-900">{app.fullName}</div>
+                              <div className="text-gray-500">{app.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 text-gray-900">
+                          {app.institution}
+                        </td>
+                        <td className="p-3 text-gray-900">
+                          {app.typestage}
+                        </td>
+                        <td className="p-3 text-gray-500">
+                          {app.date}
+                        </td>
+                        <td className="p-3 text-gray-500">
+                          {app.periode}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(app.status)}`}>
+                            {app.status}
+                          </span>
+                        </td>
+                        <td className="p-3 font-medium">
+                          <button
+                            onClick={() => navigate(`/candidature/${app.id}`)}
+                            className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 font-semibold text-sm transition-colors"
+                          >
+                            Voir Détails
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
 
               {/* Pagination */}
               {totalPages > 1 && (
@@ -1115,15 +1037,12 @@ export default function Dashboard() {
               <div><b>Domaine d'Étude/Spécialisation:</b> {selectedApplication.domaine || "Non spécifié"}</div>
               <div><b>Domaines d'intérêt:</b> {(() => {
                 try {
-                  console.log("Modal areas of interest:", selectedApplication.areasOfInterest);
                   if (selectedApplication.areasOfInterest && selectedApplication.areasOfInterest.length > 0) {
                     const result = selectedApplication.areasOfInterest.join(", ");
-                    console.log("Modal display result:", result);
                     return result;
                   }
                   return "Aucun domaine sélectionné";
                 } catch (error) {
-                  console.error("Error displaying areas of interest:", error);
                   return "Erreur d'affichage";
                 }
               })()}</div>

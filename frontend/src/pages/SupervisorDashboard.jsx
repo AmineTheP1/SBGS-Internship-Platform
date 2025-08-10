@@ -84,7 +84,6 @@ export default function SupervisorDashboard() {
           const internsData = await internsRes.json();
           setInterns(internsData.interns || []);
         } else {
-          console.error("Failed to fetch assigned interns:", internsRes.status);
           setInterns([]);
         }
 
@@ -109,20 +108,14 @@ export default function SupervisorDashboard() {
         }
 
         // Fetch intern reports
-        console.log('Fetching reports for supervisor resid:', data.supervisor.resid);
         const reportsRes = await fetch(`${API_ENDPOINTS.SUPERVISOR_GET_INTERN_REPORTS}?resid=${data.supervisor.resid}`, {
           credentials: "include"
         });
-        console.log('Reports response status:', reportsRes.status);
         if (reportsRes.ok) {
           const reportsData = await reportsRes.json();
-          console.log('Reports data:', reportsData);
           setReports(reportsData.reports || []);
-          console.log('Set reports state to:', reportsData.reports || []);
         } else {
-          console.error('Failed to fetch reports:', reportsRes.status);
           const errorData = await reportsRes.json();
-          console.error('Error data:', errorData);
         }
       } catch {
         navigate('/supervisor-login', { replace: true });
@@ -145,7 +138,7 @@ export default function SupervisorDashboard() {
         setShowInternDetails(true);
       }
     } catch (error) {
-      console.error("Error fetching intern details:", error);
+      // handle error
     }
   };
 
@@ -204,7 +197,6 @@ export default function SupervisorDashboard() {
     
     // Handle image loading error
     logoImg.onerror = function() {
-      console.error('Erreur de chargement du logo SBGS');
       // Continue with PDF generation without the logo
       continuePdfGeneration();
     };
@@ -450,9 +442,6 @@ export default function SupervisorDashboard() {
 
   const handleConfirmPresence = async (cdtid, date, confirmed) => {
     try {
-      console.log('API_BASE_URL:', API_BASE_URL);
-      console.log('Making request to:', API_ENDPOINTS.SUPERVISOR_CONFIRM_PRESENCE);
-      console.log('Request data:', { cdtid, date, confirmed });
       
       const response = await fetch(API_ENDPOINTS.SUPERVISOR_CONFIRM_PRESENCE, {
         method: "POST",
@@ -467,9 +456,6 @@ export default function SupervisorDashboard() {
         }),
       });
       
-      console.log('Response status:', response.status);
-      console.log('Response URL:', response.url);
-
       const data = await response.json();
       if (data.success) {
         setConfirmationStatus(data.message);
@@ -507,7 +493,7 @@ export default function SupervisorDashboard() {
       } else {
         setConfirmationStatus(data.error || "Erreur lors de la confirmation");
       }
-    } catch (error) {
+    } catch {
       setConfirmationStatus("Erreur réseau lors de la confirmation");
     }
   };
@@ -567,12 +553,8 @@ export default function SupervisorDashboard() {
   };
 
   const handleApproveReport = async () => {
-    console.log("handleApproveReport called with reportAction:", reportAction);
-    console.log("selectedReport:", selectedReport);
-    console.log("requestCertificate value:", requestCertificate, "type:", typeof requestCertificate);
 
     if (!selectedReport || !reportAction) {
-      console.log("Validation failed: selectedReport or reportAction is missing");
       setReportStatus("Veuillez sélectionner une action.");
       return;
     }
@@ -586,7 +568,6 @@ export default function SupervisorDashboard() {
         resid: supervisor.resid,
         requestCertificate: requestCertificate
       };
-      console.log("Sending request body:", requestBody);
       
       const response = await fetch(API_ENDPOINTS.SUPERVISOR_APPROVE_REPORT, {
         method: "POST",
@@ -627,7 +608,7 @@ export default function SupervisorDashboard() {
         setReportStatus(data.error);
       }
     } catch (error) {
-      console.error("Error approving report:", error);
+      // handle error
       setReportStatus("Erreur lors du traitement du rapport");
     }
   };
@@ -1290,9 +1271,6 @@ export default function SupervisorDashboard() {
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentReports.map((report) => {
-                  console.log('Rendering report:', report);
-                  console.log('API_BASE_URL:', API_BASE_URL);
-                  console.log('Full image URL:', `${API_BASE_URL}${report.imageurl}`);
                   return (
                   <div key={report.rapportid} className="bg-gray-50 rounded-lg p-6 border">
                     <div className="flex items-center mb-4">
@@ -1302,9 +1280,8 @@ export default function SupervisorDashboard() {
                             src={`${API_BASE_URL}${report.imageurl}`}
                             alt={`${report.prenom} ${report.nom}`}
                             className="w-full h-full object-cover"
-                            onLoad={() => console.log('Image loaded successfully for:', report.prenom, report.nom, 'URL:', `${API_BASE_URL}${report.imageurl}`)}
+                           
                             onError={(e) => {
-                              console.log('Image failed to load for:', report.prenom, report.nom, 'URL:', `${API_BASE_URL}${report.imageurl}`);
                               e.target.style.display = 'none';
                               e.target.nextSibling.style.display = 'flex';
                             }}
@@ -1863,7 +1840,6 @@ export default function SupervisorDashboard() {
               {selectedReport.url ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Fichier soumis</label>
-                  {console.log('selectedReport in modal:', selectedReport)}
                   <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">

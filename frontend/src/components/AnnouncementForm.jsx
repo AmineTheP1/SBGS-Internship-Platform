@@ -41,7 +41,6 @@ export default function AnnouncementForm() {
         setStatus(`Erreur: ${data.error || 'Une erreur est survenue'}`);
       }
     } catch (error) {
-      console.error('Error sending announcement:', error);
       setStatus('Erreur de connexion. Veuillez réessayer.');
     } finally {
       setLoading(false);

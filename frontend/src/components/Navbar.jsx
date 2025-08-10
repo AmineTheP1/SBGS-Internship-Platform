@@ -58,7 +58,6 @@ export default function Navbar() {
         setUserType(null);
         setUserData(null);
       } catch (error) {
-        console.log("Session check error:", error);
         setIsLoggedIn(false);
         setUserType(null);
         setUserData(null);

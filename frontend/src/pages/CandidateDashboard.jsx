@@ -102,7 +102,6 @@ export default function CandidateDashboard() {
           if (usefulFilesRes.ok) {
             const usefulFilesData = await usefulFilesRes.json();
             setUsefulFiles(usefulFilesData.files || []);
-            console.log("Documents utiles récupérés:", usefulFilesData.files);
           }
         } catch (error) {
           console.error("Erreur lors de la récupération des documents utiles:", error);

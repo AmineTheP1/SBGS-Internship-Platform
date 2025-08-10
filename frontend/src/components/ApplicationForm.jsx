@@ -45,8 +45,6 @@ export default function ApplicationForm() {
         if (data.success) {
           setUniversities(data.universities);
         }
-      } catch (err) {
-        console.error("Error fetching universities:", err);
       } finally {
         setLoading(false);
       }

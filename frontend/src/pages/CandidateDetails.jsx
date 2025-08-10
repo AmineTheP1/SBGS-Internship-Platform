@@ -45,7 +45,7 @@ export default function CandidateDetails() {
           setSupervisors(data.supervisors);
         }
       } catch (err) {
-        console.error("Error fetching supervisors:", err);
+        // handle error
       }
     };
 
@@ -278,7 +278,6 @@ export default function CandidateDetails() {
           const blob = await res.blob();
           return { filename, blob };
         } catch (e) {
-          console.error(`Erreur lors du téléchargement de ${filename}:`, e);
           return null;
         }
       })

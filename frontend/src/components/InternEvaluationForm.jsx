@@ -82,7 +82,6 @@ const InternEvaluationForm = ({ candidateInfo, rapportid, resid, onClose, onSucc
         setStatus(`Erreur: ${data.error}`);
       }
     } catch (error) {
-      console.error('Error submitting evaluation:', error);
       setStatus('Erreur lors de l\'envoi de l\'évaluation');
     } finally {
       setLoading(false);

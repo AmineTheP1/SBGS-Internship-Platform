@@ -80,7 +80,6 @@ const UsefulFilesManager = () => {
       setFolders(foldersData.folders);
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching data:', err);
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +132,6 @@ const UsefulFilesManager = () => {
       }
     } catch (err) {
       setFolderError(err.message || 'Une erreur est survenue lors de la création du dossier');
-      console.error('Error creating folder:', err);
     } finally {
       setIsCreatingFolder(false);
     }
@@ -179,7 +177,6 @@ const UsefulFilesManager = () => {
         // Parse successful response
         data = await response.json();
       } catch (parseError) {
-        console.error('Error parsing response:', parseError);
         throw new Error(parseError.message || 'Failed to parse server response. Please try again.');
       }
       if (data.success) {
@@ -195,7 +192,6 @@ const UsefulFilesManager = () => {
       }
     } catch (err) {
       setUploadError(err.message || 'Une erreur est survenue lors du téléchargement du fichier');
-      console.error('Error uploading file:', err);
     } finally {
       setIsUploading(false);
     }
@@ -220,7 +216,6 @@ const UsefulFilesManager = () => {
       }
     } catch (err) {
       alert(`Erreur lors de la suppression: ${err.message}`);
-      console.error('Error deleting file:', err);
     }
   };
 
@@ -244,7 +239,6 @@ const UsefulFilesManager = () => {
       }
     } catch (err) {
       alert(`Erreur lors de la suppression: ${err.message}`);
-      console.error('Error deleting folder:', err);
     }
   };
 

@@ -127,7 +127,6 @@ export default function EnhancedChatbot() {
           bestCandidates: response.data.candidates
         };
       } else {
-        console.error("API returned success: false", response.data.error);
         return "Désolé, j'ai rencontré une erreur lors de la recherche. Veuillez réessayer.";
       }
     } catch (error) {
@@ -138,7 +137,6 @@ export default function EnhancedChatbot() {
         return "Cette fonctionnalité est réservée au personnel RH. Veuillez vous connecter avec un compte RH pour voir les évaluations des anciens stagiaires.";
       }
       // Only log unexpected errors (not auth errors)
-      console.error("Unexpected error getting best candidates:", error);
       return `Désolé, j'ai rencontré une erreur lors de la recherche (${error.response?.status || 'réseau'}). Veuillez réessayer.`;
     }
   };
@@ -174,7 +172,6 @@ export default function EnhancedChatbot() {
         return "Désolé, j'ai rencontré une erreur lors de la recherche. Veuillez réessayer.";
       }
     } catch (error) {
-      console.error("Error searching CVs:", error);
       return "Désolé, j'ai rencontré une erreur réseau. Veuillez réessayer.";
     } finally {
       setIsSearching(false);
