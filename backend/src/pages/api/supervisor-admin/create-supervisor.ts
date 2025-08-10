@@ -3,7 +3,11 @@ import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '5433'),
+  database: process.env.DB_NAME,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -63,15 +67,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ 
         success: false, 
         error: "Cet identifiant responsable existe déjà" 
-      });
-    }
-
-    // Check if email already exists
-    const existingEmail = await pool.query("SELECT email FROM responsables_stage WHERE email = $1", [email]);
-    if (existingEmail.rows.length > 0) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Cet email existe déjà" 
       });
     }
 
