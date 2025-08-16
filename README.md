@@ -491,5 +491,5 @@ This project is proprietary software developed for SBGS (Société des Boissons 
 
 ---
 
-                                                                                                                    **Built with ❤️ for SBGS by Amine Aichane**
+**Built with ❤️ for SBGS by Amine Aichane**
 
