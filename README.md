@@ -216,24 +216,6 @@ _View performance evaluation results and feedback_
 
 ---
 
-### 📱 **Mobile Responsive Design**
-
-#### Mobile Navigation
-
-_Responsive navigation optimized for mobile devices_
-![Mobile Navigation](screenshots/mobile-navigation.png)
-
-#### Mobile Application Form
-
-_Touch-friendly application process on mobile devices_
-![Mobile Application](screenshots/mobile-application.png)
-
-#### Mobile Dashboard
-
-_Optimized dashboard experience for smartphones and tablets_
-![Mobile Dashboard](screenshots/mobile-dashboard.png)
-
----
 
 ### 🎨 **Design System & Components**
 
