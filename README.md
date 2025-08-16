@@ -1,269 +1,529 @@
-# SBGS Internship Management Platform
+# 🏢 SBGS Internship Management Platform
 
-A modern web application for managing internship applications at Société des Boissons Gazeuses du Souss (SBGS), the licensed Coca-Cola bottler in Agadir, Morocco.
+A comprehensive web application for managing the complete internship lifecycle at **Société des Boissons Gazeuses du Souss (SBGS)**, the licensed Coca-Cola bottler in Agadir, Morocco. This platform handles everything from application submission to final evaluation and certification.
+
+![SBGS Platform](https://img.shields.io/badge/SBGS-Internship%20Platform-red?style=for-the-badge&logo=coca-cola)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=for-the-badge&logo=docker)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
+![Next.js](https://img.shields.io/badge/Next.js-API-000000?style=for-the-badge&logo=next.js)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql)
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Project Architecture
 
 ```
 Plateforme SBGS/
-├── backend/                # Next.js API (HR, admin, file uploads, DB)
+├── 🔧 backend/                    # Next.js API Server
+│   └── src/pages/api/
+│       ├── hr/                    # HR Management APIs
+│       ├── supervisor/            # Supervisor APIs  
+│       ├── candidate/             # Intern/Candidate APIs
+│       └── supervisor-admin/      # Admin APIs
+├── 🎨 frontend/                   # React + Vite Client
 │   └── src/
-│       └── pages/api/hr/   # HR-related API endpoints
-├── frontend/               # React + Vite frontend
-│   └── src/
-│       ├── components/     # Reusable UI components (Dashboard, ApplicationForm, etc.)
-│       ├── pages/          # Route-level pages (Home, Apply, HRPortal, Contact)
-│       ├── assets/         # Images, logo, etc.
-│       └── App.jsx         # Main app with routing
-├── database/               # Database configuration and scripts
-│   ├── init/               # Database initialization scripts
-│   ├── backups/            # Database backup files
-│   ├── backup.bat          # Windows backup script
-│   ├── backup.sh           # Linux/Mac backup script
-│   └── restore.sh          # Database restore script
-├── docker-compose.yml      # Docker services configuration
-├── Dockerfile.backend      # Backend container configuration
-├── Dockerfile.frontend     # Frontend container configuration
-├── nginx.conf              # Nginx reverse proxy configuration
-├── .env                    # Environment variables (create this)
-└── README.md
+│       ├── components/            # Reusable UI Components
+│       ├── pages/                 # Application Pages
+│       ├── config/                # API & App Configuration
+│       └── assets/                # Static Assets
+├── 🗄️ database/                   # Database Management
+│   ├── init/                      # Schema & Initial Data
+│   ├── backups/                   # Automated Backups
+│   └── scripts/                   # Maintenance Scripts
+├── 🐳 Docker Configuration
+│   ├── docker-compose.yml         # Multi-service Setup
+│   ├── Dockerfile.backend         # Backend Container
+│   ├── Dockerfile.frontend        # Frontend Container
+│   └── nginx.conf                 # Reverse Proxy Config
+└── 📋 Documentation & Config
 ```
 
 ---
 
-## 🐳 Docker Setup
+## 🚀 Complete Feature Set
 
-This project is fully containerized using Docker Compose with the following services:
+### 👨‍🎓 **Student/Candidate Portal**
+- **📝 Application System**
+  - Multi-step application form with real-time validation
+  - File uploads: CV, ID Card, Convention, Insurance documents
+  - University/School integration with search functionality
+  - Domain of interest selection (IT, Finance, Marketing, etc.)
+  
+- **📊 Personal Dashboard**
+  - Application status tracking
+  - Daily attendance clock-in/clock-out system
+  - Daily activity reports submission
+  - Final internship report upload
+  - Access to useful documents and resources
+  - Internship evaluation viewing
+  - Attestation download after completion
 
-### Services
-- **PostgreSQL Database**: `postgres:15-alpine` on port `5433` (external)
-- **Backend**: Next.js API server on port `3001`
-- **Frontend**: React + Vite development server on port `3000`
-- **Nginx**: Reverse proxy on port `80`
+### 👩‍💼 **HR Management Portal**
+- **📋 Application Management**
+  - Comprehensive dashboard with search, filter, and pagination
+  - Application review with file preview (PDF/Images)
+  - Status management (Pending, Accepted, Rejected)
+  - Bulk operations and advanced filtering
+  
+- **👥 Intern Management**
+  - Supervisor assignment system
+  - Internship period scheduling
+  - Certificate and attestation generation
+  - Best candidates identification with AI-powered ranking
+  - Interview proposal system for top performers
+  
+- **📧 Communication Tools**
+  - Announcement system with email notifications
+  - CV search and candidate matching
+  - Interview scheduling and management
+  
+- **📁 Document Management**
+  - Useful files upload and organization
+  - Folder-based document structure
+  - File sharing with interns and supervisors
+  
+- **🤖 AI Assistant**
+  - Enhanced chatbot for HR queries
+  - Candidate search and recommendation
+  - Automated responses for common questions
 
-### Quick Start with Docker
+### 👨‍🏫 **Supervisor Portal**
+- **📈 Intern Monitoring**
+  - Assigned interns dashboard
+  - Daily attendance confirmation
+  - Absence management (justified/unjustified)
+  - Monthly attendance reports
+  
+- **📝 Evaluation System**
+  - Comprehensive intern evaluation forms
+  - Skills assessment across multiple criteria
+  - Progress tracking and feedback
+  - Report approval workflow
+  
+- **🎯 Theme Management**
+  - Internship theme assignment
+  - Project milestone tracking
+  - Performance analytics
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd "Plateforme SBGS"
-   ```
-
-2. **Create environment file:**
-   ```bash
-   # Create .env file with your configuration
-   DATABASE_URL=postgresql://<username>:<password>@<host>:<port>/<database>
-   JWT_SECRET=your-jwt-secret-key
-   SUPER_ADMIN_SECRET=your-super-admin-secret-key
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=example@example.com
-   SMTP_PASS=your-app-password
-   ```
-
-3. **Start all services:**
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Access the application:**
-   - **Frontend**: http://localhost
-   - **Database**: Connect via pgAdmin to `localhost:5433`
-
-### Database Management
-
-#### Backup Database
-```bash
-# Windows
-database\backup.bat
-
-# Linux/Mac
-./database/backup.sh
-```
-
-#### Restore Database
-```bash
-# Linux/Mac
-./database/restore.sh backup_file.sql
-```
-
-#### Access Database Directly
-```bash
-# Connect to database container
-docker exec -it sbgs-postgres psql -U postgres -d sbgs_db
-
-# Or connect from host (pgAdmin)
-# Host: localhost, Port: 5433, User: postgres, Password: postgres
-```
-
-### Data Persistence
-- Database data is stored in Docker volume `postgres_data`
-- Data persists across container restarts and system reboots
-- Only gets deleted if you run `docker-compose down -v`
-
----
-
-## 🎨 Design System
-
-- **Colors:**  
-  - Coca-Cola Red: `#F40009`
-  - Coca-Cola Light: `#FF9998`
-  - Coca-Cola Dark: `#A30005`
-- **Font:** Poppins (Google Fonts)
-- **UI:** Tailwind CSS, FontAwesome, react-icons
-- **Branding:** Coca-Cola corporate identity
-
----
-
-## 🚀 Features
-
-### For Students
-- Modern, multi-step internship application form
-- File uploads: CV, Carte Nationale, Convention de Stage, Assurance (PDF/image preview)
-- Real-time validation and feedback
-- Responsive, mobile-first design
-
-### For HR Team
-- Secure login portal
-- Dashboard: view, search, filter, and manage applications
-- Status management: Accept/Reject with badge display
-- Detailed candidate view: all info, file previews, and status actions
-- Intern assignment to supervisors
-
-### For Supervisors
-- Secure login portal
-- Dashboard: view assigned interns and their activities
-- Attendance confirmation: confirm or deny candidate presence
-- Absence management: mark justified/unjustified absences
-- Daily activity monitoring and reporting
-
-### General
-- Multi-language support (French/English)
-- Professional branding and theming
-- Contact form and company info
-- Social media integration
+### 🔐 **Super Admin Features**
+- **👤 User Management**
+  - HR account creation and management
+  - Supervisor account administration
+  - Role-based access control
+  
+- **⚙️ System Configuration**
+  - Platform settings management
+  - Database maintenance tools
+  - System monitoring and analytics
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Frontend:** React 18, Vite, Tailwind CSS, React Router v6, react-icons
-- **Backend:** Next.js API routes, PostgreSQL
-- **Database:** PostgreSQL 15 (containerized)
-- **Reverse Proxy:** Nginx
-- **Containerization:** Docker & Docker Compose
-- **Styling:** Tailwind CSS, Poppins font
-- **File Uploads:** Formidable, file previews
+### **Frontend**
+- **React 18** - Modern UI library with hooks
+- **Vite** - Fast build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **React Router v6** - Client-side routing
+- **Axios** - HTTP client for API calls
+- **React Icons** - Comprehensive icon library
+
+### **Backend**
+- **Next.js** - Full-stack React framework with API routes
+- **TypeScript** - Type-safe JavaScript
+- **PostgreSQL** - Robust relational database
+- **JWT** - Secure authentication tokens
+- **Bcrypt** - Password hashing
+- **Formidable** - File upload handling
+- **Nodemailer** - Email functionality
+
+### **Infrastructure**
+- **Docker & Docker Compose** - Containerization
+- **Nginx** - Reverse proxy and load balancer
+- **PostgreSQL 15** - Database with Alpine Linux
+- **Node.js 18** - Runtime environment
+
+### **Design & UX**
+- **Coca-Cola Brand Guidelines** - Official color scheme and typography
+- **Poppins Font** - Modern, readable typography
+- **Responsive Design** - Mobile-first approach
+- **Accessibility** - WCAG compliant components
 
 ---
 
-## 📱 Main Pages & Routes
+## 🐳 Quick Start with Docker
 
-- `/` - Home page
-- `/apply` - Internship application form
-- `/hr` - HR portal login
-- `/dashboard` - HR dashboard (after login)
-- `/candidature/:id` - Candidate details (HR only)
-- `/contact` - Contact form
+### **Prerequisites**
+- Docker Desktop installed
+- Git for version control
+- 4GB+ RAM available
 
----
-
-## 📝 Key Components
-
-- **ApplicationForm.jsx:**  
-  Multi-step form, file uploads, validation, school search, interest selection.
-- **Dashboard.jsx:**  
-  Table with search/filter, status management, details modal, pagination.
-- **CandidateDetails.jsx:**  
-  Full candidate info, file previews (PDF/image), accept/reject actions, status badge.
-- **Chatbot.jsx:**  
-  Interactive HR assistant (optional).
-
----
-
-## 🔧 Development Setup
-
-### Option 1: Docker (Recommended)
+### **1. Clone & Setup**
 ```bash
-# Start all services
-docker-compose up -d
+git clone <repository-url>
+cd "Plateforme SBGS"
 
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
+# Create environment configuration
+cp .env.example .env
+# Edit .env with your settings
 ```
 
-### Option 2: Local Development
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-2. **Start development servers:**
-   - Backend:  
-     ```bash
-     cd backend && npm run dev
-     ```
-   - Frontend:  
-     ```bash
-     cd frontend && npm run dev
-     ```
-3. **Build for production:**
-   ```bash
-   npm run build
-   ```
+### **2. Environment Configuration**
+Create `.env` file with:
+```env
+# Database Configuration
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/sbgs_db
+
+# Security Keys
+JWT_SECRET=your-super-secure-jwt-secret-key-here
+SUPER_ADMIN_SECRET=your-super-admin-secret-key
+
+# Email Configuration (Gmail example)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-specific-password
+```
+
+### **3. Launch Platform**
+```bash
+# Start all services in detached mode
+docker-compose up -d
+
+# Monitor logs (optional)
+docker-compose logs -f
+
+# Check service status
+docker-compose ps
+```
+
+### **4. Access Points**
+- **🌐 Main Application**: http://localhost
+- **📊 HR Portal**: http://localhost/hr
+- **👨‍🏫 Supervisor Portal**: http://localhost/supervisor
+- **👨‍🎓 Student Portal**: http://localhost/candidate
+- **🗄️ Database**: localhost:5433 (pgAdmin compatible)
 
 ---
 
-## 📋 API Endpoints
+## 📱 Application Routes & Pages
 
-- `POST /api/hr/apply` - Submit internship application
-- `POST /api/hr/login` - HR login
-- `GET /api/hr/get-applications` - List or fetch application(s)
-- `PUT /api/hr/update-status` - Update application status
-- `GET /api/hr/get-cv` - Download CV
-- `DELETE /api/hr/delete-application` - Delete application
+### **Public Routes**
+- `/` - Landing page with company information
+- `/apply` - Internship application form
+- `/contact` - Contact form and company details
+- `/user-type` - User type selection (HR/Supervisor/Candidate)
 
----
+### **Authentication Routes**
+- `/hr` - HR login portal
+- `/supervisor` - Supervisor login portal  
+- `/candidate` - Candidate/Intern login portal
 
-## 🎨 Customization
-
-- **Colors:** Edit Tailwind config or CSS variables.
-- **Logo/Favicon:** Place your logo in `public/` and update `<link rel="icon" ... />` in `layout.tsx`.
-- **Add new components:**  
-  1. Create in `src/components/`
-  2. Import and use in the relevant page
-  3. Add route in `App.jsx` if needed
-
----
-
-## 🔒 Security
-
-- Client/server-side validation
-- Secure file upload handling
-- HR authentication
-- Input sanitization
-- Database connection security
+### **Protected Routes**
+- `/dashboard` - HR management dashboard
+- `/supervisor-dashboard` - Supervisor control panel
+- `/candidate-dashboard` - Student/Intern dashboard
+- `/candidature/:id` - Detailed candidate profile (HR only)
 
 ---
 
-## 🚨 Troubleshooting
+## 🔌 API Endpoints Overview
 
-### Database Issues
-- **Port conflicts**: If port 5433 is in use, change it in `docker-compose.yml`
-- **Connection errors**: Ensure the database container is healthy
-- **Data loss**: Always backup before major changes
+### **HR Management APIs**
+```
+Authentication & Session
+POST   /api/hr/login                    # HR login
+GET    /api/hr/session                  # Session validation
+POST   /api/hr/logout                   # Logout
 
-### Container Issues
-- **Build failures**: Check Docker logs with `docker-compose logs`
-- **Service dependencies**: Ensure database starts before backend
-- **Volume issues**: Use `docker-compose down -v` to reset volumes
+Application Management  
+GET    /api/hr/get-applications         # List applications
+PUT    /api/hr/update-status           # Update application status
+DELETE /api/hr/delete-application      # Delete application
+GET    /api/hr/get-cv                  # Download CV files
 
-### Performance
-- **Slow queries**: Check database indexes
-- **Memory issues**: Adjust Docker resource limits
-- **File uploads**: Check nginx client_max_body_size setting
+Intern Management
+POST   /api/hr/assign-intern           # Assign intern to supervisor
+GET    /api/hr/get-supervisors         # List supervisors
+POST   /api/hr/set-start-date          # Set internship dates
+GET    /api/hr/get-best-candidates     # AI-ranked top candidates
+POST   /api/hr/send-interview-proposal # Send interview invitations
+
+Document & Communication
+POST   /api/hr/send-announcement-email # Send announcements
+GET    /api/hr/search-cvs              # Search candidate CVs
+POST   /api/hr/upload-useful-file      # Upload documents
+GET    /api/hr/get-useful-files        # List documents
+```
+
+### **Supervisor APIs**
+```
+Authentication & Management
+POST   /api/supervisor/login                    # Supervisor login
+GET    /api/supervisor/get-assigned-interns     # List assigned interns
+GET    /api/supervisor/get-intern-details       # Intern details
+
+Attendance & Monitoring
+POST   /api/supervisor/mark-absence             # Mark intern absence
+POST   /api/supervisor/confirm-presence         # Confirm attendance
+GET    /api/supervisor/get-monthly-absences     # Monthly reports
+GET    /api/supervisor/get-pending-confirmations # Pending confirmations
+
+Evaluation & Reports
+POST   /api/supervisor/evaluate-intern          # Submit evaluations
+GET    /api/supervisor/get-intern-reports       # View reports
+POST   /api/supervisor/approve-report           # Approve final reports
+POST   /api/supervisor/set-theme                # Set internship themes
+```
+
+### **Candidate/Intern APIs**
+```
+Authentication & Profile
+POST   /api/candidate/login              # Candidate login
+GET    /api/candidate/get-assignment     # Get internship assignment
+GET    /api/candidate/get-evaluation     # View evaluation results
+
+Attendance System
+POST   /api/candidate/clock-in           # Clock in for the day
+POST   /api/candidate/clock-out          # Clock out
+GET    /api/candidate/get-attendance     # View attendance history
+
+Reports & Documents
+POST   /api/candidate/update-daily-report # Submit daily reports
+POST   /api/candidate/upload-report       # Upload final report
+GET    /api/candidate/get-reports         # View submitted reports
+GET    /api/candidate/check-attestation   # Check attestation status
+GET    /api/candidate/get-useful-files    # Access shared documents
+```
+
+---
+
+## 🎨 Design System & Branding
+
+### **Color Palette**
+```css
+/* Primary Coca-Cola Colors */
+--coke-red: #F40009;           /* Primary brand color */
+--coke-light: #FF9998;         /* Light accent */
+--coke-dark: #A30005;          /* Dark accent */
+
+/* UI Colors */
+--success: #10B981;            /* Success states */
+--warning: #F59E0B;            /* Warning states */
+--error: #EF4444;              /* Error states */
+--info: #3B82F6;               /* Information */
+
+/* Neutral Colors */
+--gray-50: #F9FAFB;            /* Light backgrounds */
+--gray-900: #111827;           /* Dark text */
+```
+
+### **Typography**
+- **Primary Font**: Poppins (Google Fonts)
+- **Weights**: 300 (Light), 400 (Regular), 500 (Medium), 600 (SemiBold), 700 (Bold)
+- **Fallbacks**: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto
+
+### **Component Library**
+- **Buttons**: Primary, Secondary, Outline, Ghost variants
+- **Forms**: Input fields, Select dropdowns, File uploads, Validation
+- **Navigation**: Navbar, Sidebar, Breadcrumbs, Pagination
+- **Feedback**: Alerts, Toasts, Loading states, Empty states
+- **Data Display**: Tables, Cards, Badges, Statistics
+
+---
+
+## 🗄️ Database Schema
+
+### **Core Tables**
+- **candidat** - Student/candidate profiles and authentication
+- **demandes_stage** - Internship applications and requests
+- **stages** - Active internship periods and assignments
+- **responsables_stage** - Supervisor accounts and information
+- **rh** - HR staff accounts and permissions
+
+### **Management Tables**
+- **assignations_stage** - Intern-supervisor assignments
+- **presence** - Daily attendance tracking
+- **rapports_journaliers** - Daily activity reports
+- **rapports_stage** - Final internship reports
+- **evaluations_stagiaire** - Performance evaluations
+
+### **Administrative Tables**
+- **attestations_stage** - Completion certificates
+- **pieces_jointes** - Uploaded documents and files
+- **absences** - Absence tracking and justifications
+- **ecole** - University and school directory
+
+---
+
+## 🔧 Development & Deployment
+
+### **Local Development**
+```bash
+# Install dependencies
+npm install
+
+# Start development servers
+npm run dev:backend    # Backend on :3001
+npm run dev:frontend   # Frontend on :3000
+
+# Database operations
+npm run db:migrate     # Run migrations
+npm run db:seed        # Seed test data
+npm run db:backup      # Create backup
+```
+
+### **Production Build**
+```bash
+# Build for production
+npm run build
+
+# Start production servers
+npm run start:backend
+npm run start:frontend
+
+# Or use Docker
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+### **Database Management**
+```bash
+# Backup database
+./database/backup.sh
+
+# Restore from backup
+./database/restore.sh backup_2024_01_15.sql
+
+# Connect to database
+docker exec -it sbgs-postgres psql -U postgres -d sbgs_db
+```
+
+---
+
+## 🔒 Security Features
+
+### **Authentication & Authorization**
+- JWT-based authentication with secure token storage
+- Role-based access control (HR, Supervisor, Candidate, Super Admin)
+- Session management with automatic expiration
+- Password hashing using bcrypt with salt rounds
+
+### **Data Protection**
+- Input validation and sanitization on all endpoints
+- SQL injection prevention with parameterized queries
+- File upload restrictions and virus scanning
+- CORS configuration for cross-origin requests
+
+### **Privacy & Compliance**
+- Personal data encryption for sensitive information
+- Audit logging for all administrative actions
+- GDPR-compliant data handling procedures
+- Secure file storage with access controls
+
+---
+
+## 📊 Monitoring & Analytics
+
+### **System Monitoring**
+- Docker health checks for all services
+- Database connection pooling and monitoring
+- API response time tracking
+- Error logging and alerting
+
+### **Business Analytics**
+- Application conversion rates
+- Internship completion statistics
+- Supervisor performance metrics
+- Student satisfaction scores
+
+---
+
+## 🚨 Troubleshooting Guide
+
+### **Common Issues**
+
+#### **Database Connection Problems**
+```bash
+# Check database status
+docker-compose ps postgres
+
+# View database logs
+docker-compose logs postgres
+
+# Reset database connection
+docker-compose restart postgres
+```
+
+#### **File Upload Issues**
+```bash
+# Check upload directory permissions
+ls -la backend/uploads/
+
+# Increase upload limits in nginx.conf
+client_max_body_size 50M;
+```
+
+#### **Authentication Failures**
+```bash
+# Verify JWT secret in .env
+echo $JWT_SECRET
+
+# Clear browser cookies and localStorage
+# Check token expiration in browser dev tools
+```
+
+### **Performance Optimization**
+- Enable Redis caching for frequently accessed data
+- Implement database indexing for search queries
+- Use CDN for static asset delivery
+- Enable gzip compression in Nginx
+
+### **Backup & Recovery**
+```bash
+# Automated daily backups
+0 2 * * * /path/to/backup.sh
+
+# Point-in-time recovery
+pg_restore --clean --if-exists -d sbgs_db backup.sql
+```
+
+---
+
+## 🤝 Contributing
+
+### **Development Workflow**
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+### **Code Standards**
+- ESLint configuration for JavaScript/TypeScript
+- Prettier for code formatting
+- Conventional commits for commit messages
+- Component documentation with JSDoc
+
+### **Testing**
+```bash
+# Run test suite
+npm run test
+
+# Run with coverage
+npm run test:coverage
+
+# E2E testing
+npm run test:e2e
+```
+
+---
+
+## 📄 License
+
+This project is proprietary software developed for SBGS (Société des Boissons Gazeuses du Souss). All rights reserved.
+
+
+---
+
+**Built with ❤️ for SBGS by Amine Aichane**
 
