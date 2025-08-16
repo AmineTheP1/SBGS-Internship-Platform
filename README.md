@@ -2,12 +2,6 @@
 
 A comprehensive web application for managing the complete internship lifecycle at **Société des Boissons Gazeuses du Souss (SBGS)**, the licensed Coca-Cola bottler in Agadir, Morocco. This platform handles everything from application submission to final evaluation and certification.
 
-![SBGS Platform](https://img.shields.io/badge/SBGS-Internship%20Platform-red?style=for-the-badge&logo=coca-cola)
-![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=for-the-badge&logo=docker)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
-![Next.js](https://img.shields.io/badge/Next.js-API-000000?style=for-the-badge&logo=next.js)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql)
-
 ---
 
 ## 🏗️ Project Architecture
@@ -487,34 +481,6 @@ echo $JWT_SECRET
 pg_restore --clean --if-exists -d sbgs_db backup.sql
 ```
 
----
-
-## 🤝 Contributing
-
-### **Development Workflow**
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-### **Code Standards**
-- ESLint configuration for JavaScript/TypeScript
-- Prettier for code formatting
-- Conventional commits for commit messages
-- Component documentation with JSDoc
-
-### **Testing**
-```bash
-# Run test suite
-npm run test
-
-# Run with coverage
-npm run test:coverage
-
-# E2E testing
-npm run test:e2e
-```
 
 ---
 
