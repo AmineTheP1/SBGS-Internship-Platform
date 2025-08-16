@@ -74,10 +74,6 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - SUPER_ADMIN_SECRET=${SUPER_ADMIN_SECRET}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASS=${SMTP_PASS}
       - TZ=Africa/Casablanca
     env_file:
       - .env

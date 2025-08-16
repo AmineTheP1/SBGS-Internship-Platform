@@ -1,30 +1,18 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT, 10),
-  secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendEmail({ to, subject, text, html }) {
   try {
-    const mailOptions = {
-      from: `"SBGS Plateforme" <${process.env.SMTP_USER}>`,
+    const fromAddress = `SBGS Plateforme <contact@${process.env.RESEND_DOMAIN}>`;
+
+    await resend.emails.send({
+      from: fromAddress,
       to,
       subject,
-      text: text || "", // Plain text fallback
-    };
-    
-    // Only add html if it's explicitly provided and not undefined
-    if (html !== undefined) {
-      mailOptions.html = html;
-    }
-    
-    await transporter.sendMail(mailOptions);
+      text: text || '',
+      ...(html !== undefined && { html })
+    });
   } catch (error) {
     console.error('Email send error:', error);
     throw error;
