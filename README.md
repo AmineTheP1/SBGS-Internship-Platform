@@ -2,12 +2,6 @@
 
 A comprehensive web application for managing the complete internship lifecycle at **Société des Boissons Gazeuses du Souss (SBGS)**, the licensed Coca-Cola bottler in Agadir, Morocco. This platform handles everything from application submission to final evaluation and certification.
 
-![SBGS Platform](https://img.shields.io/badge/SBGS-Internship%20Platform-red?style=for-the-badge&logo=coca-cola)
-![Docker](https://img.shields.io/badge/Docker-Containerized-blue?style=for-the-badge&logo=docker)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
-![Next.js](https://img.shields.io/badge/Next.js-API-000000?style=for-the-badge&logo=next.js)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql)
-![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-brightgreen?style=for-the-badge&logo=vercel)
 
 ## 🌐 Live Demo
 
@@ -127,18 +121,16 @@ Plateforme SBGS/
 
 #### Home Page
 
-_Modern landing page with Coca-Cola branding and clear call-to-actions_
-![Home Page](screenshots/home-page.png)
+<img width="1669" height="911" alt="localhost_ (8)" src="https://github.com/user-attachments/assets/a2c1bf46-e837-45b5-8d80-2cf5d3f5b0d9" />
+
 
 #### Application Form
 
-_Multi-step internship application with file uploads and validation_
-![Application Form](screenshots/application-form.png)
+<img width="1669" height="911" alt="localhost_ (9)" src="https://github.com/user-attachments/assets/5af93b2d-71b0-4993-961f-1081b56e7ae0" />
 
 #### User Type Selection
 
-_Clean interface for selecting user role (HR, Supervisor, or Candidate)_
-![User Selection](screenshots/user-type-selection.png)
+<img width="1669" height="911" alt="localhost_ (10)" src="https://github.com/user-attachments/assets/c9aa7aad-4682-4c75-8d75-1c3d4a59a71a" />
 
 ---
 
@@ -146,13 +138,13 @@ _Clean interface for selecting user role (HR, Supervisor, or Candidate)_
 
 #### HR Dashboard
 
-_Comprehensive dashboard with application management and analytics_
-![HR Dashboard](screenshots/hr-dashboard.png)
+<img width="1669" height="911" alt="localhost_admin (6)" src="https://github.com/user-attachments/assets/87e952c9-1232-497e-801f-6043342da4bf" />
+
 
 #### Application Review
 
-_Detailed candidate profile with file previews and status management_
-![Application Review](screenshots/application-review.png)
+<img width="1669" height="911" alt="localhost_admin (7)" src="https://github.com/user-attachments/assets/9f8d6802-7cb1-450d-966c-d9b8dfaccb4f" />
+
 
 #### Best Candidates List
 
