@@ -172,18 +172,18 @@ _Intelligent HR assistant for candidate search and recommendations_
 
 #### Attendance Management
 
-_Daily attendance confirmation and absence tracking interface_
-![Attendance Management](screenshots/attendance-management.png)
+<img width="1481" height="911" alt="localhost_candidate-dashboard (5)" src="https://github.com/user-attachments/assets/b0483bfb-54ea-4db4-880b-bcf6bfccff1b" />
+
 
 #### Intern Evaluation
 
-_Comprehensive evaluation form with multiple assessment criteria_
-![Intern Evaluation](screenshots/intern-evaluation.png)
+<img width="1143" height="869" alt="localhost_supervisor-dashboard" src="https://github.com/user-attachments/assets/da67233e-7da5-43ad-87f6-ddfee54a594c" />
 
-#### Monthly Reports
 
-_Detailed analytics and reporting for intern performance_
-![Monthly Reports](screenshots/monthly-reports.png)
+#### Daily Reports
+
+<img width="794" height="419" alt="Capture d'écran 2025-08-11 030428" src="https://github.com/user-attachments/assets/17e21f59-c69f-493e-8cfb-ddca14116c9c" />
+
 
 ---
 
