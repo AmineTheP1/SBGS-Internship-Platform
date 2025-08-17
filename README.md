@@ -167,8 +167,8 @@ _Intelligent HR assistant for candidate search and recommendations_
 
 #### Supervisor Dashboard
 
-_Overview of assigned interns with attendance and performance metrics_
-![Supervisor Dashboard](screenshots/supervisor-dashboard.png)
+<img width="1669" height="911" alt="localhost_supervisor-dashboard (1)" src="https://github.com/user-attachments/assets/a7aae8e8-438a-41f6-bf95-d1a6246e133e" />
+
 
 #### Attendance Management
 
@@ -191,8 +191,7 @@ _Detailed analytics and reporting for intern performance_
 
 #### Candidate Dashboard
 
-_Personal dashboard with internship progress and daily activities_
-![Candidate Dashboard](screenshots/candidate-dashboard.png)
+<img width="1669" height="911" alt="localhost_candidate-dashboard (2)" src="https://github.com/user-attachments/assets/3a900507-03ab-4d9a-95f5-3804c5ede091" />
 
 #### Clock In/Out System
 
@@ -206,13 +205,12 @@ _Daily activity reporting with task and document tracking_
 
 #### Final Report Upload
 
-_End-of-internship report submission with file management_
-![Final Report](screenshots/final-report.png)
+<img width="1669" height="911" alt="localhost_candidate-dashboard (6)" src="https://github.com/user-attachments/assets/a2204d37-f758-4c44-b875-ee84653aa181" />
+
 
 #### Evaluation Results
 
-_View performance evaluation results and feedback_
-![Evaluation Results](screenshots/evaluation-results.png)
+<img width="1669" height="911" alt="localhost_candidate-dashboard (3)" src="https://github.com/user-attachments/assets/dca15cdc-0a2c-40a4-b347-22f701dd3cbd" />
 
 
 ---
