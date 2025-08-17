@@ -51,7 +51,7 @@ export default function Footer() {
               </div>
               <div className="ml-3">
                 <span className="font-bold text-xl">SBGS</span>
-                <p className="text-sm opacity-70">Embouteillage Coca-Cola</p>
+                <p className="text-sm opacity-70">Société des Boissons Gazeuse du Souss</p>
               </div>
             </div>
             <p className="text-gray-400">
