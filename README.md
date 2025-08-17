@@ -158,8 +158,7 @@ Plateforme SBGS/
 
 #### Enhanced Chatbot
 
-_Intelligent HR assistant for candidate search and recommendations_
-![HR Chatbot](screenshots/hr-chatbot.png)
+<img width="787" height="380" alt="Capture d'écran 2025-08-17 231248" src="https://github.com/user-attachments/assets/b6da23bd-ed82-44d7-be38-87dd43a0094b" />
 
 ---
 
