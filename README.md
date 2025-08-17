@@ -148,13 +148,13 @@ Plateforme SBGS/
 
 #### Best Candidates List
 
-_AI-powered ranking system showing top-performing former interns_
-![Best Candidates](screenshots/best-candidates.png)
+<img width="803" height="704" alt="localhost_admin (9)" src="https://github.com/user-attachments/assets/034f4128-f098-46d7-afa7-bc65db43d410" />
+
 
 #### Document Management
 
-_Organized file system with folders and sharing capabilities_
-![Document Management](screenshots/document-management.png)
+<img width="1669" height="911" alt="localhost_admin (8)" src="https://github.com/user-attachments/assets/acc5fa72-ccf0-4e97-9d7a-72194930eeb5" />
+
 
 #### Enhanced Chatbot
 
@@ -214,25 +214,6 @@ _End-of-internship report submission with file management_
 _View performance evaluation results and feedback_
 ![Evaluation Results](screenshots/evaluation-results.png)
 
----
-
-
-### 🎨 **Design System & Components**
-
-#### UI Components Library
-
-_Consistent design system with Coca-Cola branding_
-![UI Components](screenshots/ui-components.png)
-
-#### Form Elements
-
-_Modern form controls with validation and feedback_
-![Form Elements](screenshots/form-elements.png)
-
-#### Data Visualization
-
-_Charts and analytics with clean, professional styling_
-![Data Visualization](screenshots/data-visualization.png)
 
 ---
 
