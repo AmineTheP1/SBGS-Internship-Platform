@@ -194,13 +194,12 @@ Plateforme SBGS/
 
 #### Clock In/Out System
 
-_Simple and intuitive attendance tracking interface_
-![Clock System](screenshots/clock-system.png)
+<img width="1245" height="264" alt="Capture d'écran 2025-08-18 193849" src="https://github.com/user-attachments/assets/b2909076-611c-4968-86cc-96d6d71b5e24" />
+
 
 #### Daily Reports
 
-_Daily activity reporting with task and document tracking_
-![Daily Reports](screenshots/daily-reports.png)
+<img width="673" height="557" alt="Capture d'écran 2025-08-18 193901" src="https://github.com/user-attachments/assets/ff61cd23-4046-4f78-b890-9676c0dda59e" />
 
 #### Final Report Upload
 
