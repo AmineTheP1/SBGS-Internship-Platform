@@ -10,7 +10,106 @@ A comprehensive web application for managing the complete internship lifecycle a
 The platform is fully deployed and operational, showcasing all features including the complete internship management workflow from application submission to final certification.
 
 ---
+## 📸 Platform Screenshots
 
+### 🏠 **Landing Page & Public Interface**
+
+#### Home Page
+
+<img width="1669" height="911" alt="localhost_ (8)" src="https://github.com/user-attachments/assets/a2c1bf46-e837-45b5-8d80-2cf5d3f5b0d9" />
+
+
+#### Application Form
+
+<img width="1669" height="911" alt="localhost_ (9)" src="https://github.com/user-attachments/assets/5af93b2d-71b0-4993-961f-1081b56e7ae0" />
+
+#### User Type Selection
+
+<img width="1669" height="911" alt="localhost_ (10)" src="https://github.com/user-attachments/assets/c9aa7aad-4682-4c75-8d75-1c3d4a59a71a" />
+
+---
+
+### 👩‍💼 **HR Management Portal**
+
+#### HR Dashboard
+
+<img width="1669" height="911" alt="localhost_admin (6)" src="https://github.com/user-attachments/assets/87e952c9-1232-497e-801f-6043342da4bf" />
+
+
+#### Application Review
+
+<img width="1669" height="911" alt="localhost_admin (7)" src="https://github.com/user-attachments/assets/9f8d6802-7cb1-450d-966c-d9b8dfaccb4f" />
+
+
+#### Best Candidates List
+
+<img width="803" height="704" alt="localhost_admin (9)" src="https://github.com/user-attachments/assets/034f4128-f098-46d7-afa7-bc65db43d410" />
+
+
+#### Document Management
+
+<img width="1669" height="911" alt="localhost_admin (8)" src="https://github.com/user-attachments/assets/acc5fa72-ccf0-4e97-9d7a-72194930eeb5" />
+
+
+#### Enhanced Chatbot
+
+<img width="787" height="380" alt="Capture d'écran 2025-08-17 231248" src="https://github.com/user-attachments/assets/b6da23bd-ed82-44d7-be38-87dd43a0094b" />
+
+---
+
+### 👨‍🏫 **Supervisor Portal**
+
+#### Supervisor Dashboard
+
+<img width="1669" height="911" alt="localhost_supervisor-dashboard (1)" src="https://github.com/user-attachments/assets/a7aae8e8-438a-41f6-bf95-d1a6246e133e" />
+
+
+#### Attendance Management
+
+<img width="1481" height="911" alt="localhost_candidate-dashboard (5)" src="https://github.com/user-attachments/assets/b0483bfb-54ea-4db4-880b-bcf6bfccff1b" />
+
+
+#### Intern Evaluation
+
+<img width="1143" height="869" alt="localhost_supervisor-dashboard" src="https://github.com/user-attachments/assets/da67233e-7da5-43ad-87f6-ddfee54a594c" />
+
+
+#### Daily Reports
+
+<img width="794" height="419" alt="Capture d'écran 2025-08-11 030428" src="https://github.com/user-attachments/assets/17e21f59-c69f-493e-8cfb-ddca14116c9c" />
+
+
+---
+
+### 👨‍🎓 **Student/Candidate Portal**
+
+#### Candidate Dashboard
+
+<img width="1669" height="911" alt="localhost_candidate-dashboard (2)" src="https://github.com/user-attachments/assets/3a900507-03ab-4d9a-95f5-3804c5ede091" />
+
+#### Clock In/Out System
+
+<img width="1245" height="264" alt="Capture d'écran 2025-08-18 193849" src="https://github.com/user-attachments/assets/b2909076-611c-4968-86cc-96d6d71b5e24" />
+
+
+#### Daily Reports
+
+<img width="673" height="557" alt="Capture d'écran 2025-08-18 193901" src="https://github.com/user-attachments/assets/ff61cd23-4046-4f78-b890-9676c0dda59e" />
+
+#### Final Report Upload
+
+<img width="1669" height="911" alt="localhost_candidate-dashboard (6)" src="https://github.com/user-attachments/assets/a2204d37-f758-4c44-b875-ee84653aa181" />
+
+
+#### Evaluation Results
+
+<img width="1669" height="911" alt="localhost_candidate-dashboard (3)" src="https://github.com/user-attachments/assets/dca15cdc-0a2c-40a4-b347-22f701dd3cbd" />
+
+
+---
+
+> **Note**: Screenshots showcase the actual deployed platform at [stage.amineaichane.com](https://stage.amineaichane.com). The interface demonstrates the complete user experience across all user roles and device types.
+---
 ## 🏗️ Project Architecture
 
 ```
@@ -115,107 +214,6 @@ Plateforme SBGS/
 
 ---
 
-## 📸 Platform Screenshots
-
-### 🏠 **Landing Page & Public Interface**
-
-#### Home Page
-
-<img width="1669" height="911" alt="localhost_ (8)" src="https://github.com/user-attachments/assets/a2c1bf46-e837-45b5-8d80-2cf5d3f5b0d9" />
-
-
-#### Application Form
-
-<img width="1669" height="911" alt="localhost_ (9)" src="https://github.com/user-attachments/assets/5af93b2d-71b0-4993-961f-1081b56e7ae0" />
-
-#### User Type Selection
-
-<img width="1669" height="911" alt="localhost_ (10)" src="https://github.com/user-attachments/assets/c9aa7aad-4682-4c75-8d75-1c3d4a59a71a" />
-
----
-
-### 👩‍💼 **HR Management Portal**
-
-#### HR Dashboard
-
-<img width="1669" height="911" alt="localhost_admin (6)" src="https://github.com/user-attachments/assets/87e952c9-1232-497e-801f-6043342da4bf" />
-
-
-#### Application Review
-
-<img width="1669" height="911" alt="localhost_admin (7)" src="https://github.com/user-attachments/assets/9f8d6802-7cb1-450d-966c-d9b8dfaccb4f" />
-
-
-#### Best Candidates List
-
-<img width="803" height="704" alt="localhost_admin (9)" src="https://github.com/user-attachments/assets/034f4128-f098-46d7-afa7-bc65db43d410" />
-
-
-#### Document Management
-
-<img width="1669" height="911" alt="localhost_admin (8)" src="https://github.com/user-attachments/assets/acc5fa72-ccf0-4e97-9d7a-72194930eeb5" />
-
-
-#### Enhanced Chatbot
-
-<img width="787" height="380" alt="Capture d'écran 2025-08-17 231248" src="https://github.com/user-attachments/assets/b6da23bd-ed82-44d7-be38-87dd43a0094b" />
-
----
-
-### 👨‍🏫 **Supervisor Portal**
-
-#### Supervisor Dashboard
-
-<img width="1669" height="911" alt="localhost_supervisor-dashboard (1)" src="https://github.com/user-attachments/assets/a7aae8e8-438a-41f6-bf95-d1a6246e133e" />
-
-
-#### Attendance Management
-
-<img width="1481" height="911" alt="localhost_candidate-dashboard (5)" src="https://github.com/user-attachments/assets/b0483bfb-54ea-4db4-880b-bcf6bfccff1b" />
-
-
-#### Intern Evaluation
-
-<img width="1143" height="869" alt="localhost_supervisor-dashboard" src="https://github.com/user-attachments/assets/da67233e-7da5-43ad-87f6-ddfee54a594c" />
-
-
-#### Daily Reports
-
-<img width="794" height="419" alt="Capture d'écran 2025-08-11 030428" src="https://github.com/user-attachments/assets/17e21f59-c69f-493e-8cfb-ddca14116c9c" />
-
-
----
-
-### 👨‍🎓 **Student/Candidate Portal**
-
-#### Candidate Dashboard
-
-<img width="1669" height="911" alt="localhost_candidate-dashboard (2)" src="https://github.com/user-attachments/assets/3a900507-03ab-4d9a-95f5-3804c5ede091" />
-
-#### Clock In/Out System
-
-<img width="1245" height="264" alt="Capture d'écran 2025-08-18 193849" src="https://github.com/user-attachments/assets/b2909076-611c-4968-86cc-96d6d71b5e24" />
-
-
-#### Daily Reports
-
-<img width="673" height="557" alt="Capture d'écran 2025-08-18 193901" src="https://github.com/user-attachments/assets/ff61cd23-4046-4f78-b890-9676c0dda59e" />
-
-#### Final Report Upload
-
-<img width="1669" height="911" alt="localhost_candidate-dashboard (6)" src="https://github.com/user-attachments/assets/a2204d37-f758-4c44-b875-ee84653aa181" />
-
-
-#### Evaluation Results
-
-<img width="1669" height="911" alt="localhost_candidate-dashboard (3)" src="https://github.com/user-attachments/assets/dca15cdc-0a2c-40a4-b347-22f701dd3cbd" />
-
-
----
-
-> **Note**: Screenshots showcase the actual deployed platform at [stage.amineaichane.com](https://stage.amineaichane.com). The interface demonstrates the complete user experience across all user roles and device types.
-
----
 
 ## 🛠️ Technology Stack
 
