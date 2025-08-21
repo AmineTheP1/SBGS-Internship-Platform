@@ -6,6 +6,33 @@ import { handleCors } from "../../utilities/cors";
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const EMAIL_SUBMISSIONS = new Set<string>();
 
+// Cleanup function to prevent memory leaks
+function cleanupExpiredEntries() {
+  const now = Date.now();
+  let cleaned = 0;
+  
+  // Clean expired rate limit entries
+  for (const [key, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(key);
+      cleaned++;
+    }
+  }
+  
+  // Prevent email set from growing too large
+  if (EMAIL_SUBMISSIONS.size > 5000) {
+    console.log('Email submissions set too large, clearing oldest entries');
+    EMAIL_SUBMISSIONS.clear();
+  }
+  
+  if (cleaned > 0) {
+    console.log(`Cleaned up ${cleaned} expired rate limit entries`);
+  }
+}
+
+// Run cleanup every 30 minutes
+setInterval(cleanupExpiredEntries, 30 * 60 * 1000);
+
 // Rate limiting: 1 newsletter signup per IP per hour
 const RATE_LIMIT = {
   maxRequests: 1,
@@ -83,6 +110,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method !== "POST") {
     return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
+  // Occasional cleanup (10% chance per request)
+  if (Math.random() < 0.1) {
+    cleanupExpiredEntries();
   }
 
   // Rate limiting check
