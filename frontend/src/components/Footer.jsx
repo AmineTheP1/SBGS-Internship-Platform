@@ -8,14 +8,28 @@ export default function Footer() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState("");
   const [newsletterError, setNewsletterError] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // Bot trap
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
     setNewsletterStatus("");
     setNewsletterError("");
 
+    // Honeypot check - if filled, it's a bot
+    if (honeypot) {
+      console.log("Bot detected via honeypot");
+      return; // Silently fail for bots
+    }
+
     if (!newsletterEmail) {
       setNewsletterError("Veuillez entrer votre email.");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newsletterEmail)) {
+      setNewsletterError("Veuillez entrer un email valide.");
       return;
     }
 
@@ -23,13 +37,21 @@ export default function Footer() {
       const response = await fetch(API_ENDPOINTS.NEWSLETTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: newsletterEmail }),
+        body: JSON.stringify({ 
+          email: newsletterEmail.toLowerCase().trim(),
+          honeypot: honeypot // Send honeypot to backend for additional check
+        }),
       });
+      
+      const data = await response.json();
+      
       if (response.ok) {
-        setNewsletterStatus("Merci pour votre inscription à la newsletter !");
+        setNewsletterStatus(data.message || "Merci pour votre inscription à la newsletter !");
         setNewsletterEmail("");
+      } else if (response.status === 429) {
+        setNewsletterError("Trop de tentatives. Veuillez réessayer plus tard.");
       } else {
-        setNewsletterError("Erreur lors de l'inscription. Veuillez réessayer.");
+        setNewsletterError(data.error || "Erreur lors de l'inscription. Veuillez réessayer.");
       }
     } catch {
       setNewsletterError("Erreur réseau. Veuillez réessayer.");
@@ -78,22 +100,35 @@ export default function Footer() {
               </a>
             </div>
             <h5 className="font-medium mb-2">Abonnez-vous à notre newsletter</h5>
-            <form className="flex" onSubmit={handleNewsletterSubmit}>
+            <form className="flex flex-col" onSubmit={handleNewsletterSubmit}>
+              {/* Honeypot field - hidden from users, visible to bots */}
               <input
-                type="email"
-                placeholder="Votre email"
-                className="bg-gray-800 rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-coke-red"
-                value={newsletterEmail}
-                onChange={e => setNewsletterEmail(e.target.value)}
-                required
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={e => setHoneypot(e.target.value)}
+                style={{ display: 'none' }}
+                tabIndex={-1}
+                autoComplete="off"
               />
-              <button
-                type="submit"
-                className="bg-coke-red rounded-r-lg px-4 text-white flex items-center justify-center"
-                aria-label="Envoyer"
-              >
-                <FaPaperPlane />
-              </button>
+              
+              <div className="flex">
+                <input
+                  type="email"
+                  placeholder="Votre email"
+                  className="bg-gray-800 rounded-l-lg px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-coke-red"
+                  value={newsletterEmail}
+                  onChange={e => setNewsletterEmail(e.target.value)}
+                  required
+                />
+                <button
+                  type="submit"
+                  className="bg-coke-red rounded-r-lg px-4 text-white flex items-center justify-center"
+                  aria-label="Envoyer"
+                >
+                  <FaPaperPlane />
+                </button>
+              </div>
             </form>
             {newsletterError && <div className="text-red-400 text-xs mt-2">{newsletterError}</div>}
             {newsletterStatus && <div className="text-green-400 text-xs mt-2">{newsletterStatus}</div>}
