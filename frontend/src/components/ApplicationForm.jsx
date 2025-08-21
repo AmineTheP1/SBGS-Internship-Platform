@@ -559,7 +559,6 @@ export default function ApplicationForm() {
                     {formData.cv ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.cv.name}</span>
-                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.cv.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -584,9 +583,9 @@ export default function ApplicationForm() {
                           />
                         </label>
                         <p className="pl-1">ou glisser-déposer</p>
+                        <p className="text-xs text-gray-500 mt-2">PDF jusqu'à 5MB</p>
                       </>
                     )}
-                    <p className="text-xs text-gray-500">PDF jusqu'à 5MB</p>
                   </div>
                 </div>
               </div>
@@ -604,7 +603,6 @@ export default function ApplicationForm() {
                     {formData.carteNationale ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.carteNationale.name}</span>
-                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.carteNationale.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -629,9 +627,9 @@ export default function ApplicationForm() {
                           />
                         </label>
                         <p className="pl-1">ou glisser-déposer</p>
+                        <p className="text-xs text-gray-500 mt-2">PDF jusqu'à 5MB</p>
                       </>
                     )}
-                    <p className="text-xs text-gray-500">PDF jusqu'à 5MB</p>
                   </div>
                 </div>
               </div>
@@ -649,7 +647,6 @@ export default function ApplicationForm() {
                     {formData.conventionStage ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.conventionStage.name}</span>
-                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.conventionStage.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -674,9 +671,9 @@ export default function ApplicationForm() {
                           />
                         </label>
                         <p className="pl-1">ou glisser-déposer</p>
+                        <p className="text-xs text-gray-500 mt-2">PDF jusqu'à 5MB</p>
                       </>
                     )}
-                    <p className="text-xs text-gray-500">PDF jusqu'à 5MB</p>
                   </div>
                 </div>
               </div>
@@ -693,7 +690,6 @@ export default function ApplicationForm() {
                     {formData.assurance ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.assurance.name}</span>
-                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.assurance.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -718,9 +714,9 @@ export default function ApplicationForm() {
                           />
                         </label>
                         <p className="pl-1">ou glisser-déposer</p>
+                        <p className="text-xs text-gray-500 mt-2">PDF jusqu'à 5MB</p>
                       </>
                     )}
-                    <p className="text-xs text-gray-500">PDF jusqu'à 5MB</p>
                   </div>
                 </div>
               </div>
@@ -739,7 +735,6 @@ export default function ApplicationForm() {
                   {photoPreview ? (
                     <div className="text-center">
                       <img src={photoPreview} alt="Aperçu" className="h-24 w-24 object-cover rounded-full mx-auto mb-2" />
-                      <div className="text-xs text-gray-500 mb-2">Taille: {formData.photo ? formatFileSize(formData.photo.size) : ''}</div>
                       <button
                         type="button"
                         onClick={handleRemovePhoto}
@@ -766,10 +761,10 @@ export default function ApplicationForm() {
                           />
                         </label>
                         <p className="pl-1">ou glisser-déposer</p>
+                        <p className="text-xs text-gray-500 mt-1">JPG ou PNG jusqu'à 2MB</p>
                       </div>
                     </>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">JPG ou PNG jusqu'à 2MB</p>
                 </div>
               </div>
               <div className="md:col-span-2">
