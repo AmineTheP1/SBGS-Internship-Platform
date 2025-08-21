@@ -36,6 +36,51 @@ export default function ApplicationForm() {
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // File size constants (in bytes)
+  const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
+  const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+
+  // Helper function to format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Helper function to validate file size and type
+  const validateFile = (file, type) => {
+    if (type === 'pdf') {
+      if (file.size > MAX_PDF_SIZE) {
+        return {
+          isValid: false,
+          error: `Le fichier PDF est trop volumineux (${formatFileSize(file.size)}). La taille maximale autorisée est de 5MB.`
+        };
+      }
+      if (!file.type.includes('pdf')) {
+        return {
+          isValid: false,
+          error: 'Seuls les fichiers PDF sont acceptés.'
+        };
+      }
+    } else if (type === 'image') {
+      if (file.size > MAX_IMAGE_SIZE) {
+        return {
+          isValid: false,
+          error: `L'image est trop volumineuse (${formatFileSize(file.size)}). La taille maximale autorisée est de 2MB.`
+        };
+      }
+      if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+        return {
+          isValid: false,
+          error: 'Seuls les fichiers JPG, JPEG et PNG sont acceptés.'
+        };
+      }
+    }
+    return { isValid: true, error: null };
+  };
+
   // Fetch universities from database
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -86,14 +131,33 @@ export default function ApplicationForm() {
   const handleInputChange = (e) => {
     const { name, value, type, files } = e.target;
     
+    // Clear any previous errors
+    setError("");
+    
     if (type === 'file') {
       if (name === 'cv' || name === 'carteNationale' || name === 'conventionStage' || name === 'assurance') {
-        setFormData(prev => ({ ...prev, [name]: files[0] }));
-        // ...existing code for cv uploading
+        const file = files[0];
+        if (file) {
+          const validation = validateFile(file, 'pdf');
+          if (!validation.isValid) {
+            setError(validation.error);
+            // Clear the file input
+            e.target.value = '';
+            return;
+          }
+          setFormData(prev => ({ ...prev, [name]: file }));
+        }
       } else if (name === 'photo') {
         const file = files[0];
-        setFormData(prev => ({ ...prev, photo: file }));
         if (file) {
+          const validation = validateFile(file, 'image');
+          if (!validation.isValid) {
+            setError(validation.error);
+            // Clear the file input
+            e.target.value = '';
+            return;
+          }
+          setFormData(prev => ({ ...prev, photo: file }));
           const reader = new FileReader();
           reader.onloadend = () => setPhotoPreview(reader.result);
           reader.readAsDataURL(file);
@@ -131,15 +195,21 @@ export default function ApplicationForm() {
   const handlePhotoDrop = (e) => {
     e.preventDefault();
     setPhotoDragOver(false);
+    setError("");
+    
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       const file = files[0];
-      if (file.type.startsWith('image/')) {
-        setFormData(prev => ({ ...prev, photo: file }));
-        const reader = new FileReader();
-        reader.onloadend = () => setPhotoPreview(reader.result);
-        reader.readAsDataURL(file);
+      const validation = validateFile(file, 'image');
+      if (!validation.isValid) {
+        setError(validation.error);
+        return;
       }
+      
+      setFormData(prev => ({ ...prev, photo: file }));
+      const reader = new FileReader();
+      reader.onloadend = () => setPhotoPreview(reader.result);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -489,6 +559,7 @@ export default function ApplicationForm() {
                     {formData.cv ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.cv.name}</span>
+                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.cv.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -533,6 +604,7 @@ export default function ApplicationForm() {
                     {formData.carteNationale ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.carteNationale.name}</span>
+                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.carteNationale.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -577,6 +649,7 @@ export default function ApplicationForm() {
                     {formData.conventionStage ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.conventionStage.name}</span>
+                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.conventionStage.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -620,6 +693,7 @@ export default function ApplicationForm() {
                     {formData.assurance ? (
                       <>
                         <span className="font-medium text-coke-red">{formData.assurance.name}</span>
+                        <div className="text-xs text-gray-500">Taille: {formatFileSize(formData.assurance.size)}</div>
                         <div className="mt-2">
                           <button
                             type="button"
@@ -665,6 +739,7 @@ export default function ApplicationForm() {
                   {photoPreview ? (
                     <div className="text-center">
                       <img src={photoPreview} alt="Aperçu" className="h-24 w-24 object-cover rounded-full mx-auto mb-2" />
+                      <div className="text-xs text-gray-500 mb-2">Taille: {formData.photo ? formatFileSize(formData.photo.size) : ''}</div>
                       <button
                         type="button"
                         onClick={handleRemovePhoto}
@@ -727,4 +802,4 @@ export default function ApplicationForm() {
       </div>
     </section>
   );
-} 
+}
