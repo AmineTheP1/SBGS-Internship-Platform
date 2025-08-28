@@ -31,11 +31,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ success: false, error: "Query is required" });
     }
 
-    console.log("Searching CVs for query:", query, "with status filter:", statusFilter);
-
     // Extract keywords from the query (simple approach)
     const keywords = extractKeywords(query);
-    console.log("Extracted keywords:", keywords);
 
     // Build the SQL query with optional status filter
     let sqlQuery = `
@@ -58,24 +55,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Use ILIKE for case-insensitive matching and trim whitespace
       sqlQuery += ` AND TRIM(d.statut) ILIKE $1`;
       queryParams.push(statusFilter.trim());
-      console.log("Filtering by status (case-insensitive):", statusFilter);
-    } else {
-      console.log("No status filter applied, searching all statuses");
     }
-
-    console.log("Final SQL query:", sqlQuery);
-    console.log("Query parameters:", queryParams);
 
     const result = await pool.query(sqlQuery, queryParams);
-    console.log("Found", result.rows.length, "candidates in database before CV parsing");
-    
-    // Debug: Log the first few candidates to see their actual status values
-    if (result.rows.length > 0) {
-      console.log("Sample candidates with their statuses:");
-      result.rows.slice(0, 3).forEach((row, index) => {
-        console.log(`Candidate ${index + 1}: ${row.nom} ${row.prenom} - Status: "${row.status}"`);
-      });
-    }
 
     const candidates = [];
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
@@ -92,7 +74,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
         // Check if file exists
         if (!fs.existsSync(filePath)) {
-          console.log(`CV file not found: ${filePath}`);
           continue;
         }
 
@@ -103,8 +84,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const pdfData = await pdf(dataBuffer);
           cvText = pdfData.text.toLowerCase();
         } catch (pdfError) {
-          console.error(`Error parsing PDF for candidate ${row.cdtid}:`, pdfError);
-          continue; // Skip this candidate if PDF parsing fails
+          // Skip this candidate if PDF parsing fails
+          continue;
         }
 
         // Check if any keywords match - whole word matching only
@@ -150,15 +131,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           });
         }
       } catch (error) {
-        console.error(`Error processing CV for candidate ${row.cdtid}:`, error);
         // Continue with other candidates
+        continue;
       }
     }
 
     // Sort by match score (highest first)
     candidates.sort((a, b) => b.matchScore - a.matchScore);
-
-    console.log(`Found ${candidates.length} matching candidates`);
 
     return res.status(200).json({
       success: true,
