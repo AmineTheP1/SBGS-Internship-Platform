@@ -25,30 +25,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { query } = req.body;
+    const { query, statusFilter } = req.body;
 
     if (!query || typeof query !== 'string') {
       return res.status(400).json({ success: false, error: "Query is required" });
     }
 
-    console.log("Searching CVs for query:", query);
+    console.log("Searching CVs for query:", query, "with status filter:", statusFilter);
 
     // Extract keywords from the query (simple approach)
     const keywords = extractKeywords(query);
     console.log("Extracted keywords:", keywords);
 
-    // Get all CV files from the database - only candidates with pending status
-    const result = await pool.query(`
+    // Build the SQL query with optional status filter
+    let sqlQuery = `
       SELECT 
         c.cdtid, c.nom, c.prenom, c.email, c.telephone,
         p.url as cvurl,
-        d.dsgid, d.typestage, d.domaine, d.statut as status
+        d.dsgid, d.typestage, d.domaine, d.statut as status,
+        e.nom as universityname
       FROM candidat c
       JOIN demandes_stage d ON c.cdtid = d.cdtid
       LEFT JOIN pieces_jointes p ON p.dsgid = d.dsgid AND p.typepiece = 'CV'
-      WHERE p.url IS NOT NULL 
-        AND d.statut = 'En attente'
-    `);
+      LEFT JOIN ecole e ON c.ecoleid = e.ecoleid
+      WHERE p.url IS NOT NULL
+    `;
+
+    const queryParams = [];
+    
+    // Add status filter if specified
+    if (statusFilter && statusFilter !== 'all') {
+      sqlQuery += ` AND d.statut = $1`;
+      queryParams.push(statusFilter);
+    }
+
+    const result = await pool.query(sqlQuery, queryParams);
 
     const candidates = [];
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
@@ -113,6 +124,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             typestage: row.typestage,
             domaine: row.domaine,
             status: row.status,
+            universityname: row.universityname,
             matchingKeywords: matches.filter(keyword => 
               meaningfulKeywords.includes(keyword)
             ),
@@ -137,6 +149,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       candidates,
       query,
       keywords,
+      statusFilter: statusFilter || 'all',
       totalFound: candidates.length
     });
 

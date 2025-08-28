@@ -13,7 +13,7 @@ export default function EnhancedChatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences et expériences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui parlent anglais'\n• 'Find candidates with marketing experience'\n• 'Candidats avec Excel'\n• 'Cherche des designers Photoshop'\n• 'Candidats en génie mécanique'\n\n🔍 Je recherche dans les CVs pour toutes sortes de compétences : techniques, langues, logiciels, formations, etc.\n\n💼 Vous pouvez également me demander de vous montrer les meilleurs anciens stagiaires pour un recrutement potentiel en tapant:\n• 'Montre-moi les meilleurs anciens stagiaires'\n• 'Trouve les stagiaires les mieux évalués'\n• 'Qui sont les meilleurs candidats pour un emploi?'",
+      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences et expériences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui parlent anglais'\n• 'Find candidates with marketing experience'\n• 'Candidats avec Excel'\n• 'Cherche des designers Photoshop'\n• 'Candidats en génie mécanique'\n\n🎯 **Filtres par statut disponibles:**\n• 'Trouve des candidats **en attente** avec Java'\n• 'Cherche des candidats **acceptés** avec marketing'\n• 'Candidats **refusés** avec Photoshop'\n• Sans mention de statut = recherche dans **tous les statuts**\n\n🔍 Je recherche dans les CVs pour toutes sortes de compétences : techniques, langues, logiciels, formations, etc.\n\n💼 Vous pouvez également me demander de vous montrer les meilleurs anciens stagiaires pour un recrutement potentiel en tapant:\n• 'Montre-moi les meilleurs anciens stagiaires'\n• 'Trouve les stagiaires les mieux évalués'\n• 'Qui sont les meilleurs candidats pour un emploi?'",
       isBot: true,
       timestamp: new Date()
     }
@@ -108,6 +108,25 @@ export default function EnhancedChatbot() {
     return searchKeywords.some(keyword => lowerMessage.includes(keyword));
   };
 
+  // Function to detect status filter from the message
+  const detectStatusFilter = (message) => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Check for specific status keywords
+    if (lowerMessage.includes('en attente') || lowerMessage.includes('attente') || lowerMessage.includes('pending')) {
+      return 'En attente';
+    }
+    if (lowerMessage.includes('accepté') || lowerMessage.includes('accepte') || lowerMessage.includes('accepted') || lowerMessage.includes('approuvé')) {
+      return 'Accepté';
+    }
+    if (lowerMessage.includes('refusé') || lowerMessage.includes('refuse') || lowerMessage.includes('rejected')) {
+      return 'Refusé';
+    }
+    
+    // Default: search in all statuses
+    return 'all';
+  };
+
   // Function to get best candidates
   const getBestCandidates = async () => {
     try {
@@ -142,7 +161,7 @@ export default function EnhancedChatbot() {
   };
 
   // Function to search CVs
-  const searchCVs = async (query) => {
+  const searchCVs = async (query, statusFilter = 'all') => {
     setIsSearching(true);
     try {
       const response = await fetch(API_ENDPOINTS.HR_SEARCH_CVS, {
@@ -151,22 +170,28 @@ export default function EnhancedChatbot() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ 
+          query,
+          statusFilter: statusFilter 
+        }),
       });
 
       const data = await response.json();
       
       if (data.success) {
         if (data.candidates.length === 0) {
-          return `Je n'ai trouvé aucun candidat avec les compétences "${data.keywords.join(', ')}" dans votre recherche "${query}".\n\n💡 Suggestions:\n• Essayez d'autres compétences (ex: Excel, Photoshop, anglais)\n• Utilisez des termes plus génériques (ex: "marketing" au lieu de "digital marketing")\n• Vérifiez l'orthographe des compétences recherchées\n• Essayez des synonymes (ex: "vente" au lieu de "sales")`;
+          const statusText = statusFilter === 'all' ? '' : ` avec le statut "${statusFilter}"`;
+          return `Je n'ai trouvé aucun candidat avec les compétences "${data.keywords.join(', ')}"${statusText} dans votre recherche "${query}".\n\n💡 Suggestions:\n• Essayez d'autres compétences (ex: Excel, Photoshop, anglais)\n• Utilisez des termes plus génériques (ex: "marketing" au lieu de "digital marketing")\n• Vérifiez l'orthographe des compétences recherchées\n• Essayez des synonymes (ex: "vente" au lieu de "sales")\n• Essayez sans filtre de statut pour voir tous les candidats`;
         }
 
-        let responseText = `J'ai trouvé ${data.candidates.length} candidat(s) correspondant à votre recherche "${query}":`;
+        const statusText = statusFilter === 'all' ? '' : ` (statut: ${statusFilter})`;
+        let responseText = `J'ai trouvé ${data.candidates.length} candidat(s) correspondant à votre recherche "${query}"${statusText}:`;
 
         return {
           text: responseText,
           candidates: data.candidates,
-          query: query
+          query: query,
+          statusFilter: statusFilter
         };
       } else {
         return "Désolé, j'ai rencontré une erreur lors de la recherche. Veuillez réessayer.";
@@ -220,17 +245,21 @@ export default function EnhancedChatbot() {
     }
     // Check if this is a CV search query (lower priority)
     else if (isCVSearchQuery(currentQuery)) {
-      // Show searching message
+      // Detect status filter from the query
+      const statusFilter = detectStatusFilter(currentQuery);
+      
+      // Show searching message with status info
+      const statusText = statusFilter === 'all' ? '' : ` (statut: ${statusFilter})`;
       const searchingMessage = {
         id: Date.now() + 1,
-        text: "🔍 Je recherche dans les CVs des candidats...",
+        text: `🔍 Je recherche dans les CVs des candidats${statusText}...`,
         isBot: true,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, searchingMessage]);
 
-      // Perform the search
-      const searchResult = await searchCVs(currentQuery);
+      // Perform the search with status filter
+      const searchResult = await searchCVs(currentQuery, statusFilter);
       
       // Replace searching message with results
       setMessages(prev => prev.map(msg => 
@@ -239,7 +268,8 @@ export default function EnhancedChatbot() {
               ...msg, 
               text: typeof searchResult === 'string' ? searchResult : searchResult.text,
               candidates: typeof searchResult === 'object' ? searchResult.candidates : null,
-              query: typeof searchResult === 'object' ? searchResult.query : null
+              query: typeof searchResult === 'object' ? searchResult.query : null,
+              statusFilter: typeof searchResult === 'object' ? searchResult.statusFilter : null
             }
           : msg
       ));
@@ -319,6 +349,20 @@ export default function EnhancedChatbot() {
     });
   };
 
+  // Function to get status badge color
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case 'En attente':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Accepté':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'Refusé':
+        return 'bg-red-100 text-red-800 border-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   // Function to render candidate list with pagination
   const renderCandidateList = (message) => {
     if (!message.candidates) return null;
@@ -343,10 +387,18 @@ export default function EnhancedChatbot() {
       <div className="mt-2">
         {candidatesToShow.map((candidate) => (
           <div key={candidate.cdtid} className="mb-3 p-2 bg-gray-50 rounded border-l-4 border-coke-red">
-            <div className="font-semibold text-sm">{candidate.fullName}</div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="font-semibold text-sm">{candidate.fullName}</div>
+              <span className={`px-2 py-1 rounded-full text-xs border ${getStatusBadgeColor(candidate.status)}`}>
+                {candidate.status}
+              </span>
+            </div>
             <div className="text-xs text-gray-600">📧 {candidate.email}</div>
             <div className="text-xs text-gray-600">📱 {candidate.telephone || 'Non disponible'}</div>
             <div className="text-xs text-gray-600">🎯 Compétences: {candidate.matchingKeywords.join(', ')}</div>
+            {candidate.universityname && (
+              <div className="text-xs text-gray-600">🎓 {candidate.universityname}</div>
+            )}
             <div className="text-xs">
               📄 <a 
                 href={`${API_ENDPOINTS.HR_GET_CV}?filename=${encodeURIComponent(candidate.cvfilename)}`}
