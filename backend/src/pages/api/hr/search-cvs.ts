@@ -55,11 +55,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // Add status filter if specified
     if (statusFilter && statusFilter !== 'all') {
-      sqlQuery += ` AND d.statut = $1`;
-      queryParams.push(statusFilter);
+      // Use ILIKE for case-insensitive matching and trim whitespace
+      sqlQuery += ` AND TRIM(d.statut) ILIKE $1`;
+      queryParams.push(statusFilter.trim());
+      console.log("Filtering by status (case-insensitive):", statusFilter);
+    } else {
+      console.log("No status filter applied, searching all statuses");
     }
 
+    console.log("Final SQL query:", sqlQuery);
+    console.log("Query parameters:", queryParams);
+
     const result = await pool.query(sqlQuery, queryParams);
+    console.log("Found", result.rows.length, "candidates in database before CV parsing");
+    
+    // Debug: Log the first few candidates to see their actual status values
+    if (result.rows.length > 0) {
+      console.log("Sample candidates with their statuses:");
+      result.rows.slice(0, 3).forEach((row, index) => {
+        console.log(`Candidate ${index + 1}: ${row.nom} ${row.prenom} - Status: "${row.status}"`);
+      });
+    }
 
     const candidates = [];
     const uploadsDir = path.join(process.cwd(), "public", "uploads");

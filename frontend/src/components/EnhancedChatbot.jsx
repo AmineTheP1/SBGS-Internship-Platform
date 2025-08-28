@@ -13,7 +13,7 @@ export default function EnhancedChatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences et expériences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui parlent anglais'\n• 'Find candidates with marketing experience'\n• 'Candidats avec Excel'\n• 'Cherche des designers Photoshop'\n• 'Candidats en génie mécanique'\n\n🎯 **Filtres par statut disponibles:**\n• 'Trouve des candidats **en attente** avec Java'\n• 'Cherche des candidats **acceptés** avec marketing'\n• 'Candidats **refusés** avec Photoshop'\n• Sans mention de statut = recherche dans **tous les statuts**\n\n🔍 Je recherche dans les CVs pour toutes sortes de compétences : techniques, langues, logiciels, formations, etc.\n\n💼 Vous pouvez également me demander de vous montrer les meilleurs anciens stagiaires pour un recrutement potentiel en tapant:\n• 'Montre-moi les meilleurs anciens stagiaires'\n• 'Trouve les stagiaires les mieux évalués'\n• 'Qui sont les meilleurs candidats pour un emploi?'",
+      text: "Bonjour ! Je suis votre Assistant RH SBGS. Je peux vous aider à rechercher des candidats selon leurs compétences et expériences.\n\n💡 Exemples de recherches:\n• 'Trouve des candidats avec Angular'\n• 'Cherche des développeurs React'\n• 'Candidats qui parlent anglais'\n• 'Find candidates with marketing experience'\n• 'Candidats avec Excel'\n• 'Cherche des designers Photoshop'\n• 'Candidats en génie mécanique'\n\n🎯 **Filtres par statut disponibles:**\n• 'Trouve des candidats **en attente** avec Java'\n• 'Cherche des candidats **acceptés** avec marketing'\n• 'Candidats **rejetés** avec Photoshop'\n• Sans mention de statut = recherche dans **tous les statuts**\n\n🔍 Je recherche dans les CVs pour toutes sortes de compétences : techniques, langues, logiciels, formations, etc.\n\n💼 Vous pouvez également me demander de vous montrer les meilleurs anciens stagiaires pour un recrutement potentiel en tapant:\n• 'Montre-moi les meilleurs anciens stagiaires'\n• 'Trouve les stagiaires les mieux évalués'\n• 'Qui sont les meilleurs candidats pour un emploi?'",
       isBot: true,
       timestamp: new Date()
     }
@@ -119,8 +119,8 @@ export default function EnhancedChatbot() {
     if (lowerMessage.includes('accepté') || lowerMessage.includes('accepte') || lowerMessage.includes('accepted') || lowerMessage.includes('approuvé')) {
       return 'Accepté';
     }
-    if (lowerMessage.includes('refusé') || lowerMessage.includes('refuse') || lowerMessage.includes('rejected')) {
-      return 'Refusé';
+    if (lowerMessage.includes('refusé') || lowerMessage.includes('refuse') || lowerMessage.includes('rejected') || lowerMessage.includes('rejeté') || lowerMessage.includes('rejete')) {
+      return 'Rejeté';
     }
     
     // Default: search in all statuses
@@ -139,7 +139,8 @@ export default function EnhancedChatbot() {
           return response.data.message || "Je n'ai trouvé aucun ancien stagiaire avec des évaluations dans notre base de données. Les évaluations sont créées par les superviseurs après approbation des rapports de stage.";
         }
 
-        let responseText = `J'ai trouvé ${response.data.candidates.length} ancien(s) stagiaire(s) avec les meilleures évaluations:`;
+        const stagiaireText = response.data.candidates.length === 1 ? 'ancien stagiaire' : 'anciens stagiaires';
+        let responseText = `J'ai trouvé ${response.data.candidates.length} ${stagiaireText} avec les meilleures évaluations:`;
 
         return {
           text: responseText,
@@ -163,6 +164,7 @@ export default function EnhancedChatbot() {
   // Function to search CVs
   const searchCVs = async (query, statusFilter = 'all') => {
     setIsSearching(true);
+    
     try {
       const response = await fetch(API_ENDPOINTS.HR_SEARCH_CVS, {
         method: "POST",
@@ -185,7 +187,8 @@ export default function EnhancedChatbot() {
         }
 
         const statusText = statusFilter === 'all' ? '' : ` (statut: ${statusFilter})`;
-        let responseText = `J'ai trouvé ${data.candidates.length} candidat(s) correspondant à votre recherche "${query}"${statusText}:`;
+        const candidatText = data.candidates.length === 1 ? 'candidat' : 'candidats';
+        let responseText = `J'ai trouvé ${data.candidates.length} ${candidatText} correspondant à votre recherche "${query}"${statusText}:`;
 
         return {
           text: responseText,
@@ -356,7 +359,7 @@ export default function EnhancedChatbot() {
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'Accepté':
         return 'bg-green-100 text-green-800 border-green-200';
-      case 'Refusé':
+      case 'Rejeté':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
