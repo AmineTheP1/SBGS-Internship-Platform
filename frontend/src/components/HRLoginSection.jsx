@@ -127,8 +127,11 @@ export default function HRLoginSection() {
                 </button>
               </form>
               <div className="mt-6 text-center">
-                <a href="#" className="text-sm opacity-80 hover:opacity-100 transition">
-                  Mot de passe oublié ?
+              <a
+                  href="/login"
+                  className="text-white hover:text-gray-200 text-sm underline"
+                >
+                  Retour à la sélection
                 </a>
               </div>
             </div>
